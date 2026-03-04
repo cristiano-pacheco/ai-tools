@@ -7,42 +7,60 @@ description: Generate Go use cases for modular architecture using ports-based de
 
 Generate a use case that depends on ports (interfaces), not concrete implementations.
 
+## Naming: entity first, action second (CRITICAL)
+
+Names follow the pattern `<Entity><Action>` — entity first, action second. This groups all usecases for the same entity together in file listings (page_create, page_update, page_delete appear next to each other).
+
+The pattern is `<entity>_<action>`, never `<action>_<entity>`:
+
+| Element     | Pattern                          | Example                    |
+|-------------|----------------------------------|----------------------------|
+| file        | `<entity>_<action>_usecase.go`   | `page_create_usecase.go`   |
+| input DTO   | `<Entity><Action>Input`          | `PageCreateInput`          |
+| output DTO  | `<Entity><Action>Output`         | `PageCreateOutput`         |
+| struct      | `<Entity><Action>UseCase`        | `PageCreateUseCase`        |
+| constructor | `New<Entity><Action>UseCase`     | `NewPageCreateUseCase`     |
+
+More examples to reinforce the pattern:
+
+| Operation         | File name                          | Struct name                  |
+|-------------------|------------------------------------|------------------------------|
+| create a contact  | `contact_create_usecase.go`        | `ContactCreateUseCase`       |
+| list contacts     | `contact_list_usecase.go`          | `ContactListUseCase`         |
+| delete a product  | `product_delete_usecase.go`        | `ProductDeleteUseCase`       |
+| update order      | `order_update_usecase.go`          | `OrderUpdateUseCase`         |
+| upload image      | `image_upload_usecase.go`          | `ImageUploadUseCase`         |
+| generate report   | `report_generate_usecase.go`       | `ReportGenerateUseCase`      |
+
+Wrong vs. right — never reverse the order:
+
+```
+WRONG: create_page_usecase.go       RIGHT: page_create_usecase.go
+WRONG: CreatePageUseCase            RIGHT: PageCreateUseCase
+WRONG: CreatePageInput              RIGHT: PageCreateInput
+WRONG: NewCreatePageUseCase         RIGHT: NewPageCreateUseCase
+
+WRONG: delete_product_usecase.go    RIGHT: product_delete_usecase.go
+WRONG: DeleteProductUseCase         RIGHT: ProductDeleteUseCase
+
+WRONG: list_order_usecase.go        RIGHT: order_list_usecase.go
+WRONG: ListOrderUseCase             RIGHT: OrderListUseCase
+
+WRONG: update_contact_usecase.go    RIGHT: contact_update_usecase.go
+WRONG: UpdateContactUseCase         RIGHT: ContactUpdateUseCase
+```
+
 ## Create the file
 
 Create one file per operation in:
-`internal/modules/<module>/usecase/<operation>_usecase.go`
+`internal/modules/<module>/usecase/<entity>_<action>_usecase.go`
 
 Use:
 - package: `usecase`
-- struct name: `<Operation>UseCase`
+- struct name: `<Entity><Action>UseCase`
 - method name: `Execute`
 
 **Only `_usecase.go` files belong in this package.** Mappers, utility helpers, and standalone functions do not belong here — put them in `mapper/`, `service/`, or the appropriate package. Never add package-level variables; all dependencies must be injected via the constructor.
-
-## Naming (CRITICAL)
-
-Apply consistent naming for every use case.
-
-Rules:
-- file: `<operation>_usecase.go`
-- input DTO: `<Operation>Input`
-- output DTO: `<Operation>Output`
-- use case struct: `<Operation>UseCase`
-- constructor: `New<Operation>UseCase`
-
-Example (`contact_create`):
-- file: `contact_create_usecase.go`
-- input: `ContactCreateInput`
-- output: `ContactCreateOutput`
-- struct: `ContactCreateUseCase`
-- constructor: `NewContactCreateUseCase`
-
-Example (`contact_list`, no real input):
-- file: `contact_list_usecase.go`
-- input: `ContactListInput` (empty struct)
-- output: `ContactListOutput`
-- struct: `ContactListUseCase`
-- constructor: `NewContactListUseCase`
 
 ## Follow the structure (CRITICAL)
 
@@ -50,7 +68,7 @@ Implement this order in the file:
 1. Input struct (ALWAYS present; can be empty)
 2. Output struct (ALWAYS present; can be empty)
 3. Use case struct with dependencies
-4. Constructor `New<Operation>UseCase`
+4. Constructor `New<Entity><Action>UseCase`
 5. Public `Execute` method (contains all business logic)
 
 ## Current architecture rule
@@ -77,32 +95,34 @@ import (
 	"github.com/cristiano-pacheco/catzi/internal/modules/<module>/ports"
 )
 
-type <Operation>Input struct {
+// Remember: entity first, action second — <Entity><Action>
+
+type <Entity><Action>Input struct {
 	Field string `validate:"required,max=255"`
 }
 
-type <Operation>Output struct {
+type <Entity><Action>Output struct {
 	Result string
 }
 
-type <Operation>UseCase struct {
+type <Entity><Action>UseCase struct {
 	repo      ports.<Entity>Repository
 	validator validator.Validator // include only if needed
 }
 
-func New<Operation>UseCase(
+func New<Entity><Action>UseCase(
 	repo ports.<Entity>Repository,
 	validator validator.Validator,
-) *<Operation>UseCase {
-	return &<Operation>UseCase{
+) *<Entity><Action>UseCase {
+	return &<Entity><Action>UseCase{
 		repo:      repo,
 		validator: validator,
 	}
 }
 
-func (uc *<Operation>UseCase) Execute(ctx context.Context, input <Operation>Input) (<Operation>Output, error) {
+func (uc *<Entity><Action>UseCase) Execute(ctx context.Context, input <Entity><Action>Input) (<Entity><Action>Output, error) {
 	if err := uc.validator.Validate(input); err != nil {
-		return <Operation>Output{}, err
+		return <Entity><Action>Output{}, err
 	}
 
 	// Add business orchestration here
@@ -110,7 +130,7 @@ func (uc *<Operation>UseCase) Execute(ctx context.Context, input <Operation>Inpu
 	// - call domain services
 	// - map model to output DTO
 
-	return <Operation>Output{}, nil
+	return <Entity><Action>Output{}, nil
 }
 ```
 
@@ -161,10 +181,10 @@ import brickserrors "github.com/cristiano-pacheco/bricks/pkg/errs"
 
 record, err := uc.repo.FindByX(ctx, input.Field)
 if err != nil && !errors.Is(err, brickserrors.ErrRecordNotFound) {
-	return <Operation>Output{}, err
+	return <Entity><Action>Output{}, err
 }
 if record.ID != 0 {
-	return <Operation>Output{}, brickserrors.ErrAlreadyExists
+	return <Entity><Action>Output{}, brickserrors.ErrAlreadyExists
 }
 ```
 
@@ -173,7 +193,7 @@ if record.ID != 0 {
 ```go
 enumVal, err := enum.NewTypeEnum(input.Type)
 if err != nil {
-	return <Operation>Output{}, err
+	return <Entity><Action>Output{}, err
 }
 // Assign to your model field
 ```
@@ -183,10 +203,10 @@ if err != nil {
 ```go
 items, err := uc.repo.FindAll(ctx)
 if err != nil {
-	return <Operation>Output{}, err
+	return <Entity><Action>Output{}, err
 }
 
-output := <Operation>Output{
+output := <Entity><Action>Output{
 	Items: make([]ItemOutput, len(items)),
 }
 for i, item := range items {
@@ -203,7 +223,47 @@ These patterns were found in production code and must never appear in a usecase.
 
 ---
 
-### 1. Non-usecase files in the usecase package
+### 1. Reversed naming order (action before entity)
+
+The naming pattern is `<Entity><Action>` — entity first, action second. This is the most common mistake. The natural English ordering ("create page") must be reversed to entity-first ("page create") so that all usecases for the same entity group together in file listings.
+
+```go
+// WRONG — action before entity
+// file: create_page_usecase.go
+type CreatePageInput struct { ... }
+type CreatePageOutput struct { ... }
+type CreatePageUseCase struct { ... }
+func NewCreatePageUseCase(...) *CreatePageUseCase { ... }
+```
+
+```go
+// RIGHT — entity before action
+// file: page_create_usecase.go
+type PageCreateInput struct { ... }
+type PageCreateOutput struct { ... }
+type PageCreateUseCase struct { ... }
+func NewPageCreateUseCase(...) *PageCreateUseCase { ... }
+```
+
+Think of it as a directory listing — you want to see:
+```
+page_create_usecase.go
+page_delete_usecase.go
+page_list_usecase.go
+page_update_usecase.go
+```
+
+Not scattered:
+```
+create_page_usecase.go
+delete_page_usecase.go
+list_page_usecase.go
+update_page_usecase.go
+```
+
+---
+
+### 2. Non-usecase files in the usecase package
 
 Only `_usecase.go` files belong here. Never place mappers, helpers, or utility types in `usecase/`.
 
@@ -223,7 +283,7 @@ var productAttributesMapper = NewProductAttributesMapper() // also a global!
 
 ---
 
-### 2. Package-level global variables
+### 3. Package-level global variables
 
 Never declare `var` at the package level. All dependencies must be injected.
 
@@ -241,7 +301,7 @@ type ProductCreateUseCase struct {
 
 ---
 
-### 3. ORM or infrastructure imports in a usecase
+### 4. ORM or infrastructure imports in a usecase
 
 Usecases must only import `ports.*` interfaces and domain packages. If an error originates from GORM, the repository must wrap it into a domain error before it reaches the usecase.
 
@@ -263,7 +323,7 @@ Same rule applies to: `os`, `sync`, `database/sql`, `net/http` (for status codes
 
 ---
 
-### 4. Hardcoded magic strings and IDs as business rules
+### 5. Hardcoded magic strings and IDs as business rules
 
 Business rules must not depend on raw string literals or database row IDs baked into code. Use enums, constants from a dedicated `constants/` package, or config.
 
@@ -288,7 +348,7 @@ if input.ID == constants.UncategorizedCategoryID { ... }
 
 ---
 
-### 5. Infrastructure state in the usecase struct
+### 6. Infrastructure state in the usecase struct
 
 A usecase struct must hold only injected ports. Never store in-memory caches, mutexes, sync primitives, or worker groups inside a usecase — these belong in a dedicated cache port or service.
 
@@ -314,7 +374,7 @@ type ProductQualityScoreUseCase struct {
 
 ---
 
-### 6. Direct OS or filesystem calls
+### 7. Direct OS or filesystem calls
 
 Never call `os.Stat`, `os.ReadFile`, `os.Remove`, etc. directly. Delegate to a storage port.
 
@@ -331,7 +391,7 @@ zipResult, err := uc.zipPackagerService.Package(ctx, input)
 
 ---
 
-### 7. Duplicated private methods across usecase files
+### 8. Duplicated private methods across usecase files
 
 When multiple usecases in the same package share identical logic, extract it once — either into a shared private package in a dedicated file (if it's truly stateless and package-scoped), or into an injected service/port.
 
@@ -352,7 +412,7 @@ Similarly, `resolveCollection` was duplicated across 3 AI usecase files. If mult
 
 ---
 
-### 8. `record.ID == 0` check after `FindByID`
+### 9. `record.ID == 0` check after `FindByID`
 
 `FindByID` must return `ErrRecordNotFound` when the record doesn't exist — that is the repository contract. Checking `ID == 0` after a successful `FindByID` call is a workaround for a broken contract and hides bugs.
 
@@ -379,7 +439,7 @@ If the repository you're implementing doesn't do this, fix the repository — no
 
 ---
 
-### 9. In-memory membership or uniqueness checks
+### 10. In-memory membership or uniqueness checks
 
 Never fetch all records from a repository just to check whether one specific record exists. Add the right query method to the repository port instead.
 
@@ -408,7 +468,7 @@ Same applies to membership checks — instead of loading a full collection to se
 
 ---
 
-### 10. N+1 query pattern
+### 11. N+1 query pattern
 
 Never call a repository method inside a loop to fetch individual records. Use a batch/bulk repository method instead.
 
@@ -431,7 +491,7 @@ if err != nil {
 
 ---
 
-### 11. Tracing or logging inside a usecase
+### 12. Tracing or logging inside a usecase
 
 Observability (tracing, logging, metrics) is handled exclusively by the `ucdecorator` wrapper. Adding it inside a usecase creates inconsistency, duplicates work, and couples business logic to infrastructure.
 
@@ -472,7 +532,7 @@ Register raw usecases and decorate them via `ucdecorator`.
 
 ```go
 fx.Provide(
-	usecase.New<Operation>UseCase,
+	usecase.New<Entity><Action>UseCase,
 )
 ```
 
@@ -540,39 +600,41 @@ This keeps:
 
 ## Enforce rules
 
-1. **Only `_usecase.go` files in this package.** No mappers, helpers, or standalone utilities.
-2. **No package-level variables.** All dependencies go through the constructor.
-3. **No infrastructure imports.** Allowed: `ports.*`, domain enums/errs, `bricks/pkg/validator`, `bricks/pkg/errs`. Not allowed: `gorm.io/*`, `os`, `sync`, `database/sql`, driver packages.
-4. **No hardcoded magic strings or IDs as business rules.** Use enums, `constant/` package, or config.
-5. **No state in the usecase struct.** No maps, mutexes, singleflight groups, or in-memory caches — delegate to a cache port.
-6. **No observability in usecases.** No `logger`, `trace.Span`, or metrics calls — all of these live in the `ucdecorator` wrapper.
-7. **Trust the repository contract.** `FindByID` returns `ErrRecordNotFound` when not found. Never add `if record.ID == 0` as a guard after a successful `FindByID`.
-8. **No in-memory collection scans.** To check existence or uniqueness, add `FindByName`, `FindByID`, or `ExistsByX` to the repository port.
-9. **No N+1 queries.** Never call a repository method in a loop. Use batch methods (`FindByIDs`, etc.).
-10. **No duplicated private methods across files.** If multiple usecases share the same logic, extract it to a shared service port or a single package-level helper file.
-11. **No standalone functions when the file has a struct.** All private helpers must be methods on the use case struct.
-12. **Depend only on `ports.*` interfaces.** Never bypass the ports layer.
-13. **Keep orchestration in usecases; keep persistence in repositories.**
-14. **Use a single public `Execute` method.** No private `execute` wrappers.
-15. **Always define both Input and Output structs** (use empty struct when needed).
-16. **Input/Output must NOT have `json` tags.** Use validation tags on Input only when needed.
-17. **Return typed output DTOs.** Never leak persistence models.
+1. **Entity first, action second in all names.** File: `<entity>_<action>_usecase.go`. Struct: `<Entity><Action>UseCase`. Input/Output: `<Entity><Action>Input`/`<Entity><Action>Output`. Never reverse this order.
+2. **Only `_usecase.go` files in this package.** No mappers, helpers, or standalone utilities.
+3. **No package-level variables.** All dependencies go through the constructor.
+4. **No infrastructure imports.** Allowed: `ports.*`, domain enums/errs, `bricks/pkg/validator`, `bricks/pkg/errs`. Not allowed: `gorm.io/*`, `os`, `sync`, `database/sql`, driver packages.
+5. **No hardcoded magic strings or IDs as business rules.** Use enums, `constant/` package, or config.
+6. **No state in the usecase struct.** No maps, mutexes, singleflight groups, or in-memory caches — delegate to a cache port.
+7. **No observability in usecases.** No `logger`, `trace.Span`, or metrics calls — all of these live in the `ucdecorator` wrapper.
+8. **Trust the repository contract.** `FindByID` returns `ErrRecordNotFound` when not found. Never add `if record.ID == 0` as a guard after a successful `FindByID`.
+9. **No in-memory collection scans.** To check existence or uniqueness, add `FindByName`, `FindByID`, or `ExistsByX` to the repository port.
+10. **No N+1 queries.** Never call a repository method in a loop. Use batch methods (`FindByIDs`, etc.).
+11. **No duplicated private methods across files.** If multiple usecases share the same logic, extract it to a shared service port or a single package-level helper file.
+12. **No standalone functions when the file has a struct.** All private helpers must be methods on the use case struct.
+13. **Depend only on `ports.*` interfaces.** Never bypass the ports layer.
+14. **Keep orchestration in usecases; keep persistence in repositories.**
+15. **Use a single public `Execute` method.** No private `execute` wrappers.
+16. **Always define both Input and Output structs** (use empty struct when needed).
+17. **Input/Output must NOT have `json` tags.** Use validation tags on Input only when needed.
+18. **Return typed output DTOs.** Never leak persistence models.
 
 ## Final checklist
 
-1. File is named `<operation>_usecase.go` and lives in `internal/modules/<module>/usecase/`.
-2. Input and Output structs are defined (including empty structs when needed).
-3. All dependencies are injected via constructor — no package-level vars.
-4. `Execute` contains all business logic; no private `execute` wrapper exists.
-5. No `gorm`, `os`, `sync`, `net/http` or other infra imports.
-6. No hardcoded magic strings or IDs — enums or `constant/` package used instead.
-7. No logger, tracer, or metrics inside the usecase struct or Execute.
-8. `FindByID` is trusted to return `ErrRecordNotFound` — no `ID == 0` guard.
-9. No repository calls inside loops (N+1) — batch methods used instead.
-10. No in-memory scans to check uniqueness or membership — port has the right query method.
-11. No logic duplicated from another usecase file — extracted to a service or shared helper.
-12. Wired in Fx and decorated with `ucdecorator.Wrap(factory, raw)`.
-13. Unit tests created with the `go-unit-tests` skill.
-14. `make test` passes.
-15. `make lint` passes.
-16. `make nilaway` passes.
+1. File is named `<entity>_<action>_usecase.go` (entity first, action second) and lives in `internal/modules/<module>/usecase/`.
+2. All type names follow `<Entity><Action>` order: Input, Output, UseCase struct, constructor.
+3. Input and Output structs are defined (including empty structs when needed).
+4. All dependencies are injected via constructor — no package-level vars.
+5. `Execute` contains all business logic; no private `execute` wrapper exists.
+6. No `gorm`, `os`, `sync`, `net/http` or other infra imports.
+7. No hardcoded magic strings or IDs — enums or `constant/` package used instead.
+8. No logger, tracer, or metrics inside the usecase struct or Execute.
+9. `FindByID` is trusted to return `ErrRecordNotFound` — no `ID == 0` guard.
+10. No repository calls inside loops (N+1) — batch methods used instead.
+11. No in-memory scans to check uniqueness or membership — port has the right query method.
+12. No logic duplicated from another usecase file — extracted to a service or shared helper.
+13. Wired in Fx and decorated with `ucdecorator.Wrap(factory, raw)`.
+14. Unit tests created with the `go-unit-tests` skill.
+15. `make test` passes.
+16. `make lint` passes.
+17. `make nilaway` passes.

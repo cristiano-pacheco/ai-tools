@@ -1,11 +1,18 @@
 ---
 name: go-usecase
-description: Generate Go use cases in internal/modules/<module>/usecase/ with strict NounAction naming, validate-tagged Input DTOs, ports-only module dependencies plus shared validator/logger, and Fx decoration using ucdecorator.Wrap with fx.In/fx.Out. Always use this skill when creating business operations, implementing CRUD use cases, adding new operations to a module, or when the user mentions "use case", "usecase", or wants to add an Execute-based operation to a module.
+description: Generate use cases. Use when creating business operations, CRUD use cases, or any Execute-based module operation.
 ---
 
 # Go UseCase
 
 Generate use case implementation for Go modular architecture.
+
+## When to Use
+
+- Create business operations with Execute pattern
+- CRUD use cases for any module
+- Operations requiring input validation and error handling
+- Any domain logic orchestrating ports
 
 ## File Pattern
 

@@ -1,6 +1,6 @@
 ---
 name: go-mapper
-description: Generate Go mapper functions in internal/modules/<module>/mapper/. Use when mapping between layers — HTTP DTOs to use case inputs, models to responses, or any struct-to-struct transformation.
+description: Generate pure mapper functions for struct-to-struct transformations between layers: HTTP DTOs to use case inputs, models to responses.
 ---
 
 # Go Mapper

@@ -1,11 +1,17 @@
 ---
 name: go-integration-tests
-description: Generate comprehensive Go integration tests using testify suite patterns with real database and infrastructure dependencies. Use when creating or updating integration test files, testing use cases against real databases, verifying end-to-end flows, or when asked to add integration test coverage for Go code.
+description: Generate Go integration tests with real database/infrastructure via itestkit containers. Use when testing use cases against real databases, verifying end-to-end flows, or adding integration test coverage.
 ---
 
 # Go Integration Tests
 
 Generate comprehensive Go integration tests using testify suite patterns with real database and infrastructure dependencies.
+
+## When to Use
+
+- Test use cases against real databases via containers
+- Verify end-to-end flows with real infrastructure
+- Assert DB state, side effects, and error conditions
 
 ## Planning Phase
 

@@ -1,11 +1,19 @@
 ---
 name: go-cache
-description: Generate Go cache implementations following GO modular architecture conventions. Always use this skill when the user asks to create a cache, add a Redis cache layer, cache short-lived data with TTL, implement rate limiting storage, OTP caching, session caching, OAuth state storage, or any domain cache in internal/modules/<module>/cache/. Invoke proactively whenever the user mentions caching, Redis-backed storage, TTL expiry, or temporary data — even if they don't say "cache" explicitly.
+description: Generate Redis-backed Go cache. Invoke whenever user mentions cache or Redis.
 ---
 
 # Go Cache
 
 Generate two files for every cache: a **port interface** and a **Redis-backed implementation**.
+
+## When to Use
+
+- Create a cache layer for any module
+- Redis-backed TTL storage (OTP, sessions, OAuth state)
+- Rate limiting storage
+- Boolean flag caching (existence checks)
+- JSON data caching (structured objects)
 
 ## Which Variant?
 

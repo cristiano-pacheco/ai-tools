@@ -1,11 +1,17 @@
 ---
 name: go-validator
-description: Generate Go validator implementations following GO modular architecture conventions (interface-first design, Fx DI, stateless validation). Use when creating validation logic in internal/modules/<module>/validator/ - password validation, email validation, input sanitization, business rule validation, or any domain validation that encapsulates validation rules and returns typed errors.
+description: Generate validators. Use for passwords, emails, business rules, or any validation returning typed errors.
 ---
 
 # Go Validator
 
 Generate validator files for GO modular architecture conventions.
+
+## When to Use
+
+- Create domain validators (password, email, username, etc.)
+- Input sanitization and business rule validation
+- Any validation logic returning typed domain errors
 
 ## Two-File Pattern
 

@@ -1,11 +1,18 @@
 ---
 name: go-repository
-description: Generate Go repository port interfaces and implementations following Go modular architecture conventions. Use when creating data access layers for entities in internal/modules/<module>/ including CRUD operations (Create, FindAll, FindByID, Update, Delete), custom queries, pagination, or transactions.
+description: Generate repository port interfaces and GORM implementations. Use for data access layers: CRUD, custom queries, pagination, transactions.
 ---
 
 # Go Repository
 
 Generate repository port interfaces and implementations for Go modular architecture conventions.
+
+## When to Use
+
+- Create data access layers for entities
+- CRUD operations (Create, FindAll, FindByID, Update, Delete)
+- Custom queries, pagination, transactions
+- Join queries and filtered lookups
 
 ## Two-File Pattern
 

@@ -1,11 +1,17 @@
 ---
 name: go-enum
-description: Generate Go enums following GO modular architecture conventions (string-based enums with validation, constructor, and String method). Use when creating type-safe string enumerations in internal/modules/<module>/enum/ or when user asks to create an enum, add an enum type, or define enum constants.
+description: Generate type-safe enums with validation. Use when creating enums, defining constants, or adding enum types.
 ---
 
 # Go Enum
 
 Generate type-safe Go enums following GO modular architecture conventions.
+
+## When to Use
+
+- Create type-safe enumerations for a module
+- Define domain constants with validation
+- Add validated enum types (e.g., status, category, method)
 
 ## Pattern
 

@@ -1,11 +1,18 @@
 ---
 name: go-unit-tests
-description: Generate comprehensive Go unit tests following testify patterns and best practices. Use when creating or updating Go test files, writing test suites for structs with dependencies, testing standalone functions, working with mocks, or when asked to add test coverage for Go code.
+description: Generate Go unit tests using testify suite/assert patterns. Use when writing test suites with mocks, testing standalone functions, or adding unit test coverage.
 ---
 
 # Go Unit Tests
 
 Generate comprehensive Go unit tests following testify patterns and the Arrange-Act-Assert methodology.
+
+## When to Use
+
+- Write test suites for structs with dependencies
+- Test standalone functions and value objects
+- Create mock-based unit tests
+- Add unit test coverage to existing code
 
 ## Before Writing Tests
 

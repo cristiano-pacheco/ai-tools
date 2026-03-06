@@ -1,11 +1,17 @@
 ---
 name: go-gorm-model
-description: Generate Go GORM models following Go modular architecture conventions. Use when creating or updating persistence models in internal/modules/<module>/model/, including table mapping, nullable pointer types, index tags, PostgreSQL-specific types, and timestamps. Always use this skill when asked to create a model, add a GORM struct, map a database table, or generate model files.
+description: Generate GORM persistence models. Use when creating database models using GORM.
 ---
 
 # Go GORM Model
 
 Generate GORM persistence models in `internal/modules/<module>/model/`.
+
+## When to Use
+
+- Create persistence models mapping database tables
+- Add structs with nullable pointer types, indexes, JSONB, defaults
+- Map SQL migrations to Go structs
 
 ## Pattern
 

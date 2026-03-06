@@ -1,11 +1,19 @@
 ---
 name: go-chi-router
-description: Generate Chi router implementations following Go modular architecture conventions (Chi router from bricks package, Fx DI with chi.Route interface, REST endpoints). Always use this skill when creating or modifying HTTP route registration in internal/modules/<module>/http/chi/router/, including any new router file, CRUD routes (GET, POST, PUT, DELETE), custom action endpoints, versioned APIs, route groups with middleware, or wiring routers into a module's fx.go.
+description: Generate Chi router files with route registration and Fx wiring. Use for CRUD routes, custom endpoints, versioned APIs, route groups, or any HTTP route setup.
 ---
 
 # Go Chi Router
 
 Generate Chi router implementations for Go backend HTTP transport layer.
+
+## When to Use
+
+- Register HTTP routes for a module
+- CRUD route setup (GET, POST, PUT, DELETE)
+- Custom action endpoints (e.g., /activate, /deactivate)
+- Route groups with middleware
+- Versioned API routes
 
 **Location**: `internal/modules/<module>/http/chi/router/<resource>_router.go`
 

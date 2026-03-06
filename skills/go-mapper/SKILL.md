@@ -1,6 +1,6 @@
 ---
 name: go-mapper
-description: Generate pure mapper functions for struct-to-struct transformations between layers: HTTP DTOs to use case inputs, models to responses.
+description: Generate pure mapper functions for transformations between layers, HTTP DTOs to use case inputs dtos, use case to response dto, etc.
 ---
 
 # Go Mapper

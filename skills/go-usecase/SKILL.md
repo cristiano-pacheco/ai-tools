@@ -273,6 +273,7 @@ Each use case must define its own Input and Output types in its own use case fil
 <critical>Input/Output MUST declare all fields explicitly, either directly or via nested structs declared in the same use case file.</critical>
 <critital>Input/Output types are private to that use case contract and MUST NOT be reused by other use cases.</critical>
 <critical>Shared shapes belong in repository/service/domain layers, not in use case boundary contracts.</critical>
+<critical>Input/Output types must not have json tags</critical>
 
 ## Critical Rules
 

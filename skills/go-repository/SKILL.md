@@ -1,6 +1,6 @@
 ---
 name: go-repository
-description: Generate repository port interfaces and GORM implementations. Use for data access layers: CRUD, custom queries, pagination, transactions.
+description: Generate repository port interfaces and GORM implementations. Use for data access layers, CRUD, custom queries, pagination, transactions.
 ---
 
 # Go Repository

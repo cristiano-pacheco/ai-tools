@@ -265,6 +265,15 @@ func (uc *UserCreateUseCase) Execute(...) {}
 func NewUserCreateUseCase(...) *UserCreateUseCase {}
 ```
 
+<critical>Every error must be logged.</critical>
+<critical>
+Each use case must define its own Input and Output types in its own use case file, and those boundary types must be self-contained.
+</critical>
+<critical>Input/Output MUST NOT embed or reference shared module DTOs/models</critical>
+<critical>Input/Output MUST declare all fields explicitly, either directly or via nested structs declared in the same use case file.</critical>
+<critital>Input/Output types are private to that use case contract and MUST NOT be reused by other use cases.</critical>
+<critical>Shared shapes belong in repository/service/domain layers, not in use case boundary contracts.</critical>
+
 ## Critical Rules
 
 1. **Naming**: Struct `NounActionUseCase`, Input `NounActionInput`, Output `NounActionOutput`. No exceptions.

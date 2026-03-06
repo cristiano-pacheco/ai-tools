@@ -289,6 +289,10 @@ Each use case must define its own Input and Output types in its own use case fil
 11. **No redundant comments**: Do not restate method/constructor names.
 12. **Fx decoration**: Wrap with `ucdecorator.Wrap` via `fx.In`/`fx.Out` structs.
 
+## Anti-pattern: Standalone functions
+
+Standalone functions at the package level are forbidden when a struct with methods exists in the file. They pollute the package namespace, can collide with helpers in other service files, and fragment logic that belongs to the struct.
+
 ## Workflow
 
 1. Create `usecase/<noun>_<action>_usecase.go`

@@ -312,7 +312,7 @@ Common TTL ranges:
 
 ## Fx Wiring
 
-Add to `internal/modules/<module>/module.go`:
+Add to `internal/modules/<module>/fx.go`:
 
 ```go
 fx.Provide(
@@ -348,6 +348,6 @@ fx.Provide(
 1. Decide variant: Boolean flag or JSON data?
 2. Create port interface in `ports/<name>_cache.go`
 3. Create cache implementation in `cache/<name>_cache.go`
-4. Add Fx wiring to `module.go`
+4. Add Fx wiring to `fx.go`
 5. Run `make lint`
 6. Run `make nilaway`

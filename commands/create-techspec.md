@@ -60,8 +60,8 @@ Ask focused questions about:
 
 * Use `ai/templates/techspec-template.md` as the **exact structure**
 * Provide: architecture overview, component design, interfaces, models, endpoints, integration points, impact analysis, testing strategy, observability
-* Keep it under ~2,000 words
 * **Avoid repeating PRD functional requirements**; focus on how to implement
+* This is a tech specification, **not about implementation details**; avoid showing too much code.
 
 ### 6. Save Tech Spec (Mandatory)
 

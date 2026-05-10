@@ -80,7 +80,7 @@ Ask focused questions about:
 * **Data Flow**: inputs/outputs, contracts, and transformations
 * **Dependencies**: external services/APIs, failure modes, timeouts, idempotency
 * **Core Implementation**: main logic, interfaces, and data models
-* **Testing**: critical paths, unit/integration/e2e tests, contract tests
+* **Testing**: critical paths, unit/integration tests, contract tests
 * **Reuse vs Build**: existing libraries/components, license viability, API stability
 
 ## Quality Checklist
@@ -89,7 +89,7 @@ Ask focused questions about:
 * [ ] Deep repository analysis completed
 * [ ] Key technical clarifications answered
 * [ ] Tech Spec generated using the template
-* [ ] Project rules in `ai/rules` verified
+* [ ] Reference relevant skills to apply in the techspec
 * [ ] File written to `ai/tasks/prd-[feature-name]/techspec.md`
 * [ ] Final output path provided and confirmed
 

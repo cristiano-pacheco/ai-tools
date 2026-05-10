@@ -70,12 +70,6 @@ type ServiceName interface {
 * Components to be tested together
 * Test data requirements]
 
-### End-to-End Tests
-
-[If necessary, describe E2E tests:
-
-* Test the frontend together with the backend **using Playwright**]
-
 ## Development Sequencing
 
 ### Build Order
@@ -122,7 +116,7 @@ type ServiceName interface {
 
 ### Standards Compliance
 
-[Research the rules in the `docs/` folder that apply to this tech spec and list them below:]
+[Research the relevant skills to be used on this project and the rules in the `docs/` folder that apply to this tech spec and list them below:]
 
 ### Relevant and Dependent Files
 

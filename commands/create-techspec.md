@@ -60,8 +60,8 @@ Ask focused questions about:
 
 * Use `ai/templates/techspec-template.md` as the **exact structure**
 * Provide: architecture overview, component design, interfaces, models, endpoints, integration points, impact analysis, testing strategy, observability
-* Keep it under ~2,000 words
 * **Avoid repeating PRD functional requirements**; focus on how to implement
+* This is a tech specification, **not about implementation details**; avoid showing too much code.
 
 ### 6. Save Tech Spec (Mandatory)
 
@@ -80,7 +80,7 @@ Ask focused questions about:
 * **Data Flow**: inputs/outputs, contracts, and transformations
 * **Dependencies**: external services/APIs, failure modes, timeouts, idempotency
 * **Core Implementation**: main logic, interfaces, and data models
-* **Testing**: critical paths, unit/integration/e2e tests, contract tests
+* **Testing**: critical paths, unit/integration tests, contract tests
 * **Reuse vs Build**: existing libraries/components, license viability, API stability
 
 ## Quality Checklist
@@ -89,7 +89,7 @@ Ask focused questions about:
 * [ ] Deep repository analysis completed
 * [ ] Key technical clarifications answered
 * [ ] Tech Spec generated using the template
-* [ ] Project rules in `ai/rules` verified
+* [ ] Reference relevant skills to apply in the techspec
 * [ ] File written to `ai/tasks/prd-[feature-name]/techspec.md`
 * [ ] Final output path provided and confirmed
 

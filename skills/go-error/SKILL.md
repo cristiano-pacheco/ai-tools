@@ -52,16 +52,6 @@ var (
 	// ErrProfileNotFound is returned when the profile is not found.
 	ErrProfileNotFound = brickserrs.New("PROFILE_02", "profile not found", http.StatusNotFound, nil)
 )
-
-// NewProfileValidationError returns a structured validation error with field-level details.
-func NewProfileValidationError(details []brickserrs.Detail) *brickserrs.Error {
-	return brickserrs.New(
-		ErrProfileValidationFailed.Code,
-		ErrProfileValidationFailed.Message,
-		ErrProfileValidationFailed.Status,
-		details,
-	)
-}
 ```
 
 ## Generation Steps

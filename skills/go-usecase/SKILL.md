@@ -130,7 +130,7 @@ Common tags: `required`, `min=N`, `max=N`, `email`, `oneof=val1 val2 val3`
 Every error from a repository, service, or external call MUST be logged before returning:
 
 ```go
-entity, err := uc.entityRepo.FindByID(ctx, input.ID)
+entity, err := uc.entityRepository.FindByID(ctx, input.ID)
 if err != nil {
 	uc.logger.Error("error finding entity by id", logger.Error(err))
 	return EntityGetOutput{}, err
@@ -140,7 +140,7 @@ if err != nil {
 For not-found checks where absence is expected (not a terminal error):
 
 ```go
-entity, err := uc.entityRepo.FindByEmail(ctx, input.Email)
+entity, err := uc.entityRepository.FindByEmail(ctx, input.Email)
 if err != nil && !errors.Is(err, bricserrs.ErrRecordNotFound) {
 	uc.logger.Error("error finding entity by email", logger.Error(err))
 	return EntityCreateOutput{}, err
@@ -209,13 +209,13 @@ func (uc *UserCreateUseCase) Execute(ctx context.Context, input UserCreateInput)
 ### Unlogged error — BAD
 ```go
 // BAD
-entity, err := uc.entityRepo.FindByID(ctx, input.ID)
+entity, err := uc.entityRepository.FindByID(ctx, input.ID)
 if err != nil {
 	return EntityGetOutput{}, err
 }
 
 // GOOD
-entity, err := uc.entityRepo.FindByID(ctx, input.ID)
+entity, err := uc.entityRepository.FindByID(ctx, input.ID)
 if err != nil {
 	uc.logger.Error("error finding entity by id", logger.Error(err))
 	return EntityGetOutput{}, err

@@ -7,7 +7,7 @@
 
 ## Objectives
 
-1. Produce a **concise, descriptive PR title** that captures the change in a single line
+1. Produce a **concise, descriptive PR title** that captures the change in a single line, **prefixed with a Conventional Commits type** (`feat`, `fix`, `chore`, `refactor`, `perf`, `docs`, `test`, `build`, `ci`, `style`, `revert`) followed by `: `. Example: `feat: decouple templates from channel`. An optional scope is allowed (`feat(renderer): ...`) but not required.
 2. Produce a **structured PR description** that explains the WHY, the HOW (with diagrams when useful), and the key operational properties (retry safety, observability, config, data model)
 3. Save the result as a markdown file under `ai/pull-requests/` so it can be copy-pasted into GitHub
 
@@ -62,7 +62,7 @@ If a section in the template has no real content from the diff, **omit the secti
 ### 4. Write the PR (Mandatory)
 
 * Use `ai/templates/pr-template.md` as the exact structure
-* Open with a 🚀 (or archetype-appropriate emoji) one-line hero title and a 1–2 sentence pitch
+* The PR **title** is plain Conventional Commits — no emoji (e.g. `feat: decouple templates from channel`). The **description** opens with a separate 🚀 (or archetype-appropriate emoji) one-line hero title and a 1–2 sentence pitch
 * Lead with motivation (**Why**) before mechanics (**How**)
 * Use a mermaid `sequenceDiagram` when the change adds a multi-step flow; skip the diagram for trivial changes
 * Use emoji bullets liberally in the **Key points** section — they make scanning fast (match the style of `<example1/>` and `<example2/>`)
@@ -87,7 +87,7 @@ If a section in the template has no real content from the diff, **omit the secti
 
 * [ ] Branch compared against `main` and diff inspected
 * [ ] Change archetype identified and template sections pruned accordingly
-* [ ] Title is a single line, descriptive, with leading emoji
+* [ ] Title is a single line, starts with a Conventional Commits type (`feat`, `fix`, `chore`, `refactor`, `perf`, `docs`, `test`, `build`, `ci`, `style`, `revert`) followed by `: `, and contains no leading emoji
 * [ ] **Why** is stated before **How**
 * [ ] Every cited config key / metric / endpoint / migration is grounded in the diff
 * [ ] No invented features, no speculative future work

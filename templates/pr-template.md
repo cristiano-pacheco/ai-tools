@@ -6,12 +6,16 @@
 
 ## Title
 
-`[emoji] [Imperative, single-line summary — under 80 chars]`
+`[type][(optional-scope)]: [imperative, single-line summary — under 80 chars]`
+
+Type is required and must be one of: `feat`, `fix`, `chore`, `refactor`, `perf`, `docs`, `test`, `build`, `ci`, `style`, `revert`. No leading emoji on the title.
 
 Examples:
-- `🚀 In-process cache for communication_flow_executions`
-- `⚡ Reduce render hot-path DB load with singleflight`
-- `🐛 Stop double-dispatching on River retry after partial outbox write`
+- `feat: decouple templates from channel`
+- `feat(communication-flow): in-process cache for execution rows`
+- `perf: reduce render hot-path DB load with singleflight`
+- `fix: stop double-dispatching on River retry after partial outbox write`
+- `chore(seeds): refresh template and flow seed data`
 
 ---
 

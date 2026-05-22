@@ -117,9 +117,3 @@ sequenceDiagram
 - [Small thing 2]
 
 ---
-
-<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
-## Summary by CodeRabbit
-
-[Leave this section empty — CodeRabbit fills it in on the live PR.]
-<!-- end of auto-generated comment: release notes by coderabbit.ai -->

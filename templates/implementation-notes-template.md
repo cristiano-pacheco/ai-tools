@@ -1,0 +1,41 @@
+# Implementation Notes
+
+## Task
+- ID:
+- Title:
+- Status: In Progress
+
+## Summary
+What was implemented and why.
+
+## Assumptions
+- 
+
+## Decisions
+- Decision:
+  - Why:
+  - Impact:
+
+## Changes Made
+- 
+
+## Tradeoffs
+- Tradeoff:
+  - Chosen:
+  - Rejected:
+  - Why:
+
+## Issues Found
+- Issue:
+  - Fix:
+
+## Verification
+- Lint:
+- Tests:
+- Manual checks:
+
+## Open Questions
+- 
+
+## Final Notes
+- 

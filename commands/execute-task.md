@@ -5,6 +5,21 @@ You are an **AI assistant responsible for correctly implementing tasks**. Your r
 <critical>You must not rush to finish the task. Always verify the required files, check the tests, and perform a reasoning process to ensure both understanding and correct execution (you are not lazy).</critical>
 <critical>A TASK CANNOT BE CONSIDERED COMPLETE UNTIL ALL TESTS ARE PASSING, **WITH 100% SUCCESS**</critical>
 <critical>Never mention techspec, prd, task on comments, never. these documents are not commited in the project. These references are useslees</critical>
+<critical>
+During implementation, keep an up-to-date `implementation-notes.md` file.
+
+This file must capture only information that is useful for future maintainers or reviewers:
+- decisions made because requirements were ambiguous or incomplete
+- assumptions made during implementation
+- changes made that were not explicitly requested
+- tradeoffs considered and chosen
+- deviations from the original plan
+- issues discovered while implementing
+- test results and verification notes
+- anything important that is not obvious from the code
+
+Use the ai/templates/implementation-notes.md Markdown template and keep it concise, factual, and current.
+</critical>
 
 ## Provided Information
 
@@ -80,6 +95,21 @@ After providing the summary and approach, **immediately begin implementing the t
 <critical>Use Context7 MCP to analyze documentation for the language, frameworks, and libraries involved in the implementation.</critical>
 <critical>After completing the task, mark it as completed in tasks.md</critical>
 <critical>Never mention techspec, prd, task on comments, never. these documents are not commited in the project. These references are useslees</critical>
+<critical>
+During implementation, keep an up-to-date `implementation-notes.md` file.
+
+This file must capture only information that is useful for future maintainers or reviewers:
+- decisions made because requirements were ambiguous or incomplete
+- assumptions made during implementation
+- changes made that were not explicitly requested
+- tradeoffs considered and chosen
+- deviations from the original plan
+- issues discovered while implementing
+- test results and verification notes
+- anything important that is not obvious from the code
+
+Use the ai/templates/implementation-notes.md Markdown template and keep it concise, factual, and current.
+</critical>
 
 
 </system_instructions>

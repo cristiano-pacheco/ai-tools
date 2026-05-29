@@ -51,11 +51,11 @@ Report the resolved base path for the current directory (or, if there's no git r
 
 The spec-driven suite is:
 
-- `ai-create-prd` — PRD → `engineering/<project>/<feature>/prd.md`
-- `ai-create-techspec` — tech spec → `<feature>/tech-spec.md`
-- `ai-review-techspec` — architect review → `<feature>/tech-spec-review.md`
-- `ai-create-tasks` — task list → `<feature>/tasks.md` + `NN-task.md`
-- `ai-execute-task` — implement in repo; notes → `<feature>/implementation-notes.md`
+- `ai-create-prd` — PRD → `engineering/<project>/workplans/<feature>/prd.md`
+- `ai-create-techspec` — tech spec → `workplans/<feature>/tech-spec.md`
+- `ai-review-techspec` — architect review → `workplans/<feature>/tech-spec-review.md`
+- `ai-create-tasks` — task list → `workplans/<feature>/tasks.md` + `NN-task.md`
+- `ai-execute-task` — implement in repo; notes → `workplans/<feature>/implementation-notes.md`
 - `ai-create-pr` — PR description → `<project>/pull-requests/<branch>.md`
 - `ai-code-review` — branch review → `<project>/code-reviews/review-<branch>.md`
 - `ai-codebase-review` — codebase audit → `<project>/codebase-reviews/<system>.md`

@@ -15,9 +15,9 @@ This is the execution step of a spec-driven workflow. The specs are read from Ob
 
 ## Inputs (read from the vault)
 
-- PRD: `engineering/<project>/<feature>/workplan/prd.md`
-- Tech spec: `engineering/<project>/<feature>/workplan/tech-spec.md`
-- Tasks: `engineering/<project>/<feature>/workplan/tasks.md` and the relevant `workplan/NN-task.md`
+- PRD: `engineering/<project>/workplans/<feature>/prd.md`
+- Tech spec: `engineering/<project>/workplans/<feature>/tech-spec.md`
+- Tasks: `engineering/<project>/workplans/<feature>/tasks.md` and the relevant `<feature>/NN-task.md`
 - Project standards: the repo's `docs/` folder, if present
 
 ## Output to Obsidian
@@ -32,15 +32,15 @@ Code changes go to the local repository. The only things written to Obsidian (vi
 
 ### Resolve the feature and read inputs
 
-**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD, tech spec, tasks, and the specific `NN-task.md` with `obsidian_get_file_contents`.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD, tech spec, tasks, and the specific `NN-task.md` with `obsidian_get_file_contents`.
 
 ### Update task status
 
-When a task is done, mark its checkbox in `workplan/tasks.md` with `obsidian_patch_content` (operation `replace`, targeting the task's line/block) rather than rewriting the whole file.
+When a task is done, mark its checkbox in `workplans/<feature>/tasks.md` with `obsidian_patch_content` (operation `replace`, targeting the task's line/block) rather than rewriting the whole file.
 
 ### Maintain implementation notes
 
-Keep `engineering/<project>/<feature>/workplan/implementation-notes.md` current, following `references/implementation-notes-template.md`. To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content`. Capture only what helps future maintainers or reviewers:
+Keep `engineering/<project>/workplans/<feature>/implementation-notes.md` current, following `references/implementation-notes-template.md`. To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content`. Capture only what helps future maintainers or reviewers:
 
 - decisions made because requirements were ambiguous or incomplete
 - assumptions made during implementation
@@ -72,7 +72,7 @@ After the summary and plan, **begin implementing right away**: run required comm
 Run `make lint && make test` (or the project's equivalent). Fix every issue. Do not finalize until all issues are resolved and tests pass 100%.
 
 ### 7. Report
-State which task was completed and echo `Feature ID: <feature>` plus the next unchecked task in `workplan/tasks.md` — so the user can continue in a fresh session by running `ai-execute-task` for `<feature>` again.
+State which task was completed and echo `Feature ID: <feature>` plus the next unchecked task in `workplans/<feature>/tasks.md` — so the user can continue in a fresh session by running `ai-execute-task` for `<feature>` again.
 
 <critical>DO NOT SKIP ANY STEP.</critical>
 <critical>After completing the task, mark it complete in the vault's tasks.md and update implementation-notes.md.</critical>

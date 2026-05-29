@@ -32,11 +32,11 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature folder
 
-The PRD lives at `engineering/<project>/<feature>/workplan/prd.md`, where `<feature>` is a kebab-case slug describing the feature (e.g. `queue-routing`). `workplan/` is the per-feature folder that holds the full set of working documents (PRD, tech spec, tasks, and the artifacts produced while building). Derive the slug from the feature name; if a folder for this feature may already exist, list `engineering/<project>` with `obsidian_list_files_in_dir` and reuse the matching folder.
+The PRD lives at `engineering/<project>/workplans/<feature>/prd.md`, where `<feature>` is a kebab-case slug describing the feature (e.g. `queue-routing`). `workplans/` is the project's working-docs folder; each feature gets its own subfolder under it holding the full set of working documents (PRD, tech spec, tasks, and the artifacts produced while building). Derive the slug from the feature name; if a folder for this feature may already exist, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` and reuse the matching folder.
 
 ### Write the file (there is no whole-file overwrite tool)
 
-The Obsidian MCP only exposes append / patch / delete. To write `engineering/<project>/<feature>/workplan/prd.md`:
+The Obsidian MCP only exposes append / patch / delete. To write `engineering/<project>/workplans/<feature>/prd.md`:
 
 1. Check if it exists with `obsidian_get_file_contents`.
 2. If it exists, delete it with `obsidian_delete_file` (pass `confirm: true`) — regenerating a PRD replaces it; appending would duplicate content.
@@ -66,7 +66,7 @@ Outline a section-by-section approach, note areas needing research (use web sear
 
 ### 4. Save (mandatory)
 
-Write to `engineering/<project>/<feature>/workplan/prd.md` using the write recipe above.
+Write to `engineering/<project>/workplans/<feature>/prd.md` using the write recipe above.
 
 ### 5. Report
 
@@ -84,7 +84,7 @@ The `<feature>` slug is the only thing the user needs to pass to `ai-create-tech
 - [ ] Clarifying questions asked and answered
 - [ ] PRD follows the template
 - [ ] Numbered functional requirements included
-- [ ] Saved to `engineering/<project>/<feature>/workplan/prd.md`
+- [ ] Saved to `engineering/<project>/workplans/<feature>/prd.md`
 - [ ] Final vault path reported
 
 <critical>DO NOT GENERATE THE PRD WITHOUT FIRST ASKING CLARIFYING QUESTIONS.</critical>

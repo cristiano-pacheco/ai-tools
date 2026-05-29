@@ -23,7 +23,7 @@ This is the second step of a spec-driven workflow. The tech spec is read later b
 ## Template and inputs
 
 - Tech spec structure: `references/techspec-template.md` (follow exactly).
-- Required input: the PRD at `engineering/<project>/<feature>/workplan/prd.md` (read it from the vault).
+- Required input: the PRD at `engineering/<project>/workplans/<feature>/prd.md` (read it from the vault).
 - If the repo has a `docs/` folder with project standards, review it.
 
 ## Output to Obsidian
@@ -38,13 +38,13 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature and read the PRD
 
-**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD with `obsidian_get_file_contents("engineering/<project>/<feature>/workplan/prd.md")`. If it's missing, stop and tell the user to run `ai-create-prd` first.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD with `obsidian_get_file_contents("engineering/<project>/workplans/<feature>/prd.md")`. If it's missing, stop and tell the user to run `ai-create-prd` first.
 
 When you finish, echo the `Feature ID: <feature>` and the next step (`ai-create-tasks` / `ai-review-techspec` for `<feature>`) so the chain can continue in a fresh session.
 
 ### Write the file (no whole-file overwrite tool)
 
-To write `engineering/<project>/<feature>/workplan/tech-spec.md`: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
+To write `engineering/<project>/workplans/<feature>/tech-spec.md`: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
 
 ## Workflow
 
@@ -70,7 +70,7 @@ Use `references/techspec-template.md` as the exact structure. Provide architectu
 
 ### 6. Save (mandatory)
 
-Write to `engineering/<project>/<feature>/workplan/tech-spec.md` using the recipe above, then confirm the path.
+Write to `engineering/<project>/workplans/<feature>/tech-spec.md` using the recipe above, then confirm the path.
 
 ## Quality checklist
 
@@ -79,7 +79,7 @@ Write to `engineering/<project>/<feature>/workplan/tech-spec.md` using the recip
 - [ ] Key clarifications answered
 - [ ] Tech spec follows the template
 - [ ] Relevant skills/standards referenced
-- [ ] Saved to `engineering/<project>/<feature>/workplan/tech-spec.md`
+- [ ] Saved to `engineering/<project>/workplans/<feature>/tech-spec.md`
 - [ ] Final vault path reported
 
 <critical>EXPLORE THE PROJECT FIRST, BEFORE ASKING CLARIFYING QUESTIONS.</critical>

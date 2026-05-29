@@ -90,16 +90,16 @@ When the user references a feature, the spec docs are your richest, most accurat
 
 ### Step 1: Resolve the feature in the vault
 
-List `engineering/<project>` with `obsidian_list_files_in_dir` and match the feature the user named; if ambiguous or missing, ask.
+List `engineering/<project>/workplans` with `obsidian_list_files_in_dir` and match the feature the user named; if ambiguous or missing, ask.
 
 ### Step 2: Read the feature's documents
 
 Read whichever of these exist with `obsidian_get_file_contents`, and extract:
 
-- `…/<feature>/prd.md` — **why it mattered**: the problem, the users/beneficiaries, the objectives and success metrics. This is the "result/impact" raw material.
-- `…/<feature>/tech-spec.md` — **what was built**: the components, the scope, the hard parts.
-- `…/<feature>/tasks.md` and `NN-task.md` — the concrete deliverables; completed tasks map well to individual entries.
-- `…/<feature>/implementation-notes.md` — decisions, tradeoffs, issues found, and verification notes — great for nuance and for honest "what was hard" framing.
+- `…/workplans/<feature>/prd.md` — **why it mattered**: the problem, the users/beneficiaries, the objectives and success metrics. This is the "result/impact" raw material.
+- `…/workplans/<feature>/tech-spec.md` — **what was built**: the components, the scope, the hard parts.
+- `…/workplans/<feature>/tasks.md` and `NN-task.md` — the concrete deliverables; completed tasks map well to individual entries.
+- `…/workplans/<feature>/implementation-notes.md` — decisions, tradeoffs, issues found, and verification notes — great for nuance and for honest "what was hard" framing.
 - `…/pull-requests/<branch>.md` (if present) — the PR write-up, often with metrics and surface-area facts.
 
 ### Step 3: Add the evidence trail from git/PRs
@@ -146,7 +146,7 @@ gh pr list --author @me --state merged --limit 20 \
   --json number,title,repository,mergedAt
 ```
 
-**Vault feature docs** (unique to this suite) — the feature folders under `engineering/<project>` are a record of substantial work. List them with `obsidian_list_files_in_dir` and, for features touched in the time range, pull context from their `prd.md` / `implementation-notes.md` as in mode A. This catches design and spec work that may not show up cleanly in git.
+**Vault feature docs** (unique to this suite) — the feature folders under `engineering/<project>/workplans` are a record of substantial work. List them with `obsidian_list_files_in_dir` and, for features touched in the time range, pull context from their `prd.md` / `implementation-notes.md` as in mode A. This catches design and spec work that may not show up cleanly in git.
 
 If none of these are available, fall back to the guided interview.
 

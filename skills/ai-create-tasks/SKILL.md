@@ -16,7 +16,7 @@ This is the third step of a spec-driven workflow. The task files are read later 
 
 - Task list structure: `references/tasks-template.md` (follow it strictly).
 - Individual task structure: `references/task-template.md` (follow it strictly).
-- Required inputs, read from the vault: `engineering/<project>/<feature>/workplan/prd.md` and `engineering/<project>/<feature>/workplan/tech-spec.md`.
+- Required inputs, read from the vault: `engineering/<project>/workplans/<feature>/prd.md` and `engineering/<project>/workplans/<feature>/tech-spec.md`.
 
 ## Output to Obsidian
 
@@ -30,13 +30,13 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature and read inputs
 
-**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD and tech spec with `obsidian_get_file_contents`. If either is missing, stop and tell the user to run `ai-create-prd` / `ai-create-techspec` first.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD and tech spec with `obsidian_get_file_contents`. If either is missing, stop and tell the user to run `ai-create-prd` / `ai-create-techspec` first.
 
 When you finish, echo the `Feature ID: <feature>` and the next step (`ai-execute-task` for `<feature>`) so the chain can continue in a fresh session.
 
 ### Write the files (no whole-file overwrite tool)
 
-All task files live in the feature's `workplan/` folder alongside the PRD and tech spec. For each file you write (`engineering/<project>/<feature>/workplan/tasks.md` and each `engineering/<project>/<feature>/workplan/NN-task.md`): check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders). Number individual task files with a zero-padded prefix and a hyphen: `01-task.md`, `02-task.md`, …
+All task files live in the feature's folder under `workplans/`, alongside the PRD and tech spec. For each file you write (`engineering/<project>/workplans/<feature>/tasks.md` and each `engineering/<project>/workplans/<feature>/NN-task.md`): check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders). Number individual task files with a zero-padded prefix and a hyphen: `01-task.md`, `02-task.md`, …
 
 ## Process
 
@@ -59,7 +59,7 @@ Organize sequencing, with dependencies before dependents (backend before fronten
 - **Avoid more than 10 main tasks** (group logically).
 - Use X.0 for main tasks, X.Y for subtasks.
 - Clearly indicate dependencies and mark tasks that can run in parallel.
-- Per-task files should point readers to the PRD and tech spec in the same `workplan/` folder rather than restating their full content.
+- Per-task files should point readers to the PRD and tech spec in the same feature folder rather than restating their full content.
 
 After generating all files, present the results and the vault paths, and wait for confirmation before any implementation.
 

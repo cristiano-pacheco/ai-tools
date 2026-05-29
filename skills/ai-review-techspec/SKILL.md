@@ -28,6 +28,14 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 List `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the spec with `obsidian_get_file_contents("engineering/<project>/<feature>/tech-spec.md")`. If it's missing, stop and tell the user to run `ai-create-techspec` first.
 
-### Write the file (no whole-file overwrite tool)
+### Write the file (one new file per review, never overwrite)
 
-To write `engineering/<project>/<feature>/tech-spec-review.md`: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
+Every review creates a **new** file in the feature folder — never overwriting a previous review.
+
+Build the file name as `tech-spec-review-<timestamp>.md`, where `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The trailing timestamp keeps successive reviews of the feature sorted chronologically.
+
+Full path example: `engineering/<project>/<feature>/tech-spec-review-2026-05-29-143052.md`.
+
+Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
+
+Report the final vault path when done.

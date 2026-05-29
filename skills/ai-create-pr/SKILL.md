@@ -35,9 +35,18 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 2. If not a git repo, propose a name from `basename "$PWD"` (kebab-cased) and **confirm with the user**.
 3. Base path: `engineering/<project>`.
 
-### Write the file (no whole-file overwrite tool)
+### Write the file (one new file per run, never overwrite)
 
-The PR doc goes to `engineering/<project>/pull-requests/<branch>.md`, where `<branch>` is the current branch with `/` replaced by `-`. To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
+Every run creates a **new** file directly in `engineering/<project>/pull-requests/` — never a subfolder, and never overwriting a previous PR doc.
+
+Build the file name as `<timestamp>-<branch>.md`:
+
+1. `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The leading timestamp keeps the folder sorted chronologically.
+2. `<branch>` = the current branch with every character outside `[A-Za-z0-9._-]` replaced by `-` (so `/` becomes `-`). Example: `cristiano-pacheco/add-communication-flows` → `cristiano-pacheco-add-communication-flows`.
+
+Full path example: `engineering/<project>/pull-requests/2026-05-29-143052-cristiano-pacheco-add-communication-flows.md`.
+
+Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
 
 ## Workflow
 
@@ -86,7 +95,7 @@ Use `references/pr-template.md` for structure.
 
 ### 5. Save and report
 
-Save to `engineering/<project>/pull-requests/<branch>.md`. Report the path and the title.
+Save to `engineering/<project>/pull-requests/<timestamp>-<branch>.md` (see the naming rule above). Report the path and the title.
 
 ## Don't do these
 
@@ -106,4 +115,4 @@ Save to `engineering/<project>/pull-requests/<branch>.md`. Report the path and t
 - [ ] Reads like a person wrote it
 - [ ] Every fact is in the diff
 - [ ] Empty sections deleted
-- [ ] Saved to `engineering/<project>/pull-requests/<branch>.md`
+- [ ] Saved to `engineering/<project>/pull-requests/<timestamp>-<branch>.md`

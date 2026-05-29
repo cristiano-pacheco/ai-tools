@@ -24,6 +24,17 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 2. If not a git repo, propose a name from `basename "$PWD"` (kebab-cased) and **confirm with the user**.
 3. Base path: `engineering/<project>`.
 
-### Write the file (no whole-file overwrite tool)
+### Write the file (one new file per review, never overwrite)
 
-The report goes to `engineering/<project>/codebase-reviews/<system>.md`, where `<system>` is a kebab-case slug for the feature/system reviewed (e.g. `dispatch-hot-path`). To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
+Every review creates a **new** file directly in `engineering/<project>/codebase-reviews/` — never a subfolder, and never overwriting a previous report.
+
+Build the file name as `<timestamp>-<system>.md`:
+
+1. `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The leading timestamp keeps the folder sorted chronologically.
+2. `<system>` = a kebab-case slug for the feature/system reviewed (e.g. `dispatch-hot-path`), with every character outside `[A-Za-z0-9._-]` replaced by `-`.
+
+Full path example: `engineering/<project>/codebase-reviews/2026-05-29-143052-dispatch-hot-path.md`.
+
+Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
+
+Report the final vault path when done.

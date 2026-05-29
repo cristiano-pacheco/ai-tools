@@ -37,8 +37,17 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 2. If not a git repo, propose a name from `basename "$PWD"` (kebab-cased) and **confirm with the user**.
 3. Base path: `engineering/<project>`.
 
-### Write the file (no whole-file overwrite tool)
+### Write the file (one new file per review, never overwrite)
 
-The review goes to `engineering/<project>/code-reviews/review-<branch>.md`, where `<branch>` is the current branch with `/` replaced by `-`. To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
+Every review creates a **new** file directly in `engineering/<project>/code-reviews/` — never a subfolder, and never overwriting a previous review.
+
+Build the file name as `<timestamp>-<branch>.md`:
+
+1. `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The leading timestamp keeps the folder sorted chronologically.
+2. `<branch>` = the current branch with every character outside `[A-Za-z0-9._-]` replaced by `-` (so `/` becomes `-`). Example: `cristiano-pacheco/add-communication-flows` → `cristiano-pacheco-add-communication-flows`.
+
+Full path example: `engineering/<project>/code-reviews/2026-05-29-143052-cristiano-pacheco-add-communication-flows.md`.
+
+Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
 
 Report the final vault path when done.

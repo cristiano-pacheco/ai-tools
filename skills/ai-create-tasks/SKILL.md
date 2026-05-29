@@ -16,7 +16,7 @@ This is the third step of a spec-driven workflow. The task files are read later 
 
 - Task list structure: `references/tasks-template.md` (follow it strictly).
 - Individual task structure: `references/task-template.md` (follow it strictly).
-- Required inputs, read from the vault: `engineering/<project>/<feature>/prd.md` and `engineering/<project>/<feature>/tech-spec.md`.
+- Required inputs, read from the vault: `engineering/<project>/<feature>/workplan/prd.md` and `engineering/<project>/<feature>/workplan/tech-spec.md`.
 
 ## Output to Obsidian
 
@@ -34,7 +34,7 @@ List `engineering/<project>` with `obsidian_list_files_in_dir` to find the featu
 
 ### Write the files (no whole-file overwrite tool)
 
-For each file you write (`tasks.md` and each `NN-task.md`): check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders). Number individual task files with a zero-padded prefix and a hyphen: `01-task.md`, `02-task.md`, …
+All task files live in the feature's `workplan/` folder alongside the PRD and tech spec. For each file you write (`engineering/<project>/<feature>/workplan/tasks.md` and each `engineering/<project>/<feature>/workplan/NN-task.md`): check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders). Number individual task files with a zero-padded prefix and a hyphen: `01-task.md`, `02-task.md`, …
 
 ## Process
 
@@ -57,7 +57,7 @@ Organize sequencing, with dependencies before dependents (backend before fronten
 - **Avoid more than 10 main tasks** (group logically).
 - Use X.0 for main tasks, X.Y for subtasks.
 - Clearly indicate dependencies and mark tasks that can run in parallel.
-- Per-task files should point readers to the PRD and tech spec in the same vault feature folder rather than restating their full content.
+- Per-task files should point readers to the PRD and tech spec in the same `workplan/` folder rather than restating their full content.
 
 After generating all files, present the results and the vault paths, and wait for confirmation before any implementation.
 

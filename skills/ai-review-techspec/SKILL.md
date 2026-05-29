@@ -26,15 +26,15 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature and read the tech spec
 
-List `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the spec with `obsidian_get_file_contents("engineering/<project>/<feature>/tech-spec.md")`. If it's missing, stop and tell the user to run `ai-create-techspec` first.
+List `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the spec with `obsidian_get_file_contents("engineering/<project>/<feature>/workplan/tech-spec.md")`. If it's missing, stop and tell the user to run `ai-create-techspec` first.
 
 ### Write the file (one new file per review, never overwrite)
 
 Every review creates a **new** file in the feature folder — never overwriting a previous review.
 
-Build the file name as `tech-spec-review-<timestamp>.md`, where `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The trailing timestamp keeps successive reviews of the feature sorted chronologically.
+Build the file name as `tech-spec-review-<timestamp>.md`, where `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The review goes in the feature's `workplan/` folder alongside the spec. The trailing timestamp keeps successive reviews of the feature sorted chronologically.
 
-Full path example: `engineering/<project>/<feature>/tech-spec-review-2026-05-29-143052.md`.
+Full path example: `engineering/<project>/<feature>/workplan/tech-spec-review-2026-05-29-143052.md`.
 
 Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
 

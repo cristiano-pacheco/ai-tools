@@ -15,9 +15,9 @@ This is the execution step of a spec-driven workflow. The specs are read from Ob
 
 ## Inputs (read from the vault)
 
-- PRD: `engineering/<project>/<feature>/prd.md`
-- Tech spec: `engineering/<project>/<feature>/tech-spec.md`
-- Tasks: `engineering/<project>/<feature>/tasks.md` and the relevant `NN-task.md`
+- PRD: `engineering/<project>/<feature>/workplan/prd.md`
+- Tech spec: `engineering/<project>/<feature>/workplan/tech-spec.md`
+- Tasks: `engineering/<project>/<feature>/workplan/tasks.md` and the relevant `workplan/NN-task.md`
 - Project standards: the repo's `docs/` folder, if present
 
 ## Output to Obsidian
@@ -36,11 +36,11 @@ List `engineering/<project>` with `obsidian_list_files_in_dir` to find the featu
 
 ### Update task status
 
-When a task is done, mark its checkbox in `tasks.md` with `obsidian_patch_content` (operation `replace`, targeting the task's line/block) rather than rewriting the whole file.
+When a task is done, mark its checkbox in `workplan/tasks.md` with `obsidian_patch_content` (operation `replace`, targeting the task's line/block) rather than rewriting the whole file.
 
 ### Maintain implementation notes
 
-Keep `engineering/<project>/<feature>/implementation-notes.md` current, following `references/implementation-notes-template.md`. To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content`. Capture only what helps future maintainers or reviewers:
+Keep `engineering/<project>/<feature>/workplan/implementation-notes.md` current, following `references/implementation-notes-template.md`. To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content`. Capture only what helps future maintainers or reviewers:
 
 - decisions made because requirements were ambiguous or incomplete
 - assumptions made during implementation

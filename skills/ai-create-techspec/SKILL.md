@@ -38,7 +38,9 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature and read the PRD
 
-List `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD with `obsidian_get_file_contents("engineering/<project>/<feature>/workplan/prd.md")`. If it's missing, stop and tell the user to run `ai-create-prd` first.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD with `obsidian_get_file_contents("engineering/<project>/<feature>/workplan/prd.md")`. If it's missing, stop and tell the user to run `ai-create-prd` first.
+
+When you finish, echo the `Feature ID: <feature>` and the next step (`ai-create-tasks` / `ai-review-techspec` for `<feature>`) so the chain can continue in a fresh session.
 
 ### Write the file (no whole-file overwrite tool)
 

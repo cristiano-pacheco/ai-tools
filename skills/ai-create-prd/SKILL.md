@@ -70,7 +70,14 @@ Write to `engineering/<project>/<feature>/workplan/prd.md` using the write recip
 
 ### 5. Report
 
-Give the final vault path and a **very brief** summary of the PRD.
+Give the final vault path and a **very brief** summary of the PRD. Then surface the **feature identifier** prominently so it can be carried into a fresh session for the next step:
+
+```
+Feature ID: <feature>
+Next: in a new session inside this repo, run ai-create-techspec for `<feature>`
+```
+
+The `<feature>` slug is the only thing the user needs to pass to `ai-create-techspec`, `ai-create-tasks`, `ai-review-techspec`, and `ai-execute-task` — the project resolves automatically from the git repo.
 
 ## Quality checklist
 

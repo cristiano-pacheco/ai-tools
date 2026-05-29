@@ -32,7 +32,7 @@ Code changes go to the local repository. The only things written to Obsidian (vi
 
 ### Resolve the feature and read inputs
 
-List `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD, tech spec, tasks, and the specific `NN-task.md` with `obsidian_get_file_contents`.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD, tech spec, tasks, and the specific `NN-task.md` with `obsidian_get_file_contents`.
 
 ### Update task status
 
@@ -70,6 +70,9 @@ After the summary and plan, **begin implementing right away**: run required comm
 
 ### 6. Review
 Run `make lint && make test` (or the project's equivalent). Fix every issue. Do not finalize until all issues are resolved and tests pass 100%.
+
+### 7. Report
+State which task was completed and echo `Feature ID: <feature>` plus the next unchecked task in `workplan/tasks.md` — so the user can continue in a fresh session by running `ai-execute-task` for `<feature>` again.
 
 <critical>DO NOT SKIP ANY STEP.</critical>
 <critical>After completing the task, mark it complete in the vault's tasks.md and update implementation-notes.md.</critical>

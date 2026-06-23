@@ -53,19 +53,21 @@ Clarity of invariants; contract testability; failure injection; integration and 
 
 Whether the design needs an execution orchestrator and whether it becomes a bottleneck; head-of-line blocking in sequential mode; progress counters drifting from reality; "completed" hiding many failed operations; polling APIs overloading storage; audit data and hot operational state sharing one storage model; need for reconciliation jobs; explicit timeouts/TTLs/watchdogs; oversized execution snapshots; isolating heavy processing (rendering, enrichment) from orchestration state; future expansion breaking current abstractions; governance/abuse problems from inline or ad-hoc execution; over-dependence on existing-system assumptions; operational pain from missing cancellation/retry APIs; concurrent-update protection on state transitions; duplicate effects during retries/failover; support for compliance/legal hold/audit; a clear line between control metadata and payload data; support for fairness/quotas/throttling later; unbounded backlog growth from downstream outages; missing backfill/reconciliation logic; a clear source of truth for execution state.
 
-## Required output structure
+## Required output
 
-Produce the review in exactly this structure:
+The output is **an action list — only things that must be addressed.** Do not include an overall verdict, an approval recommendation, praise, "what is good", executive summaries, or any restatement of the spec. If an item does not require the authors to change, add, or clarify something, leave it out.
 
-1. **Overall Verdict** — strong / acceptable with major revisions / not ready (1 concise paragraph).
-2. **Executive Risk Summary** — the 10 most important risks, ordered by severity.
-3. **Critical Gaps That Must Be Fixed Before Implementation** — only the highest-severity issues; explain why each is dangerous.
-4. **Detailed Review by Category** — Architecture; Distributed Systems / Execution Semantics; Data Model and Persistence; Scalability and Performance; Reliability and Failure Handling; API Design; Security and Abuse Resistance; Observability and Operations; Rollout / Migration; Testability / Implementation Risk. For each: what is good, what is weak, what is missing, what could fail in production, and specific improvements.
-5. **Hidden Assumptions** — assumptions the doc relies on but does not justify.
-6. **Questions the Authors Must Answer** — precise unanswered questions that block confident approval.
-7. **Recommended Design Changes** — concrete, prioritized; split into must-have before build / should-have before launch / can follow in later phases.
-8. **Final Approval Recommendation** — approve / approve with required changes / do not approve, with rationale.
+Produce exactly two sections:
+
+1. **Issues to Address** — every weakness, ambiguity, scalability risk, operational gap, security issue, failure mode, design flaw, unjustified assumption, and unanswered question that must be resolved. Order by severity (most dangerous first). Each issue is one entry with:
+   - **Title** — a short, specific name for the problem.
+   - **Severity** — `blocker` (must fix before implementation) / `major` (fix before launch) / `minor` (can follow in a later phase).
+   - **What's wrong** — the specific gap, contradiction, or underspecified invariant. Be concrete; cite the part of the spec.
+   - **Why it matters / how it fails in production** — the concrete failure scenario, not generic advice.
+   - **What to change** — the specific fix, decision, or detail the spec must add. If the issue is an open question, state the exact question the authors must answer.
+
+2. **Open Questions** — precise, unanswered questions that block confident approval and don't map cleanly to a single fix above. Omit this section if there are none.
 
 ## Style requirements
 
-Be highly specific. Don't praise vaguely. Don't summarize the document unless needed for the critique. Prefer concrete failure scenarios over generic advice. Identify contradictions, ambiguities, and underspecified invariants. For every major weakness, explain exactly what is unclear or risky, why it matters, how it could fail in production, and what the document should add or change. Never just say "this needs more detail." Assume the cost of under-review is much higher than the cost of being demanding.
+Be highly specific. Every entry must be actionable — something the authors must change, add, decide, or answer. Do not praise, do not summarize the document, do not describe what the spec does well. Prefer concrete failure scenarios over generic advice. Identify contradictions, ambiguities, and underspecified invariants. Never just say "this needs more detail" — say exactly what detail and why. Assume the cost of under-review is much higher than the cost of being demanding.

@@ -1,5 +1,7 @@
 # Implementation Notes
 
+> **Tasks:** [[engineering/<project>/workplans/<feature>/tasks|tasks]] · **Tech Spec:** [[engineering/<project>/workplans/<feature>/tech-spec|tech-spec]]
+
 ## Task
 - ID:
 - Title:

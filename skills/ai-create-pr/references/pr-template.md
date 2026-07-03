@@ -1,6 +1,8 @@
 # PR Template
 
-> Author guidance: keep sections that have real content from the diff; **delete sections that don't apply**. Match the tone and emoji style of the examples in `ai/commands/create-pr.md`. Open with a one-line hero title (use the leading emoji that matches the archetype: 🚀 new feature · ⚡ performance · 🐛 bug fix · 🧱 refactor · 🛡️ security · 📚 docs).
+> **Project:** [[engineering/<project>/index|<project>]]
+
+> Author guidance: keep sections that have real content from the diff; **delete sections that don't apply**. Match the tone and emoji style of the SKILL's own examples. Open with a one-line hero title (use the leading emoji that matches the archetype: 🚀 new feature · ⚡ performance · 🐛 bug fix · 🧱 refactor · 🛡️ security · 📚 docs).
 
 ---
 

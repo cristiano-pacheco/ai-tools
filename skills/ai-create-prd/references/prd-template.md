@@ -1,5 +1,7 @@
 # Product Requirements Document (PRD) Template
 
+> **Feature:** [[engineering/<project>/workplans/<feature>/index|<feature>]]
+
 ## Overview
 
 [Provide a high-level overview of your product/feature. Explain what problem it solves, who it is for, and why it is valuable.]

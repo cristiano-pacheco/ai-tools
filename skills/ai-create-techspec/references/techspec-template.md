@@ -1,5 +1,7 @@
 # Technical Specification Template
 
+> **PRD:** [[engineering/<project>/workplans/<feature>/prd|prd]] · **Feature:** [[engineering/<project>/workplans/<feature>/index|<feature>]]
+
 ## Executive Summary
 
 [Provide a brief technical overview of the solution approach. Summarize the key architectural decisions and implementation strategy in 1–2 paragraphs.]

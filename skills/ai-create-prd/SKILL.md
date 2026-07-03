@@ -42,6 +42,16 @@ The Obsidian MCP only exposes append / patch / delete. To write `engineering/<pr
 2. If it exists, delete it with `obsidian_delete_file` (pass `confirm: true`) — regenerating a PRD replaces it; appending would duplicate content.
 3. Create it with `obsidian_append_content`. This creates any missing parent folders, so you don't pre-create directories.
 
+### Maintain the index (keep the graph connected)
+
+After saving, wire the note into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias, e.g. `[[engineering/<project>/workplans/<feature>/prd|prd]]`.
+
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `prd` isn't already present, `obsidian_append_content` a bullet `- [[engineering/<project>/workplans/<feature>/prd|PRD]]` under a `## Documents` heading.
+2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
+3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
+
+Never duplicate an existing link. `ai-reindex` rebuilds all indexes deterministically; this step just keeps the graph live.
+
 ## Workflow
 
 ### 1. Clarify (mandatory)
@@ -63,6 +73,7 @@ Outline a section-by-section approach, note areas needing research (use web sear
 - Focus on WHAT and WHY, not HOW.
 - Include **numbered functional requirements**.
 - Keep the document under ~2,000 words.
+- Fill the `> **Feature:**` related-links blockquote right under the H1 with `[[engineering/<project>/workplans/<feature>/index|<feature>]]`.
 
 ### 4. Save (mandatory)
 
@@ -85,6 +96,7 @@ The `<feature>` slug is the only thing the user needs to pass to `ai-create-tech
 - [ ] PRD follows the template
 - [ ] Numbered functional requirements included
 - [ ] Saved to `engineering/<project>/workplans/<feature>/prd.md`
+- [ ] Related-links blockquote filled; feature/project/root indexes updated
 - [ ] Final vault path reported
 
 <critical>DO NOT GENERATE THE PRD WITHOUT FIRST ASKING CLARIFYING QUESTIONS.</critical>

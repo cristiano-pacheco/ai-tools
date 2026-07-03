@@ -1,5 +1,7 @@
 # Implementation Task Summary for [Feature]
 
+> **Tech Spec:** [[engineering/<project>/workplans/<feature>/tech-spec|tech-spec]] · **PRD:** [[engineering/<project>/workplans/<feature>/prd|prd]]
+
 ## Tasks
 
 * [ ] 1.0 Main Task Title

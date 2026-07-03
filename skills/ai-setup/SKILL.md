@@ -29,7 +29,7 @@ Don't continue the remaining checks until this live test passes — every other 
 
 All suite output lives under `engineering/<project>/...`. Check whether `engineering/` exists with `obsidian_list_files_in_dir("engineering")`.
 
-If it's missing, create it by writing a small index note at `engineering/README.md` with `obsidian_append_content` (writing a file creates its parent folder). Suggested content:
+If it's missing, create the root index note at `engineering/index.md` with `obsidian_append_content` (writing a file creates its parent folder). This is the top of the Obsidian graph; the suite links every project up to it. Suggested content:
 
 ```markdown
 # Engineering
@@ -37,7 +37,11 @@ If it's missing, create it by writing a small index note at `engineering/README.
 AI-generated engineering documents, grouped by project (repository).
 Each project folder holds feature specs (prd.md, tech-spec.md, tasks.md, ...),
 plus pull-requests/, code-reviews/, and codebase-reviews/.
+
+## Projects
 ```
+
+The `## Projects` list is filled as projects appear (each skill links its project here, and `ai-reindex` rebuilds the whole thing). If a legacy `engineering/README.md` exists from an older setup, leave it — but `index.md` is now the canonical root.
 
 ## 3. Verify project detection
 
@@ -59,6 +63,12 @@ The spec-driven suite is:
 - `ai-create-pr` — PR description → `<project>/pull-requests/<branch>.md`
 - `ai-code-review` — branch review → `<project>/code-reviews/review-<branch>.md`
 - `ai-codebase-review` — codebase audit → `<project>/codebase-reviews/<system>.md`
+- `ai-reindex` — rebuild the wikilink graph (root, per-project, and per-feature `index.md`)
+
+Every skill above cross-links its output and maintains three tiers of `index.md`
+(`engineering/index.md`, `engineering/<project>/index.md`, and
+`engineering/<project>/workplans/<feature>/index.md`) so the notes form a
+connected Obsidian graph. `ai-reindex` regenerates all of them deterministically.
 
 Check which of these you can see in your available skills and flag any that are missing. If skills are missing, the user can install the full suite with:
 
@@ -70,7 +80,7 @@ npx skills add cristiano-pacheco/ai-tools
 
 Print a short report:
 - ✅ / ❌ Obsidian MCP reachable
-- ✅ / ❌ `engineering/` root present (created if it was missing)
+- ✅ / ❌ `engineering/` root present with `engineering/index.md` (created if it was missing)
 - Resolved project base path for the current directory
 - Which suite skills are available, and any that are missing
 

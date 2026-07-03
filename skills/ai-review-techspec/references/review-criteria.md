@@ -57,6 +57,12 @@ Whether the design needs an execution orchestrator and whether it becomes a bott
 
 The output is **an action list — only things that must be addressed.** Do not include an overall verdict, an approval recommendation, praise, "what is good", executive summaries, or any restatement of the spec. If an item does not require the authors to change, add, or clarify something, leave it out.
 
+Directly under the H1 title, add a related-links blockquote so the note connects in the Obsidian graph:
+
+```
+> **Tech Spec:** [[engineering/<project>/workplans/<feature>/tech-spec|tech-spec]] · **PRD:** [[engineering/<project>/workplans/<feature>/prd|prd]]
+```
+
 Produce exactly two sections:
 
 1. **Issues to Address** — every weakness, ambiguity, scalability risk, operational gap, security issue, failure mode, design flaw, unjustified assumption, and unanswered question that must be resolved. Order by severity (most dangerous first). Each issue is one entry with:

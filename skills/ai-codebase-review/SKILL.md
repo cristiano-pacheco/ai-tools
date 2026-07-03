@@ -37,4 +37,15 @@ Full path example: `engineering/<project>/codebase-reviews/2026-05-29-143052-dis
 
 Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
 
+Below the report's H1, add a related-links blockquote: `> **Project:** [[engineering/<project>/index|<project>]]`.
+
+### Maintain the index (keep the graph connected)
+
+After saving, wire the note into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias; use the filename without `.md` as both target and alias.
+
+1. **Project index** — `engineering/<project>/index.md`: read it (if missing, create it with `# <project>` and a `↑ [[engineering/index|Engineering]]` back-link); append a bullet `- [[engineering/<project>/codebase-reviews/<timestamp>-<system>|<timestamp>-<system>]]` under a `## Codebase Reviews` heading (each review is a new file, so always append).
+2. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
+
+`ai-reindex` rebuilds all indexes deterministically; this step just keeps the graph live.
+
 Report the final vault path when done.

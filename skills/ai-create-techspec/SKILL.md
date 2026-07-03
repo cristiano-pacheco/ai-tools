@@ -46,6 +46,16 @@ When you finish, echo the `Feature ID: <feature>` and the next step (`ai-create-
 
 To write `engineering/<project>/workplans/<feature>/tech-spec.md`: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
 
+### Maintain the index (keep the graph connected)
+
+After saving, wire the note into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias.
+
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `tech-spec` isn't present, `obsidian_append_content` a bullet `- [[engineering/<project>/workplans/<feature>/tech-spec|Tech Spec]]` under `## Documents`.
+2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
+3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
+
+Never duplicate an existing link. `ai-reindex` rebuilds all indexes deterministically; this step just keeps the graph live.
+
 ## Workflow
 
 ### 1. Analyze the PRD (mandatory)
@@ -66,7 +76,7 @@ Map decisions to the repo's `docs/` standards. Highlight any deviation with just
 
 ### 5. Generate the tech spec (mandatory)
 
-Use `references/techspec-template.md` as the exact structure. Provide architecture overview, component design, interfaces, models, endpoints, integration points, testing strategy, and observability. Focus on **HOW**, not WHAT — avoid repeating PRD functional requirements, and avoid dumping large amounts of code.
+Use `references/techspec-template.md` as the exact structure. Provide architecture overview, component design, interfaces, models, endpoints, integration points, testing strategy, and observability. Focus on **HOW**, not WHAT — avoid repeating PRD functional requirements, and avoid dumping large amounts of code. Fill the related-links blockquote right under the H1 with the PRD and feature links: `[[engineering/<project>/workplans/<feature>/prd|prd]]` and `[[engineering/<project>/workplans/<feature>/index|<feature>]]`.
 
 ### 6. Save (mandatory)
 
@@ -79,6 +89,7 @@ Write to `engineering/<project>/workplans/<feature>/tech-spec.md` using the reci
 - [ ] Key clarifications answered
 - [ ] Tech spec follows the template
 - [ ] Relevant skills/standards referenced
+- [ ] Related-links blockquote (PRD + feature) filled; feature/project/root indexes updated
 - [ ] Saved to `engineering/<project>/workplans/<feature>/tech-spec.md`
 - [ ] Final vault path reported
 

@@ -51,6 +51,18 @@ Keep `engineering/<project>/workplans/<feature>/implementation-notes.md` current
 - test results and verification notes
 - anything important that is not obvious from the code
 
+Directly under the notes' H1, add a related-links blockquote (this is a vault note, not code — the no-references-in-code rule does not apply here): `> **Tasks:** [[engineering/<project>/workplans/<feature>/tasks|tasks]] · **Tech Spec:** [[engineering/<project>/workplans/<feature>/tech-spec|tech-spec]]`.
+
+### Maintain the index (keep the graph connected)
+
+After writing the notes, wire them into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias.
+
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `implementation-notes` isn't present, `obsidian_append_content` a bullet `- [[engineering/<project>/workplans/<feature>/implementation-notes|Implementation Notes]]` under `## Documents`.
+2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
+3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
+
+Never duplicate an existing link. `ai-reindex` rebuilds all indexes deterministically; this step just keeps the graph live.
+
 ## Execution steps
 
 ### 1. Pre-task setup

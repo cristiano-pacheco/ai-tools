@@ -38,6 +38,16 @@ When you finish, echo the `Feature ID: <feature>` and the next step (`ai-execute
 
 All task files live in the feature's folder under `workplans/`, alongside the PRD and tech spec. For each file you write (`engineering/<project>/workplans/<feature>/tasks.md` and each `engineering/<project>/workplans/<feature>/NN-task.md`): check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders). Number individual task files with a zero-padded prefix and a hyphen: `01-task.md`, `02-task.md`, …
 
+### Maintain the index (keep the graph connected)
+
+After saving, wire every file you wrote into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias.
+
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); for each file you wrote whose wikilink isn't present, `obsidian_append_content` a bullet under `## Documents` — `- [[engineering/<project>/workplans/<feature>/tasks|Tasks]]` and `- [[engineering/<project>/workplans/<feature>/NN-task|Task NN]]` for each task file.
+2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
+3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
+
+Never duplicate an existing link. `ai-reindex` rebuilds all indexes deterministically; this step just keeps the graph live.
+
 ## Process
 
 ### 1. Analyze the PRD and tech spec
@@ -50,8 +60,8 @@ Organize sequencing, with dependencies before dependents (backend before fronten
 
 ### 3. Generate the files
 
-- `tasks.md` — the summary, following `references/tasks-template.md`.
-- One `NN-task.md` per main task, following `references/task-template.md`, detailing subtasks, success criteria, and the unit/integration tests.
+- `tasks.md` — the summary, following `references/tasks-template.md`. Fill its related-links blockquote (under the H1) with `[[engineering/<project>/workplans/<feature>/tech-spec|tech-spec]]` and `[[engineering/<project>/workplans/<feature>/prd|prd]]`.
+- One `NN-task.md` per main task, following `references/task-template.md`, detailing subtasks, success criteria, and the unit/integration tests. Fill its related-links blockquote with links to `tasks`, `tech-spec`, and `prd` in the same feature folder.
 
 ## Guidelines
 

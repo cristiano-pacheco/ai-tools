@@ -35,6 +35,8 @@ Produce the report using this exact structure.
 
 ```
 # <Feature / System Name> — Critical Codebase Review & Improvement Suggestions
+
+> **Project:** [[engineering/<project>/index|<project>]]
 ```
 
 ### 1. Reference Scenario

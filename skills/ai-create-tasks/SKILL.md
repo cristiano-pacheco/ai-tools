@@ -20,7 +20,9 @@ This is the third step of a spec-driven workflow. The task files are read later 
 
 ## Output to Obsidian
 
-All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tools, grouped by project. Nothing is written to local disk.
+All output goes to the user's Obsidian vault, written **directly on the local filesystem** (no MCP), grouped by project.
+
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Everything below lives under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
 ### Resolve the project base path
 
@@ -30,19 +32,19 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature and read inputs
 
-**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD and tech spec with `obsidian_get_file_contents`. If either is missing, stop and tell the user to run `ai-create-prd` / `ai-create-techspec` first.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists (`ls -1 "<vault>/engineering/<project>/workplans"`). Otherwise, list `<vault>/engineering/<project>/workplans` (`ls -1`) to find the feature folder; if ambiguous or missing, ask the user. Read the PRD and tech spec with the `Read` tool. If either is missing, stop and tell the user to run `ai-create-prd` / `ai-create-techspec` first.
 
 When you finish, echo the `Feature ID: <feature>` and the next step (`ai-execute-task` for `<feature>`) so the chain can continue in a fresh session.
 
-### Write the files (no whole-file overwrite tool)
+### Write the files
 
-All task files live in the feature's folder under `workplans/`, alongside the PRD and tech spec. For each file you write (`engineering/<project>/workplans/<feature>/tasks.md` and each `engineering/<project>/workplans/<feature>/NN-task.md`): check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders). Number individual task files with a zero-padded prefix and a hyphen: `01-task.md`, `02-task.md`, …
+All task files live in the feature's folder under `workplans/`, alongside the PRD and tech spec. Write each file (`<vault>/engineering/<project>/workplans/<feature>/tasks.md` and each `<vault>/engineering/<project>/workplans/<feature>/NN-task.md`) with the `Write` tool — it overwrites if present and creates any missing parent folders. Number individual task files with a zero-padded prefix and a hyphen: `01-task.md`, `02-task.md`, …
 
 ### Maintain the index (keep the graph connected)
 
 After saving, wire every file you wrote into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias.
 
-1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); for each file you wrote whose wikilink isn't present, `obsidian_append_content` a bullet under `## Documents` — `- [[engineering/<project>/workplans/<feature>/tasks|Tasks]]` and `- [[engineering/<project>/workplans/<feature>/NN-task|Task NN]]` for each task file.
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); for each file you wrote whose wikilink isn't present, add a bullet under `## Documents` (with the `Edit` tool, or `Write` the updated file) — `- [[engineering/<project>/workplans/<feature>/tasks|Tasks]]` and `- [[engineering/<project>/workplans/<feature>/NN-task|Task NN]]` for each task file.
 2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
 3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
 

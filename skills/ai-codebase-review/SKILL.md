@@ -16,7 +16,9 @@ This is distinct from `ai-code-review`, which reviews a single branch's diff. Th
 
 ## Output to Obsidian
 
-All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tools, grouped by project. Nothing is written to local disk.
+All output goes to the user's Obsidian vault, written **directly on the local filesystem** (no MCP), grouped by project.
+
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Everything below lives under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
 ### Resolve the project base path
 
@@ -33,9 +35,9 @@ Build the file name as `<timestamp>-<system>.md`:
 1. `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The leading timestamp keeps the folder sorted chronologically.
 2. `<system>` = a kebab-case slug for the feature/system reviewed (e.g. `dispatch-hot-path`), with every character outside `[A-Za-z0-9._-]` replaced by `-`.
 
-Full path example: `engineering/<project>/codebase-reviews/2026-05-29-143052-dispatch-hot-path.md`.
+Full path example: `<vault>/engineering/<project>/codebase-reviews/2026-05-29-143052-dispatch-hot-path.md`.
 
-Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
+Write the file with the `Write` tool (it creates missing parent folders). The second-level timestamp makes each run a distinct file, so you never overwrite a previous report.
 
 Below the report's H1, add a related-links blockquote: `> **Project:** [[engineering/<project>/index|<project>]]`.
 
@@ -43,7 +45,7 @@ Below the report's H1, add a related-links blockquote: `> **Project:** [[enginee
 
 After saving, wire the note into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias; use the filename without `.md` as both target and alias.
 
-1. **Project index** — `engineering/<project>/index.md`: read it (if missing, create it with `# <project>` and a `↑ [[engineering/index|Engineering]]` back-link); append a bullet `- [[engineering/<project>/codebase-reviews/<timestamp>-<system>|<timestamp>-<system>]]` under a `## Codebase Reviews` heading (each review is a new file, so always append).
+1. **Project index** — `engineering/<project>/index.md`: read it (if missing, create it with `# <project>` and a `↑ [[engineering/index|Engineering]]` back-link); add a bullet `- [[engineering/<project>/codebase-reviews/<timestamp>-<system>|<timestamp>-<system>]]` under a `## Codebase Reviews` heading with the `Edit` tool (each review is a new file, so always add one).
 2. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
 
 `ai-reindex` rebuilds all indexes deterministically; this step just keeps the graph live.

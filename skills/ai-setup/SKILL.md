@@ -1,35 +1,33 @@
 ---
 name: ai-setup
-description: Set up and health-check the ai-* skills' Obsidian integration. Use to set up, configure, verify, or troubleshoot ai-tools or its Obsidian connection — e.g. after installing with `npx skills add cristiano-pacheco/ai-tools`, or "is my Obsidian wired up?". Checks the MCP, the engineering/ root, and project detection.
+description: Set up and health-check the ai-* skills' Obsidian integration. Use to set up, configure, verify, or troubleshoot ai-tools or its Obsidian connection — e.g. after installing with `npx skills add cristiano-pacheco/ai-tools`, or "is my Obsidian wired up?". Checks the vault directory, the engineering/ root, and project detection.
 ---
 
 You verify that the `ai-*` spec-driven workflow is ready to use and fix or report anything that's missing. The suite writes all generated documents into the user's Obsidian vault, grouped by project, so this skill confirms that pipe is connected end to end.
 
 Run the checks below in order and finish with a short summary.
 
-## 1. Obsidian MCP reachable
+## 1. Vault reachable
 
-The suite reaches Obsidian through two pieces that must both be installed:
+The suite reads and writes the Obsidian vault **directly on the local filesystem** — no MCP, no plugins, no HTTP API. It just needs the vault directory to exist and be writable.
 
-1. **Local REST API with MCP** — an Obsidian community plugin that exposes the vault over a local HTTP API. Install/enable it from Obsidian's community plugins, then copy its API key.
-   Project: https://github.com/coddingtonbear/obsidian-local-rest-api
-2. **mcp-obsidian** — the MCP server that bridges this agent to that REST API. Configure it as an MCP server with the plugin's API key and base URL.
-   Project: https://github.com/MarkusPfundstein/mcp-obsidian
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` (i.e. `~/Documents/obsidian/obsidian`). If the user's vault lives elsewhere, they can tell any ai-* skill a different absolute path.
 
-**Run a live test:** confirm the `mcp__mcp-obsidian__*` tools actually work by calling one of them — list the vault root with `obsidian_list_files_in_vault` (or `obsidian_get_recent_changes`). A successful response proves both pieces are wired up correctly.
+**Run a live test:** confirm the vault directory exists and is writable:
 
-If the call fails, the integration isn't connected. Tell the user to:
-- install/enable the **Local REST API** plugin in Obsidian (link above) and make sure Obsidian is running,
-- install and configure **mcp-obsidian** (link above) with the plugin's API key and base URL,
-- then re-run this skill.
+```bash
+test -d "$HOME/Documents/obsidian/obsidian" && test -w "$HOME/Documents/obsidian/obsidian" && echo OK
+```
 
-Don't continue the remaining checks until this live test passes — every other step depends on it.
+If it doesn't print `OK`, the vault isn't where expected. Tell the user to either create the directory, point Obsidian's vault there, or supply the correct absolute vault path — then re-run this skill.
+
+Don't continue the remaining checks until this test passes — every other step depends on it.
 
 ## 2. Ensure the `engineering/` vault root
 
-All suite output lives under `engineering/<project>/...`. Check whether `engineering/` exists with `obsidian_list_files_in_dir("engineering")`.
+All suite output lives under `<vault>/engineering/<project>/...`. Check whether it exists: `test -d "$HOME/Documents/obsidian/obsidian/engineering"`.
 
-If it's missing, create the root index note at `engineering/index.md` with `obsidian_append_content` (writing a file creates its parent folder). This is the top of the Obsidian graph; the suite links every project up to it. Suggested content:
+If it's missing, create the root index note at `<vault>/engineering/index.md` with the `Write` tool (it creates the parent folder). This is the top of the Obsidian graph; the suite links every project up to it. Suggested content:
 
 ```markdown
 # Engineering
@@ -79,7 +77,7 @@ npx skills add cristiano-pacheco/ai-tools
 ## 5. Summary
 
 Print a short report:
-- ✅ / ❌ Obsidian MCP reachable
+- ✅ / ❌ Vault directory reachable and writable
 - ✅ / ❌ `engineering/` root present with `engineering/index.md` (created if it was missing)
 - Resolved project base path for the current directory
 - Which suite skills are available, and any that are missing

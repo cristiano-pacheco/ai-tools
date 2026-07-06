@@ -28,7 +28,9 @@ This is the second step of a spec-driven workflow. The tech spec is read later b
 
 ## Output to Obsidian
 
-All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tools, grouped by project. Nothing is written to local disk.
+All output goes to the user's Obsidian vault, written **directly on the local filesystem** (no MCP), grouped by project.
+
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Everything below lives under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
 ### Resolve the project base path
 
@@ -38,19 +40,19 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature and read the PRD
 
-**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD with `obsidian_get_file_contents("engineering/<project>/workplans/<feature>/prd.md")`. If it's missing, stop and tell the user to run `ai-create-prd` first.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists (`ls -1 "<vault>/engineering/<project>/workplans"`). Otherwise, list `<vault>/engineering/<project>/workplans` (`ls -1`) to find the feature folder; if ambiguous or missing, ask the user. Read the PRD with the `Read` tool from `<vault>/engineering/<project>/workplans/<feature>/prd.md`. If it's missing, stop and tell the user to run `ai-create-prd` first.
 
 When you finish, echo the `Feature ID: <feature>` and the next step (`ai-create-tasks` / `ai-review-techspec` for `<feature>`) so the chain can continue in a fresh session.
 
-### Write the file (no whole-file overwrite tool)
+### Write the file
 
-To write `engineering/<project>/workplans/<feature>/tech-spec.md`: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content` (it creates missing parent folders).
+Write `<vault>/engineering/<project>/workplans/<feature>/tech-spec.md` with the `Write` tool — it overwrites if present (regenerating replaces it) and creates any missing parent folders.
 
 ### Maintain the index (keep the graph connected)
 
 After saving, wire the note into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias.
 
-1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `tech-spec` isn't present, `obsidian_append_content` a bullet `- [[engineering/<project>/workplans/<feature>/tech-spec|Tech Spec]]` under `## Documents`.
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `tech-spec` isn't present, add a bullet `- [[engineering/<project>/workplans/<feature>/tech-spec|Tech Spec]]` under `## Documents` (with the `Edit` tool, or `Write` the updated file).
 2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
 3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
 

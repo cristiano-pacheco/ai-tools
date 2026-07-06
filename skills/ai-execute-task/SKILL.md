@@ -22,7 +22,9 @@ This is the execution step of a spec-driven workflow. The specs are read from Ob
 
 ## Output to Obsidian
 
-Code changes go to the local repository. The only things written to Obsidian (via `mcp__mcp-obsidian__*`, grouped by project) are the task-status update and the implementation notes.
+Code changes go to the local repository. The only things written to the Obsidian vault (grouped by project) are the task-status update and the implementation notes — written **directly on the local filesystem** (no MCP).
+
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. The vault docs live under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
 ### Resolve the project base path
 
@@ -32,15 +34,15 @@ Code changes go to the local repository. The only things written to Obsidian (vi
 
 ### Resolve the feature and read inputs
 
-**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the PRD, tech spec, tasks, and the specific `NN-task.md` with `obsidian_get_file_contents`.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists (`ls -1 "<vault>/engineering/<project>/workplans"`). Otherwise, list `<vault>/engineering/<project>/workplans` (`ls -1`) to find the feature folder; if ambiguous or missing, ask the user. Read the PRD, tech spec, tasks, and the specific `NN-task.md` with the `Read` tool.
 
 ### Update task status
 
-When a task is done, mark its checkbox in `workplans/<feature>/tasks.md` with `obsidian_patch_content` (operation `replace`, targeting the task's line/block) rather than rewriting the whole file.
+When a task is done, mark its checkbox in `<vault>/engineering/<project>/workplans/<feature>/tasks.md` with the `Edit` tool — replace just that task's `- [ ]` with `- [x]` on its line, rather than rewriting the whole file.
 
 ### Maintain implementation notes
 
-Keep `engineering/<project>/workplans/<feature>/implementation-notes.md` current, following `references/implementation-notes-template.md`. To write it: check existence with `obsidian_get_file_contents`, delete with `obsidian_delete_file` (pass `confirm: true`) if present, then create with `obsidian_append_content`. Capture only what helps future maintainers or reviewers:
+Keep `<vault>/engineering/<project>/workplans/<feature>/implementation-notes.md` current, following `references/implementation-notes-template.md`. Write it with the `Write` tool — it overwrites if present and creates any missing parent folders. Capture only what helps future maintainers or reviewers:
 
 - decisions made because requirements were ambiguous or incomplete
 - assumptions made during implementation
@@ -57,7 +59,7 @@ Directly under the notes' H1, add a related-links blockquote (this is a vault no
 
 After writing the notes, wire them into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias.
 
-1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `implementation-notes` isn't present, `obsidian_append_content` a bullet `- [[engineering/<project>/workplans/<feature>/implementation-notes|Implementation Notes]]` under `## Documents`.
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `implementation-notes` isn't present, add a bullet `- [[engineering/<project>/workplans/<feature>/implementation-notes|Implementation Notes]]` under `## Documents` (with the `Edit` tool, or `Write` the updated file).
 2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
 3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
 

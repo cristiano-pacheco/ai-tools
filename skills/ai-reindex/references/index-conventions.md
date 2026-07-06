@@ -91,25 +91,29 @@ Rules:
 - Aliases: use the friendly labels above for known files; for others use the
   filename without `.md`.
 
+Paths here are on the local filesystem under the vault root
+(`$HOME/Documents/obsidian/obsidian` by default) — `<F>` means
+`<vault>/engineering/...`. Use `Read`/`Write`/`Edit` and `ls` on the **absolute**
+path. Wikilink *text* inside the notes stays vault-root-relative (`[[engineering/...]]`).
+
 ## Rebuild recipe for one index (deterministic — used by ai-reindex)
 
 To (re)build the `index.md` of a folder `F`:
 
-1. `obsidian_list_files_in_dir("<F>")` to get its children.
+1. `ls -1 "<F>"` to get its children.
 2. Build the markdown body for F's tier using the rules above.
-3. Delete the old index if present: `obsidian_get_file_contents("<F>/index.md")` →
-   if it exists, `obsidian_delete_file("<F>/index.md", confirm: true)`.
-4. Create the new one: `obsidian_append_content("<F>/index.md", <body>)`.
+3. `Write` the body to `<F>/index.md` — the `Write` tool overwrites any existing
+   index and creates missing parent folders.
 
-Delete-then-recreate makes the rebuild idempotent: running it twice yields byte-identical output.
+Overwriting makes the rebuild idempotent: running it twice yields byte-identical output.
 
 ## Append-if-missing recipe (used by the individual skills)
 
 When a skill has just written a new note and only needs to keep the graph live
 (cheap, no full rebuild):
 
-1. `obsidian_get_file_contents("<index path>")`.
-   - If it 404s, create it with the tier header above plus the one bullet.
+1. `Read` the index file (`<index path>`).
+   - If it doesn't exist, create it with `Write` using the tier header above plus the one bullet.
 2. If the exact wikilink for the new note is **not already present** in the file,
-   `obsidian_append_content` a bullet with that wikilink under the right section.
-   (Ordering drift is fine — `ai-reindex` normalizes it later.)
+   add a bullet with that wikilink under the right section using the `Edit` tool
+   (or `Write` the updated file). (Ordering drift is fine — `ai-reindex` normalizes it later.)

@@ -16,7 +16,9 @@ Your job is not to rewrite the spec for style — it is to find every weakness, 
 
 ## Output to Obsidian
 
-All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tools, grouped by project. Nothing is written to local disk.
+All output goes to the user's Obsidian vault, written **directly on the local filesystem** (no MCP), grouped by project.
+
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Everything below lives under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
 ### Resolve the project base path
 
@@ -26,7 +28,7 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature and read the tech spec
 
-**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists with `obsidian_list_files_in_dir`. Otherwise, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` to find the feature folder; if ambiguous or missing, ask the user. Read the spec with `obsidian_get_file_contents("engineering/<project>/workplans/<feature>/tech-spec.md")`. If it's missing, stop and tell the user to run `ai-create-techspec` first.
+**If the user gave you a feature identifier** (the `<feature>` slug, e.g. `river-job-index-bloat`) in their request, use it directly as `<feature>` and confirm the folder exists (`ls -1 "<vault>/engineering/<project>/workplans"`). Otherwise, list `<vault>/engineering/<project>/workplans` (`ls -1`) to find the feature folder; if ambiguous or missing, ask the user. Read the spec with the `Read` tool from `<vault>/engineering/<project>/workplans/<feature>/tech-spec.md`. If it's missing, stop and tell the user to run `ai-create-techspec` first.
 
 ### Write the file (one new file per review, never overwrite)
 
@@ -34,9 +36,9 @@ Every review creates a **new** file in the feature folder — never overwriting 
 
 Build the file name as `tech-spec-review-<timestamp>.md`, where `<timestamp>` = output of `date +%Y-%m-%d-%H%M%S` (e.g. `2026-05-29-143052`). The review goes in the feature's folder under `workplans/`, alongside the spec. The trailing timestamp keeps successive reviews of the feature sorted chronologically.
 
-Full path example: `engineering/<project>/workplans/<feature>/tech-spec-review-2026-05-29-143052.md`.
+Full path example: `<vault>/engineering/<project>/workplans/<feature>/tech-spec-review-2026-05-29-143052.md`.
 
-Create the file with `obsidian_append_content` (it creates missing parent folders). Do **not** check for or delete any existing file — the second-level timestamp makes each run a distinct file.
+Write the file with the `Write` tool (it creates missing parent folders). The second-level timestamp makes each run a distinct file, so you never overwrite a previous review.
 
 Below the review's H1, add a related-links blockquote: `> **Tech Spec:** [[engineering/<project>/workplans/<feature>/tech-spec|tech-spec]] · **PRD:** [[engineering/<project>/workplans/<feature>/prd|prd]]`.
 
@@ -44,7 +46,7 @@ Below the review's H1, add a related-links blockquote: `> **Tech Spec:** [[engin
 
 After saving, wire the note into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias.
 
-1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); append a bullet `- [[engineering/<project>/workplans/<feature>/tech-spec-review-<timestamp>|Tech Spec Review — <timestamp>]]` under `## Documents` (each review is a new file, so always append).
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); add a bullet `- [[engineering/<project>/workplans/<feature>/tech-spec-review-<timestamp>|Tech Spec Review — <timestamp>]]` under `## Documents` with the `Edit` tool (each review is a new file, so always add one).
 2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
 3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
 

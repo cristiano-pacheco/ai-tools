@@ -8,7 +8,7 @@ the `ai-*` documents form a fully connected Obsidian graph. This is the
 authoritative, deterministic rebuild — it repairs any drift left by the
 individual skills' incremental updates.
 
-<critical>This skill NEVER edits the body of existing documents. It only creates/replaces `index.md` files. Regenerating an index is delete-then-recreate, so it must be idempotent — running twice yields identical output.</critical>
+<critical>This skill NEVER edits the body of existing documents. It only creates/replaces `index.md` files. Regenerating an index is a full overwrite, so it must be idempotent — running twice yields identical output.</critical>
 
 ## Conventions (read first)
 
@@ -17,19 +17,24 @@ the wikilink format, the three index tiers, their exact markdown, the ordering
 rules, and the rebuild recipe. Everything below just sequences those rules over
 the whole tree.
 
-## 1. Verify the Obsidian MCP is reachable
+## 1. Verify the vault is reachable
 
-Call `obsidian_list_files_in_vault` (or `obsidian_get_recent_changes`). If it
-fails, stop and tell the user to set up the Obsidian integration (run `ai-setup`).
-Everything else depends on this working.
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling
+the skill a different absolute path. All paths below are under `<vault>/engineering/...`;
+use `Read`/`Write`/`Edit` (and `ls` via Bash) with the **absolute** path, but keep
+wikilink text vault-root-relative (`[[engineering/...]]`).
+
+Check the vault root exists: `test -d "$HOME/Documents/obsidian/obsidian"`. If it's
+missing (or `<vault>/engineering` doesn't exist), stop and tell the user to set up the
+integration (run `ai-setup`). Everything else depends on this.
 
 ## 2. Walk the tree and rebuild bottom-up
 
 Rebuild leaves before their parents so each parent links to indexes that already exist.
 
-1. `obsidian_list_files_in_dir("engineering")` → each subdirectory is a `<project>`.
+1. `ls -1 "<vault>/engineering"` → each subdirectory is a `<project>`.
 2. For each `<project>`:
-   a. `obsidian_list_files_in_dir("engineering/<project>/workplans")` (skip if absent)
+   a. `ls -1 "<vault>/engineering/<project>/workplans"` (skip if absent)
       → for each `<feature>` folder, **rebuild** its
       `engineering/<project>/workplans/<feature>/index.md` (feature tier).
    b. **Rebuild** `engineering/<project>/index.md` (project tier): list the
@@ -38,7 +43,7 @@ Rebuild leaves before their parents so each parent links to indexes that already
 3. **Rebuild** `engineering/index.md` (root tier): one bullet per project.
 
 Use the "Rebuild recipe for one index" from the conventions file for every
-`index.md` (list → build body → delete-if-present → create).
+`index.md` (list → build body → `Write` the index, overwriting any existing one).
 
 ## 3. Report
 

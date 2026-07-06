@@ -19,13 +19,15 @@ If it's unclear which applies, ask: "Do you want this tied to a specific feature
 
 ## Output to Obsidian
 
-All output goes to a single brag document in the user's Obsidian vault via the `mcp__mcp-obsidian__*` tools. Unlike the other ai-* skills, this one is **not** grouped by project — your accomplishments across every repo accumulate in one place. Nothing is written to local disk.
+All output goes to a single brag document in the user's Obsidian vault, written **directly on the local filesystem** (no MCP). Unlike the other ai-* skills, this one is **not** grouped by project — your accomplishments across every repo accumulate in one place.
+
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Use the `Read`/`Write`/`Edit` tools with the **absolute** path.
 
 ### The brag document — one directory, one file
 
-Everything goes into `brag-document/brag-document.md` (a single directory at the vault root holding a single file).
+Everything goes into `<vault>/brag-document/brag-document.md` (a single directory at the vault root holding a single file).
 
-It is a running, accumulating log, so **append** to it with `obsidian_append_content` (which creates the directory and file on first write). **Never delete-then-recreate it** — that would erase your history. Before appending, read it with `obsidian_get_file_contents` and skip any entry already present (match on PR number, commit, or feature). To slot a new entry under an existing heading (a week, a theme, or a project), use `obsidian_patch_content` (operation `append`, target that heading) instead of appending at the end. Review packs are appended as a new dated section in this same file — not a separate file.
+It is a running, accumulating log, so you **append** to it — **never overwrite it blindly**, that would erase your history. Read it first with the `Read` tool (creating the file with `Write` if it doesn't exist yet) and skip any entry already present (match on PR number, commit, or feature). Then add the new entries with the `Edit` tool: either after the last entry, or under an existing heading (a week, a theme, or a project) by inserting right after that heading. (If you use `Write`, write back the full existing content plus the new entries.) Review packs are added as a new dated section in this same file — not a separate file.
 
 ### Tag each entry with its project
 
@@ -90,11 +92,11 @@ When the user references a feature, the spec docs are your richest, most accurat
 
 ### Step 1: Resolve the feature in the vault
 
-List `engineering/<project>/workplans` with `obsidian_list_files_in_dir` and match the feature the user named; if ambiguous or missing, ask.
+List `<vault>/engineering/<project>/workplans` (`ls -1`) and match the feature the user named; if ambiguous or missing, ask.
 
 ### Step 2: Read the feature's documents
 
-Read whichever of these exist with `obsidian_get_file_contents`, and extract:
+Read whichever of these exist with the `Read` tool, and extract:
 
 - `…/workplans/<feature>/prd.md` — **why it mattered**: the problem, the users/beneficiaries, the objectives and success metrics. This is the "result/impact" raw material.
 - `…/workplans/<feature>/tech-spec.md` — **what was built**: the components, the scope, the hard parts.
@@ -146,7 +148,7 @@ gh pr list --author @me --state merged --limit 20 \
   --json number,title,repository,mergedAt
 ```
 
-**Vault feature docs** (unique to this suite) — the feature folders under `engineering/<project>/workplans` are a record of substantial work. List them with `obsidian_list_files_in_dir` and, for features touched in the time range, pull context from their `prd.md` / `implementation-notes.md` as in mode A. This catches design and spec work that may not show up cleanly in git.
+**Vault feature docs** (unique to this suite) — the feature folders under `<vault>/engineering/<project>/workplans` are a record of substantial work. List them (`ls -1`) and, for features touched in the time range, pull context from their `prd.md` / `implementation-notes.md` as in mode A. This catches design and spec work that may not show up cleanly in git.
 
 If none of these are available, fall back to the guided interview.
 
@@ -194,7 +196,7 @@ For longer narrative sections, use **STAR**: Situation → Task → Action → R
 4. **DO** show drafted entries to the user before saving. Never auto-save without confirmation.
 5. **DO** group related commits/tasks into a single entry.
 6. **DO** preserve the user's voice — reframe for impact, but never invent accomplishments or inflate scope.
-7. **DO** append to the single brag document (preserve history); never delete-then-recreate it.
+7. **DO** append to the single brag document (preserve history); never overwrite it blindly.
 8. **DO NOT** fabricate metrics, team sizes, or impact numbers. If the user/docs don't provide a number, keep it qualitative.
 9. **DO NOT** pad weak periods with trivial entries — an honest gap beats inflated fluff.
 10. **DO NOT** draft entries before scanning/reading is complete.

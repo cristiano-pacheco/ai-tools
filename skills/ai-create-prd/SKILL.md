@@ -22,7 +22,9 @@ The PRD structure is defined in `references/prd-template.md`. Read it and follow
 
 ## Output to Obsidian
 
-All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tools, grouped by project. Nothing is written to local disk.
+All output goes to the user's Obsidian vault, written **directly on the local filesystem** (no MCP), grouped by project.
+
+**Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Everything below lives under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
 ### Resolve the project base path
 
@@ -32,21 +34,17 @@ All output goes to the user's Obsidian vault via the `mcp__mcp-obsidian__*` tool
 
 ### Resolve the feature folder
 
-The PRD lives at `engineering/<project>/workplans/<feature>/prd.md`, where `<feature>` is a kebab-case slug describing the feature (e.g. `queue-routing`). `workplans/` is the project's working-docs folder; each feature gets its own subfolder under it holding the full set of working documents (PRD, tech spec, tasks, and the artifacts produced while building). Derive the slug from the feature name; if a folder for this feature may already exist, list `engineering/<project>/workplans` with `obsidian_list_files_in_dir` and reuse the matching folder.
+The PRD lives at `engineering/<project>/workplans/<feature>/prd.md`, where `<feature>` is a kebab-case slug describing the feature (e.g. `queue-routing`). `workplans/` is the project's working-docs folder; each feature gets its own subfolder under it holding the full set of working documents (PRD, tech spec, tasks, and the artifacts produced while building). Derive the slug from the feature name; if a folder for this feature may already exist, list `<vault>/engineering/<project>/workplans` (`ls -1`) and reuse the matching folder.
 
-### Write the file (there is no whole-file overwrite tool)
+### Write the file
 
-The Obsidian MCP only exposes append / patch / delete. To write `engineering/<project>/workplans/<feature>/prd.md`:
-
-1. Check if it exists with `obsidian_get_file_contents`.
-2. If it exists, delete it with `obsidian_delete_file` (pass `confirm: true`) — regenerating a PRD replaces it; appending would duplicate content.
-3. Create it with `obsidian_append_content`. This creates any missing parent folders, so you don't pre-create directories.
+Write `<vault>/engineering/<project>/workplans/<feature>/prd.md` with the `Write` tool — it overwrites if the file exists (regenerating a PRD replaces it) and creates any missing parent folders, so you don't pre-create directories.
 
 ### Maintain the index (keep the graph connected)
 
 After saving, wire the note into the Obsidian graph with append-if-missing. Wikilinks use vault-root-relative paths + alias, e.g. `[[engineering/<project>/workplans/<feature>/prd|prd]]`.
 
-1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `prd` isn't already present, `obsidian_append_content` a bullet `- [[engineering/<project>/workplans/<feature>/prd|PRD]]` under a `## Documents` heading.
+1. **Feature index** — `engineering/<project>/workplans/<feature>/index.md`: read it (if missing, create it with `# <feature>` and a `↑ [[engineering/<project>/index|<project>]]` back-link); if the wikilink for `prd` isn't already present, add a bullet `- [[engineering/<project>/workplans/<feature>/prd|PRD]]` under a `## Documents` heading (with the `Edit` tool, or `Write` the updated file).
 2. **Project index** — `engineering/<project>/index.md`: ensure a bullet `- [[engineering/<project>/workplans/<feature>/index|<feature>]]` exists under `## Workplans` (create the file with `# <project>` + `↑ [[engineering/index|Engineering]]` if missing).
 3. **Root index** — `engineering/index.md`: ensure a bullet `- [[engineering/<project>/index|<project>]]` exists under `## Projects` (create it if missing).
 

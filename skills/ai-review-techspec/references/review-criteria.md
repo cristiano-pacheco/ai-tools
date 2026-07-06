@@ -53,27 +53,60 @@ Clarity of invariants; contract testability; failure injection; integration and 
 
 Whether the design needs an execution orchestrator and whether it becomes a bottleneck; head-of-line blocking in sequential mode; progress counters drifting from reality; "completed" hiding many failed operations; polling APIs overloading storage; audit data and hot operational state sharing one storage model; need for reconciliation jobs; explicit timeouts/TTLs/watchdogs; oversized execution snapshots; isolating heavy processing (rendering, enrichment) from orchestration state; future expansion breaking current abstractions; governance/abuse problems from inline or ad-hoc execution; over-dependence on existing-system assumptions; operational pain from missing cancellation/retry APIs; concurrent-update protection on state transitions; duplicate effects during retries/failover; support for compliance/legal hold/audit; a clear line between control metadata and payload data; support for fairness/quotas/throttling later; unbounded backlog growth from downstream outages; missing backfill/reconciliation logic; a clear source of truth for execution state.
 
-## Required output
+## Relevance filter — report only what matters
 
-The output is **an action list — only things that must be addressed.** Do not include an overall verdict, an approval recommendation, praise, "what is good", executive summaries, or any restatement of the spec. If an item does not require the authors to change, add, or clarify something, leave it out.
+The review is a short, high-signal action list, **not** an exhaustive catalog. Before writing an issue, apply this bar:
 
-Directly under the H1 title, add a related-links blockquote so the note connects in the Obsidian graph:
+- **Include** only issues that would materially change the design, break in production, or force a real decision. If the authors would read it and shrug, cut it.
+- **Merge** related nitpicks into one issue. Do not split one root cause into five entries.
+- **Cap the list.** Aim for the **top 5–8 issues**, never more than 12. If you found more, you are including noise — raise the bar and drop the weakest.
+- **No filler.** Do not include an issue just to fill a category. Empty categories are fine and expected.
+- Do not include an overall verdict, approval recommendation, praise, "what is good", executive summary, or any restatement of the spec.
+
+## Required output — visual and scannable
+
+The document must be **skimmable in 30 seconds**. Lead with a table; keep prose tight.
+
+Directly under the H1 title, add the related-links blockquote:
 
 ```
 > **Tech Spec:** [[engineering/<project>/workplans/<feature>/tech-spec|tech-spec]] · **PRD:** [[engineering/<project>/workplans/<feature>/prd|prd]]
 ```
 
-Produce exactly two sections:
+Then produce these sections **in order**:
 
-1. **Issues to Address** — every weakness, ambiguity, scalability risk, operational gap, security issue, failure mode, design flaw, unjustified assumption, and unanswered question that must be resolved. Order by severity (most dangerous first). Each issue is one entry with:
-   - **Title** — a short, specific name for the problem.
-   - **Severity** — `blocker` (must fix before implementation) / `major` (fix before launch) / `minor` (can follow in a later phase).
-   - **What's wrong** — the specific gap, contradiction, or underspecified invariant. Be concrete; cite the part of the spec.
-   - **Why it matters / how it fails in production** — the concrete failure scenario, not generic advice.
-   - **What to change** — the specific fix, decision, or detail the spec must add. If the issue is an open question, state the exact question the authors must answer.
+### 1. Summary table
 
-2. **Open Questions** — precise, unanswered questions that block confident approval and don't map cleanly to a single fix above. Omit this section if there are none.
+A single markdown table — the at-a-glance view. One row per issue, ordered by severity (most dangerous first). Use severity badges: `🔴 Blocker` / `🟠 Major` / `🟡 Minor`.
+
+```
+| # | Severity | Issue | Area |
+|---|----------|-------|------|
+| 1 | 🔴 Blocker | Progress counter drifts from reality under retries | Execution model |
+| 2 | 🟠 Major | No idempotency key on job publication | Distributed systems |
+```
+
+### 2. Issue details
+
+One compact block per issue, in the same order and numbering as the table. Keep each field to **one or two sentences** — no paragraphs.
+
+```
+#### 1. 🔴 Progress counter drifts from reality under retries
+
+- **What's wrong:** <specific gap/contradiction, cite the spec section>
+- **How it fails:** <concrete production failure scenario, not generic advice>
+- **Fix:** <the exact decision/detail/change the spec must add>
+```
+
+Severity meaning: `🔴 Blocker` = must fix before implementation · `🟠 Major` = fix before launch · `🟡 Minor` = can follow in a later phase.
+
+### 3. Open Questions
+
+A short bulleted list of precise, unanswered questions that block confident approval and don't map to a single fix above. **Omit the whole section if there are none.**
 
 ## Style requirements
 
-Be highly specific. Every entry must be actionable — something the authors must change, add, decide, or answer. Do not praise, do not summarize the document, do not describe what the spec does well. Prefer concrete failure scenarios over generic advice. Identify contradictions, ambiguities, and underspecified invariants. Never just say "this needs more detail" — say exactly what detail and why. Assume the cost of under-review is much higher than the cost of being demanding.
+- **Terse.** Every field is one or two sentences. If it runs longer, cut words, not content. The explanation must never be longer than it needs to be.
+- **Specific and actionable.** Every issue names something the authors must change, add, decide, or answer. Never "this needs more detail" — say exactly what detail and why.
+- **Concrete over generic.** Prefer a real failure scenario ("two workers ack the same message, counter double-decrements") over generic advice ("consider idempotency").
+- **No praise, no summary, no restatement.** Cite the spec section by name; don't quote it back.

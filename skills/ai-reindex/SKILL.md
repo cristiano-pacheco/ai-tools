@@ -45,7 +45,18 @@ Rebuild leaves before their parents so each parent links to indexes that already
 Use the "Rebuild recipe for one index" from the conventions file for every
 `index.md` (list → build body → `Write` the index, overwriting any existing one).
 
-## 3. Report
+## 3. Commit to the vault repo
+
+After all `index.md` files are rebuilt, stage, commit, and push them from the vault root so the repo stays in sync:
+
+```bash
+V="$HOME/Documents/obsidian/obsidian"
+git -C "$V" add -A && git -C "$V" commit -m "ai-reindex: rebuild wikilink indexes" && git -C "$V" push
+```
+
+If there's nothing staged, no `origin`, or the push fails (offline), report it briefly and finish — don't abort the skill. `ai-setup` configures the repo and its `origin`.
+
+## 4. Report
 
 Print a short summary: how many projects, features, and index files were rebuilt,
 and flag anything skipped (e.g. a project with no `workplans/`). If you noticed

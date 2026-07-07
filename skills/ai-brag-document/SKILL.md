@@ -23,6 +23,15 @@ All output goes to a single brag document in the user's Obsidian vault, written 
 
 **Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Use the `Read`/`Write`/`Edit` tools with the **absolute** path.
 
+**Commit to the vault repo (after writing).** After updating the brag document, stage, commit, and push from the vault root so the repo stays in sync:
+
+```bash
+V="$HOME/Documents/obsidian/obsidian"
+git -C "$V" add -A && git -C "$V" commit -m "<message>" && git -C "$V" push
+```
+
+Use a concise message (e.g. `ai-brag-document: <what changed>`). If there's nothing staged, no `origin`, or the push fails (offline), report it briefly and finish — don't abort the skill. `ai-setup` configures the repo and its `origin`.
+
 ### The brag document — one directory, one file
 
 Everything goes into `<vault>/brag-document/brag-document.md` (a single directory at the vault root holding a single file).

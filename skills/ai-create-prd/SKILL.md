@@ -26,6 +26,15 @@ All output goes to the user's Obsidian vault, written **directly on the local fi
 
 **Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Everything below lives under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
+**Commit to the vault repo (after writing).** Once this run's files are written (the note plus any `index.md` updates), stage, commit, and push them from the vault root so the repo stays in sync:
+
+```bash
+V="$HOME/Documents/obsidian/obsidian"
+git -C "$V" add -A && git -C "$V" commit -m "<message>" && git -C "$V" push
+```
+
+Use a concise message naming the note (e.g. `ai-create-prd: <feature>`). If there's nothing staged, no `origin`, or the push fails (offline), report it briefly and finish — don't abort the skill. `ai-setup` configures the repo and its `origin`.
+
 ### Resolve the project base path
 
 1. Run `git rev-parse --show-toplevel`; the basename of that path is the project name.

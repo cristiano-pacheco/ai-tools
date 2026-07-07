@@ -26,6 +26,15 @@ Code changes go to the local repository. The only things written to the Obsidian
 
 **Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. The vault docs live under `<vault>/engineering/...`. Use the `Read`/`Write`/`Edit` tools (and `ls` via Bash) with the **absolute** path, e.g. `$HOME/Documents/obsidian/obsidian/engineering/<project>/...`. Wikilink text inside notes stays vault-root-relative and unchanged (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
+**Commit to the vault repo (after writing).** This skill's vault writes are the task-status update and the implementation notes — after writing them, stage, commit, and push from the vault root so the repo stays in sync (this is separate from any commit you make in the code repo):
+
+```bash
+V="$HOME/Documents/obsidian/obsidian"
+git -C "$V" add -A && git -C "$V" commit -m "<message>" && git -C "$V" push
+```
+
+Use a concise message naming the task (e.g. `ai-execute-task: <feature> NN`). If there's nothing staged, no `origin`, or the push fails (offline), report it briefly and finish — don't abort the skill. `ai-setup` configures the repo and its `origin`.
+
 ### Resolve the project base path
 
 1. Run `git rev-parse --show-toplevel`; the basename is the project name (this is also the repo you implement in).

@@ -41,7 +41,31 @@ plus pull-requests/, code-reviews/, and codebase-reviews/.
 
 The `## Projects` list is filled as projects appear (each skill links its project here, and `ai-reindex` rebuilds the whole thing). If a legacy `engineering/README.md` exists from an older setup, leave it — but `index.md` is now the canonical root.
 
-## 3. Verify project detection
+## 3. Initialize the vault git repo
+
+The vault is version-controlled: every ai-* skill commits and pushes its output. Set this up here.
+
+First **ask the user for the git repository** (the remote URL, e.g. `git@github.com:user/obsidian-vault.git`) unless they already gave one. This is the `origin` the vault pushes to.
+
+Then, from the **vault root** (`$HOME/Documents/obsidian/obsidian` — the Obsidian root directory), initialize the repo, wire the remote, and make the first commit:
+
+```bash
+V="$HOME/Documents/obsidian/obsidian"
+if [ -d "$V/.git" ]; then
+  echo "already a git repo"
+  git -C "$V" remote -v
+else
+  git -C "$V" init -b main
+  git -C "$V" remote add origin "<REPO_URL>"
+  git -C "$V" add -A
+  git -C "$V" commit -m "chore: initial vault commit"
+  git -C "$V" push -u origin main
+fi
+```
+
+Substitute `<REPO_URL>` with the URL the user gave. If it's already a repo, leave it as is (just confirm `origin`). If the push fails (no access, empty remote conflict), report the exact error and let the user resolve it — don't force-push.
+
+## 4. Verify project detection
 
 The suite names the project from the git repository:
 - Run `git rev-parse --show-toplevel`; the basename is the project name, so the base path is `engineering/<basename>`.
@@ -49,7 +73,7 @@ The suite names the project from the git repository:
 
 Report the resolved base path for the current directory (or, if there's no git repo here, state that the no-git fallback will apply).
 
-## 4. Confirm the suite is available
+## 5. Confirm the suite is available
 
 The spec-driven suite is:
 
@@ -74,11 +98,12 @@ Check which of these you can see in your available skills and flag any that are 
 npx skills add cristiano-pacheco/ai-tools
 ```
 
-## 5. Summary
+## 6. Summary
 
 Print a short report:
 - ✅ / ❌ Vault directory reachable and writable
 - ✅ / ❌ `engineering/` root present with `engineering/index.md` (created if it was missing)
+- ✅ / ❌ Vault git repo initialized with `origin` set (or already present)
 - Resolved project base path for the current directory
 - Which suite skills are available, and any that are missing
 

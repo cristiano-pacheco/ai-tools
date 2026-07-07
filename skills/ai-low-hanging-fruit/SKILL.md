@@ -22,6 +22,15 @@ Output lives in the user's Obsidian vault, written **directly on the local files
 
 **Vault root (default):** `$HOME/Documents/obsidian/obsidian` — override by telling the skill a different absolute path. Everything below lives under `<vault>/engineering/...`. Use `Read`/`Write`/`Edit` (and `ls` via Bash) with the **absolute** path. Wikilink text inside notes stays vault-root-relative (`[[engineering/...]]`) — never put the absolute path inside `[[...]]`.
 
+**Commit to the vault repo (after writing).** Once this run's files are written (the note plus any `index.md` updates), stage, commit, and push them from the vault root so the repo stays in sync:
+
+```bash
+V="$HOME/Documents/obsidian/obsidian"
+git -C "$V" add -A && git -C "$V" commit -m "<message>" && git -C "$V" push
+```
+
+Use a concise message naming the note (e.g. `ai-low-hanging-fruit: <feature>`). If there's nothing staged, no `origin`, or the push fails (offline), report it briefly and finish — don't abort the skill. `ai-setup` configures the repo and its `origin`.
+
 1. **Project:** run `git rev-parse --show-toplevel`; the basename is the project name. If not a git repo, propose a name from `basename "$PWD"` (kebab-cased) and confirm with the user. Base path: `engineering/<project>`.
 2. **Feature:** if the user gave a feature slug (e.g. `river-job-index-bloat`), use it and confirm the folder exists (`ls -1 "<vault>/engineering/<project>/workplans"`). Otherwise list `<vault>/engineering/<project>/workplans` to find it; if ambiguous or missing, ask.
 3. **Inputs:** read `<vault>/engineering/<project>/workplans/<feature>/prd.md` with `Read`. If the PRD is missing, stop and tell the user to run `ai-create-prd` first. Then read `tech-spec.md` from the same folder **only if it exists** — its presence unlocks the descope analysis below.

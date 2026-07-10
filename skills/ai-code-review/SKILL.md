@@ -1,6 +1,7 @@
 ---
 name: ai-code-review
-description: Review the current branch's diff as a principal engineer focused on production risk, saved to Obsidian. Use for a code review of a branch — bugs, race conditions, data/security risks ("is this safe to ship?"), not style. For a whole-codebase audit use ai-codebase-review.
+description: Review a branch diff for production risk.
+disable-model-invocation: true
 ---
 
 Act as a **Principal Backend Engineer** reviewing this code to prevent production incidents.

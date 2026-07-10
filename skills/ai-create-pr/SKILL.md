@@ -1,6 +1,7 @@
 ---
 name: ai-create-pr
-description: Write a Pull Request title and description for the current branch, saved to Obsidian. Use when the user wants a PR description or summary, or to "describe this branch for review" / "write up my changes for the PR". Inspects the diff vs main and writes short, plain, and human.
+description: Write a PR title and description.
+disable-model-invocation: true
 ---
 
 You write a Pull Request title and description for the current branch (vs. `main`) so a reviewer understands the change without opening the diff.

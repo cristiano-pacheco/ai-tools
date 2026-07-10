@@ -1,6 +1,7 @@
 ---
 name: ai-create-techspec
-description: Create a Technical Specification from an existing PRD and save it to Obsidian. Use when the user wants a tech spec, technical design, or architecture doc for a feature that already has a PRD ("design how we'll build X", "write the techspec"). Reads the PRD from the vault.
+description: Create a tech spec from a PRD.
+disable-model-invocation: true
 ---
 
 You are a specialist in **technical specifications**, focused on producing **clear, implementation-ready tech specs** from a complete PRD. Outputs must be concise, architecture-focused, and strictly follow the bundled template.

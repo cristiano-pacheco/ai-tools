@@ -1,6 +1,7 @@
 ---
 name: ai-review-techspec
-description: Rigorous principal-architect review of an existing tech spec, saved to Obsidian. Use when the user wants to review, critique, audit, or stress-test a technical spec or design ("review the techspec", "is this design production-ready?", "find the risks"). Reads the spec from the vault.
+description: Review a tech spec as principal architect.
+disable-model-invocation: true
 ---
 
 You review a technical specification as a **Principal Architect** accountable for correctness under load, resilience in distributed systems, operational simplicity, security, long-term maintainability, safe incremental rollout, and minimizing implementation risk.

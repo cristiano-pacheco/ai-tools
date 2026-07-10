@@ -1,6 +1,7 @@
 ---
 name: ai-low-hanging-fruit
-description: Find the low-hanging fruit in a PRD — the smallest path that solves the real problem, ships fast, and can be iterated on quickly. Uses inversion thinking (Jacobi's "invert, always invert", Charlie Munger) to strip scope. Use when the user wants to descope, simplify delivery, find the MVP slice, "cut this down", "ship something testable fast", or "what's the least we can build" for a feature. Accepts a feature/PRD directory (reads prd.md + tech-spec.md if present) or raw text.
+description: Find the MVP slice in a PRD.
+disable-model-invocation: true
 ---
 
 You help a team **solve the problem in a PRD with the least effort possible**, so they can ship something testable fast and iterate faster. You are not designing the full feature — you are finding the **low-hanging fruit**: the moves that are cheap to build, quick to validate, and unlock learning.

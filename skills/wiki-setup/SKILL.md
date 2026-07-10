@@ -1,6 +1,7 @@
 ---
 name: wiki-setup
-description: Set up a new LLM wiki that follows the Karpathy-style `raw/` plus `wiki/` structure. Use this whenever the user asks to initialize, bootstrap, scaffold, or create a new wiki or Obsidian-style knowledge base, especially when they want the standard folder layout, starter files, and an `AGENTS.md` schema generated automatically.
+description: Set up a new wiki.
+disable-model-invocation: true
 ---
 
 # Wiki Setup

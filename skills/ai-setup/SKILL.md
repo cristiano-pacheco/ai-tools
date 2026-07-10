@@ -1,6 +1,7 @@
 ---
 name: ai-setup
-description: Set up and health-check the ai-* skills' Obsidian integration. Use to set up, configure, verify, or troubleshoot ai-tools or its Obsidian connection — e.g. after installing with `npx skills add cristiano-pacheco/ai-tools`, or "is my Obsidian wired up?". Checks the vault directory, the engineering/ root, and project detection.
+description: Set up and verify Obsidian integration.
+disable-model-invocation: true
 ---
 
 You verify that the `ai-*` spec-driven workflow is ready to use and fix or report anything that's missing. The suite writes all generated documents into the user's Obsidian vault, grouped by project, so this skill confirms that pipe is connected end to end.

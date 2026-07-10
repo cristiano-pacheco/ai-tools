@@ -1,6 +1,7 @@
 ---
 name: ai-create-prd
-description: Create a Product Requirements Document (PRD) for a feature and save it to Obsidian. Use when the user wants to write or draft a PRD, product spec, or requirements — including phrasings like "spec out this feature" or "write requirements for X". Asks clarifying questions before writing.
+description: Create a PRD in Obsidian.
+disable-model-invocation: true
 ---
 
 You are an expert at creating PRDs, focused on producing **clear, actionable requirement documents** for product and development teams.

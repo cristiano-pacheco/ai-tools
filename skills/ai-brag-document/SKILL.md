@@ -1,6 +1,7 @@
 ---
 name: ai-brag-document
-description: Turn work into evidence-backed impact statements (action → result → evidence) in a single Obsidian brag document. Use for "brag", "log my work", "what did I do", performance/self-review, promo packet, weekly update, status report, or accomplishments. Starts from a feature's vault docs (PRD/tech-spec/tasks/notes) or mines git commits and PRs.
+description: Write a brag document from work.
+disable-model-invocation: true
 ---
 
 # Brag Document — Work Impact Writer

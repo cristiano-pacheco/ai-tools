@@ -1,6 +1,7 @@
 ---
 name: ai-execute-task
-description: Implement the next task from a feature's task list — real code in the local repo — then mark it done and keep implementation notes in Obsidian. Use when the user wants to execute, implement, or build a task ("do the next task", "implement the queue-routing tasks"). Reads the specs from the vault.
+description: Implement the next task from a list.
+disable-model-invocation: true
 ---
 
 You are responsible for **correctly implementing tasks**. Identify the next available task, do the setup, and **implement it** properly — no hacks or shortcuts.

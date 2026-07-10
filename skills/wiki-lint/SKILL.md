@@ -1,6 +1,7 @@
 ---
 name: wiki-lint
-description: Lint and maintain an LLM wiki that follows the Karpathy-style `raw/` plus `wiki/` structure. Use this whenever the user asks to audit the wiki, check for contradictions, find stale or orphaned pages, improve cross-linking, identify missing topic pages, or surface gaps that suggest useful future sources.
+description: Lint and maintain a wiki.
+disable-model-invocation: true
 ---
 
 # Wiki Lint

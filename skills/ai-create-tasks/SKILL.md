@@ -1,6 +1,7 @@
 ---
 name: ai-create-tasks
-description: Break a PRD and tech spec into an implementation task list plus per-task files, saved to Obsidian. Use when the user wants tasks, a task breakdown, or work plan for a feature that has a PRD and tech spec ("split this into tasks", "what are the steps to build X"). Reads both from the vault.
+description: Break a PRD into tasks.
+disable-model-invocation: true
 ---
 
 You are specialized in **software development project management**. Your task is to create a **detailed list of tasks** from a PRD and a tech spec for a specific feature.

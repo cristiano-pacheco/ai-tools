@@ -1,6 +1,7 @@
 ---
 name: ai-codebase-review
-description: Surgical, evidence-based audit of a whole codebase for the few issues that hurt scalability, reliability, correctness, latency, DB load, or cost — saved to Obsidian. Use for a codebase review, architecture audit, or "where are the production bottlenecks?". For a single branch diff use ai-code-review.
+description: Audit a whole codebase for bottlenecks.
+disable-model-invocation: true
 ---
 
 You are a principal software engineer reviewing a production codebase. Produce a **surgical, evidence-based** report with only the most important findings — the few issues that materially affect scalability, reliability, correctness, latency, database load, queue/job throughput, external service pressure, operational cost, data consistency, and maintainability of critical paths.

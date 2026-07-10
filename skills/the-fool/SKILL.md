@@ -1,6 +1,7 @@
 ---
 name: the-fool
-description: Use when challenging ideas, plans, decisions, or proposals. Invoke to play devil's advocate, run a pre-mortem, red team, stress test assumptions, audit evidence quality, or find blind spots before committing. Do NOT use for building plans, making decisions, or generating solutions — this skill only challenges and critiques.
+description: Challenge ideas as devil's advocate.
+disable-model-invocation: true
 license: CC-BY-4.0
 metadata:
   author: https://github.com/Jeffallan

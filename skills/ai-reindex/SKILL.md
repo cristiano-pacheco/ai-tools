@@ -1,6 +1,7 @@
 ---
 name: ai-reindex
-description: Rebuild the Obsidian wikilink indexes across the whole engineering/ tree so every note is connected in the graph. Use to reindex, "rebuild the engineering index", "recreate the obsidian links/graph", or fix orphaned notes after moving/deleting files. Deterministically regenerates the root, per-project, and per-feature index.md files.
+description: Rebuild Obsidian wikilink indexes.
+disable-model-invocation: true
 ---
 
 You rebuild the three tiers of `index.md` for the entire `engineering/` vault so

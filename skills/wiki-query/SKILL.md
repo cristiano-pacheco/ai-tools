@@ -1,6 +1,7 @@
 ---
 name: wiki-query
-description: Answer questions from an LLM wiki that follows the Karpathy-style `raw/` plus `wiki/` structure. Use this whenever the user asks questions about a wiki-backed subject area, wants a synthesis from existing wiki pages, asks for citations or traceability to source material, or wants a durable query result written back into the knowledge base.
+description: Answer questions from a wiki.
+disable-model-invocation: true
 ---
 
 # Wiki Query

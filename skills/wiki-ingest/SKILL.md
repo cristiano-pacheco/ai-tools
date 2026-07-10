@@ -1,6 +1,7 @@
 ---
 name: wiki-ingest
-description: Ingest new source material into an LLM wiki that follows the Karpathy-style `raw/` to `wiki/` workflow. Use this whenever the user asks to ingest, summarize, incorporate, process, catalog, or fold documents into a wiki or Obsidian-style knowledge base, especially when the repo contains `raw/`, `wiki/`, and an `AGENTS.md` schema that defines index and log updates.
+description: Ingest sources into a wiki.
+disable-model-invocation: true
 ---
 
 # Wiki Ingest

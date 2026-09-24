@@ -16,5 +16,3 @@ Follow the repo's issue-tracker doc (`docs/agents/issue-tracker.md`, "Implementa
 Run typechecking (make lint) regularly, single test files regularly, and the full test suite once at the end.
 
 Once done, use /ai-review-changes skill to review the work.
-
-Commit your work to the current branch.

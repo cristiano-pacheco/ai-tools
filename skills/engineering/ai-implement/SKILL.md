@@ -11,7 +11,7 @@ Implement the work described by the user in the spec or tickets.
 When the work comes from an issue-tracker ticket, the ticket file tracks the work end to end. 
 Follow the repo's issue-tracker doc (`docs/agents/issue-tracker.md`, "Implementation ticket lifecycle")
 
-## Review and commit
+## Review
 
 Run typechecking (make lint) regularly, single test files regularly, and the full test suite once at the end.
 

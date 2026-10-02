@@ -1,128 +1,46 @@
 ---
 name: ai-commit
-description: Commit and push vault artifacts or explicitly scoped code changes when an AI workflow delegates its repository handoff.
+description: Commit and push vault artifacts or explicitly scoped code changes.
+disable-model-invocation: true
 ---
 
-You commit and push changes produced by the `ai-*` workflow. You are the **only** skill in the suite allowed to run `git add` / `git commit` against the Obsidian vault. By default you operate on that vault. `ai-review-and-fix` may additionally delegate a narrowly scoped code-repository commit to you.
-
-<critical>For the default `vault` target, NEVER run `git add`, `git commit`, or `git push` against the current working directory; target the vault root via `git -C "$V"`. For the explicit `code` target, use only the resolved code toplevel and the exact supplied paths. The vault repo and the code repo are different repositories — mixing them is the exact bug this skill exists to prevent.</critical>
-<critical>If the vault root resolves to the same path as the current working directory's git toplevel, STOP and abort. That means the agent is running inside the vault as if it were the code repo, which is a misconfiguration.</critical>
+This skill owns vault Git operations for the `ai-*` suite. Other skills delegate vault staging, commits, and pushes here. The default target is `vault`; only `ai-review-and-fix` may request `code`.
 
 ## Inputs
 
-The calling skill provides:
-- **commit message** — a concise Conventional Commits message naming the note (e.g. `ai-create-prd: <feature>`). If none is provided, compose one from the staged diff.
-- **target** — `vault` (default) or `code`.
-- **code paths** — required only for `target: code`: exact repository-relative paths changed by the calling skill. Never infer them from the whole worktree.
+- `target` is `vault` by default, or `code`.
+- `message` is optional. Prefer the caller's Conventional Commit message; otherwise compose one from the staged diff.
+- `code paths` is required for `code`. The caller must inspect `git status --short` and supply exact repository-relative paths it changed, excluding unrelated work.
 
-## Code target (only for `ai-review-and-fix`)
+## Resolve repositories
 
-When `target: code`, operate on the current working directory's Git repository, never the vault:
+1. Set `V="${OBSIDIAN_AI_VAULT:-$HOME/Documents/obsidian/obsidian}"`. Verify the directory exists and is a Git repository. On failure, stop and tell the user to run `ai-setup` or set `OBSIDIAN_AI_VAULT`.
+2. Resolve `VAULT_TOPLEVEL` with `git -C "$V" rev-parse --show-toplevel` and `CWD_TOPLEVEL` with `git rev-parse --show-toplevel`. The code target requires the latter to succeed.
+3. If the toplevels match, abort. The caller must run from the code repository, not the vault.
 
-1. Resolve `CWD_TOPLEVEL="$(git rev-parse --show-toplevel)"`; stop if it fails.
-2. Resolve the vault as below and stop if `CWD_TOPLEVEL` equals `VAULT_TOPLEVEL`.
-3. Require a non-empty explicit `code paths` list. Verify each path is inside `CWD_TOPLEVEL`; reject absolute paths, `..` traversal, and paths outside the repository.
-4. Stage only those paths: `git -C "$CWD_TOPLEVEL" add -- <paths>`. Never use `git add -A` for code.
-5. If the scoped staged diff is empty, report that no code commit is needed. Do not create an empty commit.
-6. Commit with the supplied Conventional Commit message, then push the current branch if `origin` exists. A missing origin or a push failure is non-fatal; report it exactly and do not force-push.
+## Stage and commit
 
-Do not commit unrelated pre-existing changes. The caller must inspect `git status --short` before delegating and include only files it changed.
+Use only the selected repository. For `vault`, run every Git command with `git -C "$V"`. For `code`, use `git -C "$CWD_TOPLEVEL"`.
 
-## Workflow
+### Vault target
 
-Use the code-target flow above when requested. Otherwise use the vault-target workflow below.
+1. Run `git -C "$V" add -A`. This includes unrelated vault changes, preserving the suite's existing behavior. Callers should invoke this skill immediately after writing their artifacts.
+2. Inspect `git -C "$V" diff --cached`. If empty, report that the vault is up to date and stop.
+3. Commit with `git -C "$V" commit -m "<message>"`.
 
-### 1. Resolve the vault root
+### Code target
 
-```bash
-V="${OBSIDIAN_AI_VAULT:-$HOME/Documents/obsidian/obsidian}"
-```
+1. Require a non-empty `code paths` list. Reject absolute paths, `..` traversal, and any path that resolves outside `CWD_TOPLEVEL`.
+2. Stage only those paths with `git -C "$CWD_TOPLEVEL" add -- <paths>`.
+3. Inspect the staged diff restricted to those paths. If empty, report that no code commit is needed and stop.
+4. Commit only those paths with `git -C "$CWD_TOPLEVEL" commit --only -m "<message>" -- <paths>`. Leave unrelated staged changes untouched.
 
-- If `$OBSIDIAN_AI_VAULT` is set, use it verbatim.
-- Otherwise fall back to `$HOME/Documents/obsidian/obsidian`.
+Use `<type>(<optional scope>): <description>`, omitting parentheses when there is no scope. Write a lowercase, imperative description with no final period. Preserve body line breaks and omit `Co-Authored-By` trailers.
 
-Validate it exists and is a git repo:
+If a commit fails, report the exact error and stop for the user to resolve it. Create new commits only; never amend or rewrite history.
 
-```bash
-test -d "$V" || { echo "Vault not found: $V" >&2; exit 1; }
-git -C "$V" rev-parse --is-inside-work-tree >/dev/null || { echo "Not a git repo: $V" >&2; exit 1; }
-```
+## Push and report
 
-If either check fails, report the error and tell the user to run `ai-setup` or set `$OBSIDIAN_AI_VAULT`. Do not continue.
+After a successful commit, push the current branch if the selected repository has `origin`. Never force-push. A missing origin or failed push is non-fatal; report the outcome and keep the local commit. `ai-setup` configures the vault remote.
 
-### 2. Guard against operating inside the vault
-
-Compare the vault toplevel against the current working directory's git toplevel:
-
-```bash
-VAULT_TOPLEVEL="$(git -C "$V" rev-parse --show-toplevel)"
-CWD_TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || echo "")"
-
-if [ -n "$CWD_TOPLEVEL" ] && [ "$VAULT_TOPLEVEL" = "$CWD_TOPLEVEL" ]; then
-  echo "ABORT: vault root equals the current working directory's git toplevel ($VAULT_TOPLEVEL)." >&2
-  echo "The agent is running inside the vault repo as if it were the code repo — this is a misconfiguration." >&2
-  echo "Run the calling skill from inside the code repository, not from the vault." >&2
-  exit 1
-fi
-```
-
-This is the critical guard that prevents the suite from committing code changes into the vault or vault notes into the code repo.
-
-### 3. Stage
-
-Stage everything under the vault root:
-
-```bash
-git -C "$V" add -A
-```
-
-If nothing is staged, report that the vault was already up to date and stop — never create an empty commit:
-
-```bash
-if git -C "$V" diff --cached --quiet; then
-  echo "No vault changes to commit."
-  exit 0
-fi
-```
-
-### 4. Commit
-
-Use a HEREDOC to preserve formatting:
-
-```bash
-git -C "$V" commit -m "$(cat <<'EOF'
-<message>
-EOF
-)"
-```
-
-Commit message rules:
-- Conventional Commits: `<type>(<optional scope>): <short description>`.
-- Prefer the message the calling skill provided.
-- Imperative mood, lowercase, no period.
-- Never include a `Co-Authored-By` trailer.
-
-### 5. Push (if origin exists)
-
-```bash
-if git -C "$V" remote get-url origin >/dev/null 2>&1; then
-  git -C "$V" push || echo "Push failed (offline or no access) — commit is local. Resolve manually." >&2
-else
-  echo "No origin remote on the vault — commit is local. ai-setup configures the remote." >&2
-fi
-```
-
-A push failure is non-fatal: the commit is already local, so report it and finish. Do not abort the calling skill.
-
-### 6. Report
-
-Print a short summary:
-- The commit hash (`git -C "$V" log -1 --oneline`).
-- Whether the push succeeded, was skipped (no origin), or failed.
-- Any guard that triggered (e.g. vault-equals-cwd abort).
-
-## Notes
-
-- This skill is the single chokepoint for vault git operations. Other `ai-*` skills must not run `git add` / `git commit` / `git push` themselves — they delegate here.
-- If the vault has unrelated staged changes from another source, `git add -A` will include them. This matches the historical suite behavior; the calling skills are expected to run `ai-commit` immediately after their own writes, so unrelated drift is rare. `ai-setup` initializes the repo and `origin`.
-- Never force-push, amend a prior commit, or rewrite vault history. If the commit fails (e.g. hook rejection), report the exact error and let the user resolve it.
+Report the commit hash and whether the push succeeded, failed, or was skipped. If a repository guard stopped the workflow, report that reason instead.

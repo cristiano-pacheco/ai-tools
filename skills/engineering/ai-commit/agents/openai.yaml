@@ -1,0 +1,5 @@
+interface:
+  display_name: "ai-commit"
+  short_description: "Commit and push vault artifacts or scoped code changes"
+policy:
+  allow_implicit_invocation: false

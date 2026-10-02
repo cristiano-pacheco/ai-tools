@@ -1,0 +1,5 @@
+interface:
+  display_name: "commit"
+  short_description: "Commit staged changes using Conventional Commits"
+policy:
+  allow_implicit_invocation: false

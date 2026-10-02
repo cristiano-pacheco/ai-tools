@@ -1,12 +1,12 @@
 ---
 name: ai-to-tickets
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker (edges as text in one file per ticket locally, or native blocking links on a real tracker).
+description: Break a plan, spec, or the current conversation into small, focused tickets, each declaring its blocking edges, published to the configured tracker (edges as text in one file per ticket locally, or native blocking links on a real tracker).
 disable-model-invocation: true
 ---
 
 # To Tickets
 
-Break a plan, spec, or conversation into a set of **tickets**: tracer-bullet vertical slices, each declaring the tickets that **block** it.
+Break a plan, spec, or conversation into small, focused **tickets**, each covering one concrete task with minimal context and declaring the tickets that **block** it.
 
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/ai-setup-skills`.
 
@@ -22,22 +22,19 @@ If you have not already explored the codebase, do so to understand the current s
 
 Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the easy change."
 
-### 3. Draft vertical slices
+### 3. Draft small tasks
 
-Break the work into **tracer bullet** tickets.
+Break the work into small, focused **tickets**.
 
-<vertical-slice-rules>
-
-- Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal slice of one layer
-- A completed slice is demoable or verifiable on its own
-- Each slice is sized to fit in a single fresh context window
-- Any prefactoring should be done first
-
-</vertical-slice-rules>
+- Each ticket covers one concrete change with clear acceptance criteria, including at least one type of test.
+- For HTTP handlers and the HTTP transport layer, require end-to-end (E2E) tests through the HTTP interface, never unit tests. This rule takes precedence over the dependency-based rules below.
+- For code without dependencies on other instances, require only unit tests.
+- For code with dependencies on other instances, such as a use case or repository, prefer integration tests. These are code dependencies, distinct from ticket blockers.
+- Scope each ticket to the context needed for that change; tasks may target a single layer or component.
+- Split tickets that combine independently verifiable changes.
+- Schedule any required prefactoring before the changes that depend on it.
 
 Give each ticket its **blocking edges**: the other tickets that must complete before it can start. A ticket with no blockers can start immediately.
-
-**Wide refactors are the exception to vertical slicing.** A **wide refactor** is one mechanical change (rename a column, retype a shared symbol) whose **blast radius** fans across the whole codebase, so a single edit breaks thousands of call sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as **expand–contract**. First expand: add the new form beside the old so nothing breaks. Then migrate the call sites over in batches sized by blast radius (per package, per directory), each batch its own ticket blocked by the expand, keeping CI green batch to batch because the old form still exists. Finally contract: delete the old form once no caller remains, in a ticket blocked by every migrate batch. When even the batches can't stay green alone, keep the sequence but let them share an integration branch that all block a final integrate-and-verify ticket; green is promised only there.
 
 ### 4. Quiz the user
 
@@ -45,7 +42,7 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
-- **What it delivers**: the end-to-end behaviour this ticket makes work
+- **What it delivers**: the concrete change this ticket makes
 
 Ask the user:
 
@@ -71,14 +68,14 @@ Do NOT close or modify any parent issue.
 
 # <NN>: <Ticket title>
 
-**What to build:** the end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.
+**What to build:** the concrete change this ticket makes.
 
 **Blocked by:** the numbers/titles of the tickets that gate this one, or "None (can start immediately)".
 
 **Status:** ready-for-agent
 
 - [ ] Acceptance criterion 1
-- [ ] Acceptance criterion 2
+- [ ] Required tests: <unit, integration, or E2E, with the behaviour to verify>
 
 </local-ticket-template>
 
@@ -90,12 +87,12 @@ A reference to the parent issue on the tracker (if the source was an existing is
 
 ## What to build
 
-The end-to-end behaviour this ticket makes work, from the user's perspective, not layer-by-layer implementation.
+The concrete change this ticket makes.
 
 ## Acceptance criteria
 
 - [ ] Criterion 1
-- [ ] Criterion 2
+- [ ] Required tests: <unit, integration, or E2E, with the behaviour to verify>
 
 ## Blocked by
 

@@ -18,4 +18,8 @@ For ticket work, follow `docs/agents/issue-tracker.md` through claiming, progres
 
 Discover verification commands from the repo's instructions, build files, scripts, and CI. Run applicable checks and focused tests during implementation, then all required checks and the full suite on the final changes.
 
-Use /ai-code-review before completion. Fix findings and rerun affected checks. Conclude only when checks pass, findings are resolved, and the ticket lifecycle is complete.
+<critical>
+Use /ai-code-review before completion.
+
+Fix findings and rerun affected checks. Conclude only when checks pass, findings are resolved, and the ticket lifecycle is complete.
+</critical>

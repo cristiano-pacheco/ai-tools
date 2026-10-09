@@ -10,6 +10,10 @@ Break a plan, spec, or conversation into small, focused **tickets**, each coveri
 
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/ai-setup-skills`.
 
+<critical>
+Before creating or editing any Markdown file, load the /unslop skill and follow its guidelines for writing and reviewing text.
+</critical>
+
 ## Process
 
 ### 1. Gather context

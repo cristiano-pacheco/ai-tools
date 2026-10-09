@@ -6,6 +6,10 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or tickets.
 
+<critical>
+Before creating or editing any Markdown file, load the /unslop skill and follow its guidelines for writing and reviewing text.
+</critical>
+
 ## Standards
 
 Read the fucking @CODING_STANDARDS.md before editing. Apply its rules. When correcting a violation, check the rest of the changed code for the same error.

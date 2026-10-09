@@ -8,6 +8,8 @@ Commit the existing index without pausing for approval. Stage files only when ex
 
 ## Workflow
 
+<critical>MANDATORY: load and use the global **unslop** skill (`~/.agents/skills/unslop/SKILL.md`) before writing the commit message. Its guidelines are required for the message produced by this skill — do not skip it, even if the diff seems already clean. The goal is clear, objective commit messages without AI slop.</critical>
+
 1. Read `git diff --cached --stat`, `git diff --cached`, and `git log --oneline -5`. If the index is empty, report it and stop.
 2. Check every staged file and the full diff for secrets. If a file likely contains secrets, such as `.env`, credentials, tokens, or keys, abort and warn the user.
 3. Write a Conventional Commit message using the format below. For mixed changes, choose the most significant type. Follow recent commit style within these rules.

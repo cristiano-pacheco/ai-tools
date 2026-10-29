@@ -1,0 +1,78 @@
+# Integration bootstrap
+
+Read when adding/changing the real PostgreSQL/Redis fixture, migration stack or
+composed module test. A pure mapper/validator test does not bootstrap containers.
+Use `github.com/cristiano-pacheco/bricks/pkg/itestkit`; it already owns container
+startup, mapped addresses, connections, migration invocation and teardown.
+
+## Select the stack
+
+| Required guarantee | Start / reset / construct |
+| --- | --- |
+| Persistence, constraint, transaction | `StartPostgres`; apply owned SQL; `TruncateTables(t)` per scenario; real repository/use case |
+| Cache hit/miss/TTL/invalidation | `StartRedis`; `kit.Redis()`; reset the isolated test Redis per scenario; real cache |
+| DB plus cache | One kit starts both; reset both; fresh SUT per scenario |
+| Public decorated operation or module graph | Same real adapters plus production `Module`; resolve the public generic operation |
+| HTTP protocol without DB policy changes | Registered Bricks router with `httptest`; start DB only if the assertion crosses into real persistence |
+| Uncontrolled third-party effect | Replace only its application port, preserving the real controlled stack |
+
+## Fixture ownership
+
+Start from `itestkit.DefaultConfig()` and override fields. In v0.1.21 `New` replaces
+the entire config when `PostgresImage` is empty, even for a Redis-only fixture.
+Register `t.Cleanup(kit.Cleanup)` immediately after `New`, before any startup can
+fail. Call each start/migration method once and fail immediately on an error:
+the `sync.Once` implementation does not preserve the first error on a later call.
+A failed kit is discarded, not retried as if it were fresh.
+
+The suite in [Integration test](integration-test.md) uses only PostgreSQL and
+one owned SQL directory. The same pattern starts Redis only when consumed:
+`require.NoError(t, kit.StartRedis())`, then use `kit.Redis()` (a universal client).
+`FlushDB` is appropriate only on that kit's dedicated Redis, never a shared service.
+Keep suites/scenarios sharing `TruncateTables` or `FlushDB` sequential.
+
+Use scoped `kit.Cleanup` by default on a shared development Docker host.
+`itestkit.TestMain(m)` and `CleanupAll()` in the inspected baseline enumerate and
+remove **all** containers with the `org.testcontainers` label, across projects.
+Reserve that global wrapper for an isolated worker whose entire Testcontainers
+inventory belongs to the run; do not copy it into concurrent local suites.
+`Cleanup`, `StopPostgres` and `StopRedis` return no value. Cleanup is registered
+once; a second teardown hook should not terminate the same container again.
+
+## One path versus multiple modules
+
+`kit.RunMigrations()` uses `Config.MigrationsPath` and resolves a relative
+`file://` path from the consumer's nearest `go.mod`. It runs one migration
+source. For one independent module, point at its real `migration/` directory.
+
+For a stack with cross-module foreign keys, use the production embedded runner
+and the complete set of real module filesystems. The baseline kit exposes its GORM handle but no migration DSN getter. Use the
+underlying pgx connection configuration to build a properly escaped PostgreSQL
+URL, as the executable suite's multi-module variation shows.
+
+Choose one migration route for a kit. Do not call both `RunMigrations` and the
+embedded runner against separate partial schemas. Verify global version uniqueness
+and dependency order; grouped Fx slices do not order migrations.
+
+## Composed proof
+
+For a claim about runtime publication, use the owner module's actual `Module`.
+Supply the kit's concrete shared database wrapper and Bricks validator. Provide
+real fixture configuration for logger/i18n/decorators, and a controlled metrics
+implementation if creating repeated graphs in one process would duplicate global
+Prometheus registration. Resolve `ucdecorator.UseCase[Input, Output]`; invoking
+only the raw pointer does not exercise public publication/translation.
+
+For an HTTP group claim, consume `[]brickschi.Route` through `fx.In`, register
+those real contributions on a Bricks server and call `SetupRoutes` before serving
+its `Router()` through `httptest`. This exercises discovery without fixed ports.
+A real listener readiness claim requires an actual listener test too.
+
+In v0.1.21 Chi `OnStart` launches listeners asynchronously and can return before
+a bind failure; the inspected newer checkout binds synchronously. Keep those
+claims tied to the installed implementation. A passed `app.Start` in the older
+release does not establish HTTP readiness.
+
+*Check:* required stack only, cleanup registered before startup, real migrations
+and adapters, isolated sequential resets, production publication when claimed,
+and execution evidence. A compile-only or skipped integration run is unrun proof.

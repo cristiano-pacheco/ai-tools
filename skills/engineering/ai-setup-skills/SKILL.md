@@ -14,7 +14,7 @@ Setup owns these repository outputs:
 - `docs/agents/triage-labels.md` when this process includes triage labels
 - one root-level `## Agent skills` section in `AGENTS.md` or `CLAUDE.md`
 
-It does not own domain documentation. Leave `CONTEXT.md`, `CONTEXT-MAP.md`, ADRs, `docs/agents/domain.md`, and every instruction outside the `## Agent skills` section unchanged.
+It does not own domain documentation. Leave `GLOSSARY.md`, `GLOSSARY-MAP.md`, ADRs, `docs/agents/domain.md`, and every instruction outside the `## Agent skills` section unchanged.
 
 ## Process
 

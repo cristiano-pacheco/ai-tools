@@ -8,6 +8,10 @@ This skill takes the current conversation context and codebase understanding and
 
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/ai-setup-skills`.
 
+<critical>
+Before creating or editing any Markdown file, load the /unslop skill and follow its guidelines for writing and reviewing text.
+</critical>
+
 ## Process
 
 1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the spec, and respect any ADRs in the area you're touching.

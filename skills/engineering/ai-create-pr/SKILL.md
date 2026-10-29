@@ -8,7 +8,7 @@ You write a Pull Request title and description for the current branch (vs. `main
 
 Goal: **short, plain, human** — like a teammate explaining the PR in chat, not a corporate write-up.
 
-<critical>load and use the unslop skill to produce the text</critical>
+<critical>MANDATORY: load and use the global **unslop** skill (`~/.agents/skills/unslop/SKILL.md`) before writing any PR text. Its guidelines are required for the title and description produced by this skill — do not skip it, even if the text seems already clean.</critical>
 <critical>EXPLORE THE BRANCH DIFF FIRST.</critical>
 <critical>WRITE LIKE A HUMAN — SHORT, PLAIN, NO PADDING.</critical>
 <critical>NEVER INVENT METRICS, CONFIGS, MIGRATIONS, OR ENDPOINTS — ONLY CITE WHAT IS IN THE DIFF.</critical>
@@ -104,7 +104,8 @@ Borrow other sections only when there's real content. Skip the rest.
 
 If a fact isn't in the diff, don't write it.
 
-### 4. Write the PR
+### 4. Load the unslop skill
+Before writing anything, load and follow the global **unslop** skill (`~/.agents/skills/unslop/SKILL.md`). Its slop-removal guidelines are mandatory for the PR title and description text.
 
 Use `references/pr-template.md` for structure.
 
@@ -132,6 +133,7 @@ Save to `engineering/<project>/pull-requests/<timestamp>-<branch>.md` (see the n
 
 ## Checklist (one pass before saving)
 
+- [ ] Unslop skill loaded and its guidelines applied to the text
 - [ ] Diff inspected
 - [ ] Title is Conventional Commits, no emoji
 - [ ] Description under ~250 words

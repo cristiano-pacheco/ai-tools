@@ -92,4 +92,5 @@ The fresh bounded shutdown context is intentional: the running command context
 is already cancelled. Register the command at the process root. A migration
 command similarly resolves/runs its actual migration runner, returns failures,
 and closes its graph; it does not instantiate an HTTP server or business operation.
-Read [Command test](command-test.md) for changed boundary proof.
+Apply [Test policy](test-policy.md) to verification; read [Command test](command-test.md)
+only when a command test is explicitly requested or required.

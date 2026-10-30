@@ -1,9 +1,8 @@
 # Unit test
 
-Use the project's test boundary first. Default to local deterministic proof for a
-mapper, enum, validator, or pure service; use real integration for persistence,
-transaction, and full use-case effects. Isolated collaborator proof is permitted
-only where the project allows doubles. Never replace integration-only rules.
+Apply [Test policy](test-policy.md) first. By default, unit test dependency-free
+behavior without mocks or test doubles; usecase and service tests are integration
+tests, including for pure services.
 
 Put tests beside implementation in an external `<package>_test` package unless
 local tooling requires otherwise. Give each scenario a behavior name and clear
@@ -12,14 +11,12 @@ of thresholds, null/zero/empty distinctions, and dependency failure when relevan
 Use `errors.Is`/`errors.As` or the project's equivalent, not rendered-message
 matching. Assert side-effect absence when rejection must precede I/O.
 
-For collaborators, reuse generated project mocks or narrow controlled ports. A
-fresh fixture/SUT per case prevents state leakage. Context matchers must not
-assume one concrete implementation of `context.Context`. Do not assert span
+A fresh fixture/SUT per case prevents state leakage. Do not assert span
 internals, logger formatting, or private helper calls as a proxy for behavior.
 
-The optional example below focuses on validation-before-I/O and is appropriate
-only for a permitted isolated use-case boundary. It does not replace public-operation
-integration proof for policy and persistence.
+The optional example below uses a controlled collaborator and is appropriate only
+when an explicit user request or project contract overrides the default boundary.
+It does not replace public-operation integration proof.
 
 ## Example: input validation proof
 

@@ -12,7 +12,7 @@ proof. These are routing checks, not claims that generated Go code was executed.
 | "Add a column to the HTTP response", value already returned by use case | Implementation; REST -> HTTP DTO/handler as affected, mapper, selected test boundary. No module/architecture/usecase/repository/model loading unless another contract is changed or unverified. |
 | "Fix SQL returning another tenant's orders", endpoint unchanged | Bug fix; repository, test; usecase if authorization/scope propagation is affected. Prove tenant isolation with real storage; select REST only if its contract is implicated. |
 | "Create the server command" | Implementation; CLI infrastructure branch, runtime, test. No business use case. |
-| "Change migration command help text" | Implementation; CLI and focused command proof. No schema migration or application setup. |
+| "Change migration command help text" | Implementation; CLI; no command test by default. Report any unverified behavior. No schema migration or application setup. |
 | "Extract a price conversion helper" | Refactoring; mapper, test; establish the behavior baseline before extraction. Add model only when units/types change. No service, validator, or constructor for pure conversion. |
 | "Validate customer eligibility using external data" | Implementation; validator, error, test; Fx for a new adapter binding, consistency if validity must hold through a write. External I/O does not reclassify acceptance as a service. |
 | "Confirm order and reserve stock atomically" | Implementation; usecase, repository, consistency, test; model/runtime only if affected. Prove shared transaction and rollback. |
@@ -35,7 +35,7 @@ proof. These are routing checks, not claims that generated Go code was executed.
 | "Create an order persistence model" | `model/order_model.go`, `OrderModel`, GORM tags, nullable pointers, and `TableName() == "orders"`; no business behavior or JSON tags. |
 | "Create a repository" | `port/order_repository.go` and `repository/order_repository.go`, `port.OrderRepository` and `repository.OrderRepository`, compile-time assertion, GORM `WithContext`, model values at the port, GORM pointers only internally. |
 | "Create a Link model and repository", neighboring files are named `order.go` | Implementation; Model + Repository and affected proof. Create `model/link_model.go`, `port/link_repository.go`, and `repository/link_repository.go`; neighboring filenames do not override role suffixes. Check every added/renamed filename at completion. |
-| Add tests for Link persistence | Test and affected Model/Repository boundary; use `link_model_test.go` or `link_repository_test.go` for the respective component, retaining the role suffix. |
+| Add integration coverage for Link persistence | Test policy; exercise persistence through a usecase or service integration test, not direct model or repository suites. An explicit request for those suites overrides the default. |
 | Add a multi-table persistence projection | Model + Repository query; use `<purpose>_view.go`, not `_model.go` merely because it lives in `model`. |
 | Extract repository-local query assembly in a file with `NewLinkRepository` | Repository and affected proof; use an unexported method such as `func (r *LinkRepository) applyFilters(...)`, including when it needs no receiver fields. No package-level `func applyFilters(...)`. |
 | Move a component helper to `link_helpers.go` in the same package | Refactoring; preserve behavior and receiver ownership. A sibling file does not make a package-level function private to the component; moving the free function fails the completion check. |
@@ -80,7 +80,11 @@ proof. These are routing checks, not claims that generated Go code was executed.
 | Actual primary/replica connection selection changes | Repository topology; Database for connection ownership and Fx contribution for names; no automatic topology for ordinary CRUD. |
 | HTTP wire field/tag edit only | REST -> HTTP DTO and affected conversion/proof. Do not load HTTP handler/body/router or persistence unless another contract changes. |
 | HTTP byte limit, media type, null/trailing body behavior | REST -> HTTP body plus affected handler proof. No application/schema rewrite because body parsing changed. |
-| Pure mapper tests | Test -> Unit test and Mapper. No Cobra example, integration fixture, or Fx module by default. |
+| Pure mapper tests | Test policy -> Unit test and Mapper; no mocks, Cobra example, integration fixture, or Fx module by default. |
+| Generate integration tests for a module | Test policy -> Integration test for usecases and services, including pure services. No direct repository, model, cache, command, or transport component tests. |
+| Cover an HTTP or gRPC API | Test policy -> end-to-end test through the actual API transport; no direct handler, router, or middleware tests. |
+| Cover a Cobra command or a cache | No direct tests by default; report any unverified guarantee. An explicit request for that specific test overrides the default. |
+| User explicitly requests repository unit tests | The explicit request overrides the default for that target only; do not add unrelated model or cache tests. |
 | New migration with existing data | Migration and Model when representation changes; real upgrade/fresh/reversal proof; no DB pool guide without changed pool behavior. |
 | Named Fx parameter or grouped route contribution | Fx -> Fx contribution; verify both provider and consumer tags and actual reachability. A basic interface bind does not load group examples. |
 | New SDK provider | Provider and changed Port/DTO/Fx; inspect real pinned APIs rather than use fictional SDK method names. |
@@ -130,7 +134,7 @@ repository evidence. CLI recipes use Cobra.
 | Add a service because the diagram lists one | Add only an actual reusable capability; a simple query uses repository and its required rule without an obligatory service. |
 | Fx resolves a handler or registers a command | Composition is not business execution; assert the actual RunE/handler path invokes its public operation once. |
 | Model/port depicted as extra runtime processing stages | Model is passive data; port dispatch calls the already injected implementation, not another object. |
-| CLI-only mapping correction | CLI branch and command proof; do not load HTTP examples or unchanged persistence recipes. |
+| CLI-only mapping correction | CLI branch and test policy; no command test by default. Report any unverified command behavior. |
 
 | Request/response case | Expected route and contract |
 | --- | --- |

@@ -1,8 +1,11 @@
 # Integration test
 
-Select for use-case durable effects, repository, transaction, migration, cache or
-composed module guarantees. [Integration bootstrap](integration-bootstrap.md)
-owns fixture selection and framework caveats. Use real controlled dependencies;
+Apply [Test policy](test-policy.md) first: select usecase or service operations
+as the default integration test targets. Exercise repositories, transactions,
+migrations and caches through those operations rather than separate suites unless
+an explicit request or project contract requires otherwise.
+[Integration bootstrap](integration-bootstrap.md) owns fixture selection and
+framework caveats. Use real controlled dependencies;
 replace an uncontrolled provider at its port only when the project allows it.
 
 Place `//go:build integration` suites under `test/integration/modules/<module>/<role>`,

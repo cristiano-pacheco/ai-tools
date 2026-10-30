@@ -1,15 +1,16 @@
 # Test routing
 
-Project-mandated boundaries/runners override defaults. Select proof by observable
-contract, not library names or every dependency constructed by the suite.
+First read [Test policy](test-policy.md) whenever planning, generating, or changing
+tests. Apply its target and exception rules before selecting a recipe below; select
+proof by observable contract, not every dependency constructed by the suite.
 
 | Guarantee | Read |
 | --- | --- |
-| Deterministic mapper, enum, validator, pure service, permitted isolated collaborator behavior | [Unit test](unit-test.md) |
-| Application persistence/effects, repository, transaction, migrated schema, controlled cache/protocol, composed module | [Integration test](integration-test.md) |
-| Cobra parsing, mapping, output, errors, process boundary | [Command test](command-test.md) |
-| HTTP method/path, decode, middleware, render | REST's selected HTTP component and existing composed HTTP boundary |
-| Fx dependency reachability/binding | [Fx](fx.md); add integration for constructor/resource/lifecycle success |
+| Dependency-free behavior eligible for unit tests | [Unit test](unit-test.md) |
+| Usecase or service public operation and its effects | [Integration test](integration-test.md) |
+| HTTP or gRPC API transport behavior | End-to-end test through the actual API boundary |
+| Explicitly requested Cobra command test | [Command test](command-test.md) |
+| Explicitly required Fx dependency reachability/binding proof | [Fx](fx.md); distinguish graph validation from runtime proof |
 
 Select the asserted behavior's component recipe as well as this boundary. A test-only
 request does not authorize production behavior changes; report a discovered

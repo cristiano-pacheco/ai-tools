@@ -124,5 +124,6 @@ An output failure after a successful write operation does not roll back its
 committed effect. Retry/idempotency follows that operation's contract.
 
 *Check:* file in `cmd`, root registration, caller context/trusted identity,
-explicit Input, one public Execute call, Output-only rendering, and registered
-Cobra execution proof from [Command test](command-test.md).
+explicit Input, one public Execute call, and Output-only rendering. Apply
+[Test policy](test-policy.md) to verification; use [Command test](command-test.md)
+only when an explicit request or project contract requires command testing.

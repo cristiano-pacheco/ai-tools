@@ -15,6 +15,9 @@ Choose ownership from the behavior and data being changed, not the transport
 that exposes it. An order operation exposed through REST and Cobra belongs to
 the same module and reuses the same public use-case contract.
 
+Apply [Naming](naming.md) when adding or renaming files, including optional
+components, ports and tests. The tree illustrates that contract, not exceptions.
+
 ## Default expanded structure
 
 Reference layout for an `order` module with GORM persistence and REST CRUD.
@@ -26,7 +29,7 @@ the change scope. Route, migration and locale contributions reuse the Bricks con
 ```text
 internal/modules/order/
 |-- fx.go                                      # constructors, interface bindings, contributions
-|-- decorate_usecase.go                         # public ucdecorator exposure
+|-- decorate_usecase.go                         # [conditional] explicitly selected decorated operations
 |-- migration_fs.go                             # concrete SQL contribution
 |-- locale_fs.go                                # [conditional] concrete locale contribution
 |-- usecase/
@@ -64,7 +67,7 @@ internal/modules/order/
 |   |-- order_status_enum.go
 |   `-- order_status_enum_test.go
 |-- errs/
-|   `-- order.go                               # coded module error catalog
+|   `-- order_error.go                         # coded module error catalog
 |-- mapper/                                    # [conditional] application/model conversion
 |   |-- order_mapper.go
 |   `-- order_mapper_test.go
@@ -90,9 +93,9 @@ not copied into every module. Test files shown above apply when the project's
 test boundary permits local tests; infrastructure proof belongs to its integration
 suite, commonly `test/integration/modules/order/` outside the module.
 
-`cmd/root.go`, `cmd/server.go`, and `cmd/migrate.go` compose the process outside
-the module. A business command has its entrypoint in `cmd/order_get.go`;
-it invokes the module's public operation. Additional packages such as `client`,
+`cmd/root.go`, `cmd/server_command.go`, and `cmd/migrate_command.go` compose the
+process outside the module. A business command has its entrypoint in
+`cmd/order_get_command.go`; it invokes the module's public operation. Additional packages such as `client`,
 `cache`, or `config` are added for their own responsibilities, using the rules below.
 
 ## Select packages from the capability
@@ -157,7 +160,10 @@ present responsibility, public operations and owned data have one module, and
 no package or loaded guide exists merely to complete a directory template.
 
 Default new-project infrastructure follows [Bricks](bricks.md), with process
-composition in [Bootstrap](bootstrap.md). Module `fx.go` registers raw constructors
-and a separate public decorated exposure; [Usecase decorator](usecase-decorator.md)
-loads when that publication changes. This module tree does not require loading
-every platform recipe for an isolated operation edit.
+composition in [Bootstrap](bootstrap.md). Module `fx.go` registers concrete
+constructors and consumers receive those instances directly by default.
+[Use case](usecase.md#execution-profile) selects the execution profile;
+`decorate_usecase.go` exists only for explicitly requested decoration or existing
+decorated operations being maintained. A new operation stays direct even when
+another operation in the module is decorated. This module tree does not require
+loading every platform recipe for an isolated operation edit.

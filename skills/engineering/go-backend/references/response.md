@@ -56,9 +56,10 @@ Create fresh typed errors for request-specific details. [Error](error.md) owns
 the catalog and cause/identity contracts; [Locale](locale.md) owns translated text.
 
 The renderer logs its own marshal/write failures, not the original unknown
-application error. The decorated operation's logging layer reports that failure.
-For a direct profile, define that reporting owner rather than assuming every
-rendered 500 has been logged.
+application error. In the default direct-use-case profile, define or preserve
+that reporting owner rather than assuming every rendered 500 has been logged.
+An explicitly selected or existing decorated operation may delegate reporting
+to its logging layer; verify that layer is enabled and reached.
 
 ## Composition
 

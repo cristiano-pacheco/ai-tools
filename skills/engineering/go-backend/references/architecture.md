@@ -7,8 +7,8 @@ A verified local edit does not automatically load either broader guide.
 
 ## Dependency contract
 
-Transport imports public operation Input/Output and consumes the published generic
-use-case interface. Raw use cases consume application interfaces and values;
+Transport imports public operation Input/Output and consumes its concrete
+use-case pointer by default. Use cases consume application interfaces and values;
 Bricks provides shared shape validation. A repository implements its port and
 receives the initialized concrete database wrapper. Fx imports constructors and
 binds their concrete instances to interfaces at the owner composition root.
@@ -16,7 +16,7 @@ binds their concrete instances to interfaces at the owner composition root.
 | Owner | Permitted dependency for this responsibility |
 | --- | --- |
 | cmd business entrypoint / HTTP handler | Public application operation and its own transport/mapping collaborators |
-| Raw usecase | Owned application values, ports, GORM model values internally and shared input validator |
+| Usecase | Owned application values, ports, GORM model values internally and shared input validator |
 | port | Consumed contracts and their allowed owned value types |
 | repository | Its port/model, shared database and persistence library |
 | validator/service | Its consumed application contracts; an evidence validator uses read ports |
@@ -31,8 +31,11 @@ model, SDK payload, HTTP type or Cobra value. Wire DTOs remain transport-owned.
 
 Cross-module business interactions consume the owner's public operation API,
 keeping its repository/model/private implementation packages internal to that
-module. Keep both import and runtime dependency graphs acyclic. A raw operation
-never depends on its own decorated publication.
+module. Keep both import and runtime dependency graphs acyclic. Only an explicit
+decorator request or modification of an existing decorated use case selects
+generic decorated publication; other decorated operations do not opt in a new
+use case. In that branch, the underlying operation never depends on its own
+decorated publication.
 
 *Check:* each dependency serves the declared owner; public representations respect
 boundaries; constructors stay concrete; cross-module calls use public operations.

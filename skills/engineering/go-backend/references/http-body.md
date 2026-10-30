@@ -8,8 +8,11 @@ success/error rendering. Keep application validation in the use case.
 
 `internal/modules/order/http/chi/handler/order_create_handler.go`. This follows
 the framework parser's documented behavior above, with a 64 KiB read bound.
-Provide its constructor and decorated operation in the owner's Fx graph and
-attach `HandleCreateOrder` to the resource's POST route when creation is exposed.
+Provide its constructor and concrete `*usecase.OrderCreateUseCase` in the owner's
+Fx graph and attach `HandleCreateOrder` to the resource's POST route when creation
+is exposed. Preserve a decorated consumer only when changing an already decorated
+operation, or introduce it when explicitly requested; see
+[Usecase decorator](usecase-decorator.md).
 
 ```go
 package handler
@@ -23,20 +26,19 @@ import (
 	"github.com/cristiano-pacheco/bricks/pkg/http/request"
 	"github.com/cristiano-pacheco/bricks/pkg/http/response"
 	"github.com/cristiano-pacheco/bricks/pkg/logger"
-	"github.com/cristiano-pacheco/bricks/pkg/ucdecorator"
 )
 
 const maxOrderCreateBodyBytes = 64 << 10
 
 type OrderCreateHandler struct {
-	operation    ucdecorator.UseCase[usecase.OrderCreateInput, usecase.OrderCreateOutput]
+	operation    *usecase.OrderCreateUseCase
 	actorID      ActorID
 	errorHandler response.ErrorHandler
 	logger       logger.Logger
 }
 
 func NewOrderCreateHandler(
-	operation ucdecorator.UseCase[usecase.OrderCreateInput, usecase.OrderCreateOutput],
+	operation *usecase.OrderCreateUseCase,
 	actorID ActorID, errorHandler response.ErrorHandler, log logger.Logger,
 ) *OrderCreateHandler {
 	return &OrderCreateHandler{operation: operation, actorID: actorID, errorHandler: errorHandler, logger: log}

@@ -1,20 +1,23 @@
 # Usecase decorator test
 
-Read for public operation publication, decorator configuration/effects, or its
-composition proof. [Usecase decorator](usecase-decorator.md) owns production
-contracts; [Integration test](integration-test.md) owns the migrated PostgreSQL
+Read only for explicitly selected or existing decorated operations when proving
+publication, configuration or chain effects. [Usecase decorator](usecase-decorator.md)
+owns the opt-in production contracts; [Integration test](integration-test.md) owns the migrated PostgreSQL
 suite. Reuse that suite rather than create another container test setup.
 
 ## Proof boundary
 
-Resolve the public generic operations through the production `order.Module`,
-not a test-only call to `Wrap`. The example uses real repositories, validation,
+This example assumes get and create were explicitly selected for decoration
+and their publication provider was added to the production `order.Module`
+using the opt-in recipe. The default direct module alone does not publish these
+generic interfaces. Resolve them through that production module, not a test-only
+call to `Wrap`. The example uses real repositories, validation,
 i18n and factory. A recording metrics implementation isolates process-global
 Prometheus registration and observes exactly-once outcomes; it does not prove
 Prometheus export. Tracing is disabled in this focused graph; traced context,
 OTLP export and logger output require their own affected-boundary evidence.
 
-`test/integration/modules/order/usecase/order_decorator_test.go`. These methods
+`test/integration/modules/order/usecase/order_usecase_decorator_test.go`. These methods
 extend `OrderGetUseCaseTestSuite` from Integration test. Its runner discovers
 them, and its normal `SetupTest` resets real persistence before each test.
 The config fixture loads through the actual Bricks loader. Tests remain

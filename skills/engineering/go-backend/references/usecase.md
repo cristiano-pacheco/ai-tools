@@ -17,11 +17,27 @@ Use noun before action consistently:
 For confirmation, the corresponding names are `order_confirm_usecase.go`,
 `OrderConfirmUseCase`, `OrderConfirmInput`, and `OrderConfirmOutput`.
 
+## Execution profile
+
+Use a plain concrete use case by default. Register `New<Name>UseCase` once in
+Fx and inject `*usecase.<Name>UseCase` into HTTP, Cobra and application callers;
+invoke `Execute` directly. No decorator interface, `Wrap`, publication provider,
+factory module or decorator configuration is required.
+
+Use decorators only when explicitly requested, or preserve them when changing
+an existing use case that is already decorated. A decorated neighboring operation,
+installed framework package or existing application factory does not opt a new
+use case in. Do not migrate existing decorated operations to direct execution
+as a side effect of another change. Read [Usecase decorator](usecase-decorator.md)
+only for opted-in decoration/publication work; verified unchanged wiring does
+not require loading that guide for a local policy edit.
+
 ## Recipe: implement an operation
 
-1. Declare input, output, use-case struct, constructor, `Execute`, then private
-   orchestration helpers. Define explicit named input/output structs even when
-   empty. Shared values use named fields, not aliases or embedded operation contracts.
+1. Declare input, output, use-case struct, constructor, `Execute`, then unexported
+   receiver methods for operation-local orchestration. Define explicit named
+   input/output structs even when empty. Shared values use named fields, not
+   aliases or embedded operation contracts.
 2. Put simple shape constraints in input `validate` tags. Inject the established
    input validator and validate the complete input as the first action of `Execute`.
    Use Bricks `validator.Validator.Validate`; provide `validator.Module` once at
@@ -158,10 +174,10 @@ func (uc *OrderCreateUseCase) Execute(ctx context.Context, input OrderCreateInpu
 }
 ```
 
-Register a new raw constructor and extend the module's public decorated
-publication together. The [Fx example](fx.md#example-module-composition) registers
-both get and create; exposing creation over HTTP separately selects the body,
-handler and route recipes. Adding a constructor alone does not decorate it.
+Register the concrete constructor directly, as in the
+[Fx example](fx.md#example-module-composition). Exposing creation over HTTP
+separately selects the body, handler and route recipes. Only operations selected
+for decoration under the execution profile above add a decorated publication.
 
 ## Operation contract and cross-module calls
 
@@ -180,5 +196,5 @@ Before completion, reclassify every helper by its body and verify registration
 of the intended public operation. Apply the project's logging/decorator policy;
 a generic example does not authorize duplicating telemetry inside `Execute`.
 
-Read [Usecase decorator](usecase-decorator.md) when public publication or decorator
-composition changes; a local policy edit with verified wiring does not select it.
+At completion, verify that the chosen execution profile follows the selection
+rule above and that callers resolve the intended direct or decorated instance.

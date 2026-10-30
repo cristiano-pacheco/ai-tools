@@ -14,9 +14,8 @@ model directly to the caller.
 
 ```text
                              APPLICATION
-CLI RunE in cmd/*.go  --+     public Execute(ctx, Input)
-                       |        -> enabled decorators
-                       +------> -> raw UseCase.Execute(ctx, Input)
+CLI RunE in cmd/*.go  --+
+                       +------> concrete UseCase.Execute(ctx, Input)
 HTTP handler method  --+               |
                                        +-- shape validator
                                        +-- optional named validator via port
@@ -26,8 +25,13 @@ HTTP handler method  --+               |
                                        |
                                        `-- constructs Output or returns error
                                                 |
-CLI writer / HTTP DTO <--- Output or error <--- decorators
+CLI writer / HTTP DTO <--------------------------+
 ```
+
+The default entrypoint receives the concrete `*usecase.<Name>UseCase` and calls
+it directly. Use [Usecase decorator](usecase-decorator.md) only when explicitly
+requested or when changing an operation already decorated. A decorated neighbor
+or application does not opt a new operation into decoration.
 
 The operation selects these collaborators and their order. A validator
 accepts/rejects, a repository accesses storage and a service performs a reusable
@@ -43,12 +47,12 @@ no executable step.
 | Responsibility | Default file/owner | Runtime action |
 | --- | --- | --- |
 | Process start | Executable main and `cmd/root.go` | Build required graph; register commands; call root ExecuteContext |
-| Business CLI entrypoint | `cmd/<noun>_<action>.go`, Cobra RunE | Parse/map command values; invoke one public operation; write Output |
-| HTTP process | `cmd/server.go` and Bricks server | Run HTTP lifecycle; no business operation for starting a server |
+| Business CLI entrypoint | `cmd/<noun>_<action>_command.go`, Cobra RunE | Parse/map command values; invoke one public operation; write Output |
+| HTTP process | `cmd/server_command.go` and Bricks server | Run HTTP lifecycle; no business operation for starting a server |
 | HTTP route | `http/chi/router/<resource>_router.go` | Attach method/path/middleware to handler method |
 | HTTP business entrypoint | `http/chi/handler/<resource>_handler.go` | Decode/map request; invoke one public operation; render HTTP DTO/error |
 | HTTP wire values | `http/dto/<resource>_dto.go` | Request/response structures; no application workflow |
-| Public operation wrapper | Module Fx publication | Decorate one raw instance; publish its generic operation interface |
+| Optional decorated operation | Module Fx publication, only for the selected decorated operation | Wrap its concrete instance once; publish its generic operation interface |
 | Application operation | `usecase/<noun>_<action>_usecase.go` | Validate Input, decide/orchestrate policy and effects, construct Output |
 | Collaborator contract | `port/<capability>_<role>.go` | Declare methods consumed by the application |
 | Persistence data | `model/<entity>_model.go` | GORM record/schema mapping and persistence-owned views |
@@ -99,8 +103,9 @@ For `OrderGetUseCase.Execute`, the sequence is exact:
 3. Propagate a failed lookup. On success, pass actor and stored owner to
    `port.OrderAccessValidator.Validate`. Its rejection is an operation error.
 4. Build `OrderGetOutput` from accepted state. Return Output and nil error.
-5. Enabled decorators observe/translate the result. The entrypoint receives that
-   result and renders success only when error is nil.
+5. The entrypoint receives Output/error directly and renders success only when
+   error is nil. A selected decorated operation instead returns through its
+   existing/requested decorator chain.
 
 This query has no service, cache or transaction because its behavior needs none.
 A write operation constructs/changes its module's model, calls its persistence
@@ -120,7 +125,7 @@ calls `port.EmailProvider.Send`; the provider adapts the external email system.
 
 ```text
 business entrypoint
-  -> public operation -> raw use case
+  -> concrete use case
        -> required validators
        -> repository for required stored state/effects
        -> OrderConfirmationService.Execute(ctx, application value), if promised
@@ -140,11 +145,11 @@ The exact collaborator subset and ordering must be stated before implementation.
 | Value | May cross this boundary | Stops here |
 | --- | --- | --- |
 | Cobra arguments/flags, HTTP request/context/path/query/body | Transport -> its own parsing/mapping | Transport types do not become public operation fields |
-| Operation Input | Entrypoint -> public/raw operation | Application-owned contract, independent of wire/storage/SDK types |
+| Operation Input | Entrypoint -> operation | Application-owned contract, independent of wire/storage/SDK types |
 | Model value | Repository -> its module's application code | No model exposed as public Output or HTTP response |
-| Operation Output | Application -> decorators -> entrypoint | Transport maps it to its own output representation |
+| Operation Output | Application -> entrypoint | Transport maps it to its own output representation |
 | HTTP response DTO | Handler -> Bricks JSON response | HTTP wire contract only |
-| Error | Failed collaborator -> use case -> decorators -> entrypoint | No success result rendered; shared boundary owns external representation |
+| Error | Failed collaborator -> use case -> entrypoint | No success result rendered; shared boundary owns external representation |
 
 Use `cmd.Context()` or `r.Context()` as the invocation context, and forward it
 through I/O collaborators. A traced child context preserves cancellation and
@@ -154,12 +159,13 @@ values; it need not have the same pointer. Do not replace caller context with
 Return on the first failure that prevents the operation's promised success.
 The use case does not write HTTP status, print CLI diagnostics or choose an exit
 code. A CLI entrypoint returns the error to its process owner; an HTTP entrypoint
-passes it to the shared error renderer once. [Error](error.md) defines raw versus
-translated identity; [Usecase decorator](usecase-decorator.md) defines that chain.
+passes it to the shared error renderer once. [Error](error.md) defines error
+identity. For an explicitly selected decorated operation, its chain may observe
+or translate Output/error before the entrypoint receives it.
 
 ## Completion check
 
-Identify the file/method for entrypoint, Input, public/raw operation, each
+Identify the file/method for entrypoint, Input, operation, each
 collaborator, commit/effect, Output and transport result. Check that:
 
 - The CLI entrypoint is in cmd, or the HTTP entrypoint is the registered handler.
@@ -167,7 +173,8 @@ collaborator, commit/effect, Output and transport result. Check that:
 - Every business step has one owner; optional roles exist only for a real need.
 - Application types stay independent of transport; model and SDK values stop at their owners.
 - The use case returns Output/error; errors prevent success rendering.
-- Fx constructs/binds; decorators wrap once; neither performs business policy.
+- Fx constructs/binds and the default entrypoint calls the concrete use case.
+  Any selected decorator chain wraps once and performs no business policy.
 - The actual command/route is registered and its mapping/result are proved.
 
 If any step's owner or returned representation is unclear, the flow is not ready

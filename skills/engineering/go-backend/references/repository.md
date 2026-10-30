@@ -20,8 +20,9 @@ stable error; an empty collection is successful absence, never a dependency erro
    instrumentation contract. Inject the shared database; opening connections
    belongs to [Database](database.md), not this constructor.
 2. Order the file as type, interface assertion, concrete-pointer constructor,
-   public methods, then repository-owned helpers. Keep the assertion immediately
-   below the type and initialize dependencies through named fields.
+   public methods, then unexported receiver methods for repository-owned helpers.
+   Keep the assertion immediately below the type and initialize dependencies
+   through named fields.
 3. Use caller context on every operation. For supported pinned versions, use
    `gorm.G[model.X]` for fixed lookups/create/delete; put `Limit(1)` before
    `First(ctx)`. Use the traditional builder for targeted updates, dynamic

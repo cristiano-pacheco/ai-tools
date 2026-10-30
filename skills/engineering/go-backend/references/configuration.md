@@ -117,8 +117,10 @@ func TestConfigurationOverlay(t *testing.T) {
 ```
 
 Platform subtree names are fixed by their modules: `app.logger`, `app.http`,
-`app.open-telemetry`, `app.ucdecorator`, `app.i18n`, and `app.redis`.
-Database loading belongs to the application's shared database module.
+`app.open-telemetry`, `app.i18n`, and `app.redis` when those modules are consumed.
+`app.ucdecorator` belongs only to the explicitly requested decorator branch or
+an existing decorated use case being modified; omit it from the default direct
+stack. Database loading belongs to the application's shared database module.
 [Server](server.md) supplies a compatible complete base for the example stack.
 
 *Check:* exact subtree/tags, base/overlay/env behavior through the real loader,

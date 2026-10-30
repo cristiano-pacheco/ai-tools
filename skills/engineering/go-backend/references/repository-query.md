@@ -18,7 +18,7 @@ or ordering guarantees. A fixed ID lookup stays in [Repository](repository.md).
 
 ## Example: filtered count and page
 
-`internal/modules/order/repository/order_query.go`. Add this method to the
+`internal/modules/order/repository/order_query_repository.go`. Add this method to the
 consumed port only when a collection operation needs it. The caller validates
 `limit > 0`, its maximum, and `offset >= 0` before the repository call.
 
@@ -71,7 +71,7 @@ type OrderSummaryView struct {
 }
 ```
 
-`internal/modules/order/repository/order_summary_query.go`. The example assumes
+`internal/modules/order/repository/order_summary_repository.go`. The example assumes
 an owned `order_items(order_id)` relation exists in the migrated schema; it does
 not instruct a query-only task to create it.
 

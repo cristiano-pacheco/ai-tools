@@ -7,7 +7,7 @@ registration and its Bricks `Route` contribution.
 
 ## Registration is not execution
 
-At bootstrap, Fx constructs the handler and its decorated operation. The module
+At bootstrap, Fx constructs the handler and its concrete use case. The module
 router implements `brickschi.Route.Setup(*Server)`, registering
 `GET /api/v1/orders/{id}` against `HandleGetOrder`. Bricks collects that route.
 Registration does not execute `OrderGetUseCase.Execute`.
@@ -27,14 +27,11 @@ http/chi/handler/order_handler.go: HandleGetOrder       HTTP ENTRYPOINT
   | parses path "42" as uint64
   | constructs OrderGetInput{ID: 42, ActorID: 7}
   v
-public ucdecorator.UseCase[OrderGetInput, OrderGetOutput].Execute
-  | enabled decorators
-  v
 usecase.OrderGetUseCase.Execute                        SAME APPLICATION OPERATION
   | validates Input; repository loads OrderModel; access validator accepts owner
   | creates OrderGetOutput{ID: 42, Status: "pending"}
   v
-Output/error returns through decorators
+Output/error returns directly to the handler
   |
   v
 handler maps Output -> http/dto.OrderGetResponse
@@ -46,14 +43,14 @@ HTTP 200, Content-Type: application/json
 
 GET has no request body, so it does not invent a body DTO. The HTTP response DTO
 is still required: it owns the wire representation independently of Output.
-The exact raw operation and repository are the same ones used by CLI; HTTP does
+The exact operation and repository are the same ones used by CLI; HTTP does
 not maintain a second copy of ownership/business policy.
 
 ## Complete handler
 
 `internal/modules/order/http/chi/handler/order_handler.go`. Trusted middleware
 supplies `ActorID`; IDs from URL/JSON are caller-controlled data. The constructor
-receives the public decorated operation, Bricks renderer and logger.
+receives `*usecase.OrderGetUseCase`, the Bricks renderer and logger.
 
 ```go
 package handler
@@ -68,21 +65,20 @@ import (
 	"example.com/project/internal/modules/order/usecase"
 	"github.com/cristiano-pacheco/bricks/pkg/http/response"
 	"github.com/cristiano-pacheco/bricks/pkg/logger"
-	"github.com/cristiano-pacheco/bricks/pkg/ucdecorator"
 	"github.com/go-chi/chi/v5"
 )
 
 type ActorID func(context.Context) (uint64, bool)
 
 type OrderHandler struct {
-	orderGet     ucdecorator.UseCase[usecase.OrderGetInput, usecase.OrderGetOutput]
+	orderGet     *usecase.OrderGetUseCase
 	actorID      ActorID
 	errorHandler response.ErrorHandler
 	logger       logger.Logger
 }
 
 func NewOrderHandler(
-	orderGet ucdecorator.UseCase[usecase.OrderGetInput, usecase.OrderGetOutput],
+	orderGet *usecase.OrderGetUseCase,
 	actorID ActorID, errorHandler response.ErrorHandler, log logger.Logger,
 ) *OrderHandler {
 	return &OrderHandler{orderGet: orderGet, actorID: actorID, errorHandler: errorHandler, logger: log}
@@ -112,7 +108,11 @@ func (h *OrderHandler) HandleGetOrder(w http.ResponseWriter, r *http.Request) {
 
 [HTTP DTO](http-dto.md) owns `OrderGetResponse`, [Mapper](mapper.md) owns
 `ToOrderGetResponse`, [Use case](usecase.md) owns Input/Output and policy, and
-[Repository](repository.md) owns the GORM adapter.
+[Repository](repository.md) owns the GORM adapter. Only for an explicitly
+requested decorator or when changing an already decorated operation, follow
+[Usecase decorator](usecase-decorator.md) and adapt that consumer's signature to
+the published decorated contract. A decorated application alone does not opt
+this operation into decoration.
 
 ## Body-based operation: create
 
@@ -124,7 +124,7 @@ POST /api/v1/orders + JSON {"notes":"deliver in the morning"}
   -> trusted middleware actor + Bricks bounded body decoder
   -> http/dto.OrderCreateRequest (wire fields only)
   -> OrderCreateInput{ActorID: trustedActor, Notes: request.Notes}
-  -> public decorated OrderCreateUseCase.Execute
+  -> concrete OrderCreateUseCase.Execute
   -> shared shape validation -> model.OrderModel -> port.OrderRepository.Create
   -> concrete repository persists -> model with generated ID
   -> OrderCreateOutput{ID: persistedID, Status: persistedStatus}
@@ -144,8 +144,8 @@ exposing it; providing the application operation alone creates no HTTP endpoint.
 | Missing trusted identity | Handler before Execute | 401 through shared error renderer |
 | Malformed/zero path ID | Handler before Execute | 400; no operation call |
 | Malformed create body | Body decoder before Execute | Classified decode error; no operation call |
-| Valid JSON, invalid operation fields | Raw use-case validation | Validation error rendered as 422 |
-| Record absent | Repository, propagated through use case/decorators | Catalog code/status, normally 404 |
+| Valid JSON, invalid operation fields | Use-case validation | Validation error rendered as 422 |
+| Record absent | Repository, propagated directly through use case | Catalog code/status, normally 404 |
 | Existing row owned by another actor | Use-case access validator | Catalog rejection; this example permits a distinct 403 |
 | Unexpected storage failure | Adapter error propagated to shared renderer | Safe generic 500; no driver text on the wire |
 | Success response write fails | Handler after headers may commit | Log terminal write failure; no second response or repeated Execute |

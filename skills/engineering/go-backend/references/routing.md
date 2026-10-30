@@ -10,6 +10,8 @@ documentation selects its subject. The skill entrypoint owns the stopping rule.
 
 | Changed contract | Read |
 | --- | --- |
+| Package ownership, naming, imports, or reuse; also mandatory for every invocation | [Anti-patterns](anti-patterns.md) |
+| Creating, renaming, or reviewing Go filenames, split files, ports, or test basenames | [Naming](naming.md) |
 | Bricks package choice, framework API/version, new platform capability | [Bricks](bricks.md) |
 | Process stack creation/change, server or migration graph | [Bootstrap](bootstrap.md) |
 | New module, selecting packages, or deciding/changing module ownership/public boundary | [Module](module.md) |
@@ -35,7 +37,7 @@ documentation selects its subject. The skill entrypoint owns the stopping rule.
 | Error identity, classification, public rendering contract | [Error](error.md) |
 | Atomic writes, concurrency, retry, idempotency, acknowledgement | [Consistency](consistency.md) |
 | Fx provider, interface binding, module registration, named/grouped contribution, invocation, or hook registration | [Fx](fx.md) |
-| Public use-case publication or decorator chain | [Usecase decorator](usecase-decorator.md) |
+| Explicitly requested decoration, or changed publication/chain of an existing decorated use case | [Usecase decorator](usecase-decorator.md); direct execution remains the default in [Use case](usecase.md#execution-profile) |
 | Coded error locale entry, language or locale asset contribution | [Locale](locale.md) |
 | Log/span/metric behavior or reporting ownership | [Observability](observability.md) |
 | Config source/overlay/env mapping, module typed settings, defaults/validation | [Configuration](configuration.md) |

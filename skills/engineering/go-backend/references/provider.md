@@ -2,9 +2,10 @@
 
 A provider adapts a third-party capability such as email, payment, signing, or
 identity. Name the port for the needed capability, not the vendor. Put the port
-in the consumer module, SDK implementation in `provider`, and shared application
-input/output in `dto`. An HTTP-based vendor is still a provider; Client owns a
-remote-service protocol when that is the actual responsibility.
+in `port/<name>_provider.go` in the consumer module, SDK implementation in
+`provider/<name>_provider.go`, and shared application input/output in `dto`.
+An HTTP-based vendor is still a provider; Client owns a remote-service protocol
+when that is the actual responsibility.
 
 ## Recipe: SDK capability
 

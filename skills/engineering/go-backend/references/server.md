@@ -22,14 +22,13 @@ import (
 	"github.com/cristiano-pacheco/bricks/pkg/logger"
 	"github.com/cristiano-pacheco/bricks/pkg/metrics"
 	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
-	"github.com/cristiano-pacheco/bricks/pkg/ucdecorator"
 	"github.com/cristiano-pacheco/bricks/pkg/validator"
 	"go.uber.org/fx"
 )
 
 var ServerModule = fx.Module("server",
 	logger.Module, validator.Module, response.Module,
-	metrics.Module, i18n.Module, ucdecorator.Module, trace.Module,
+	metrics.Module, i18n.Module, trace.Module,
 	database.Module, order.Module, brickschi.Module,
 )
 ```
@@ -62,7 +61,10 @@ The executable supplies a signal-cancelled context to `ExecuteContext`, prints
 one returned error and sets the process exit status. Business commands consume
 published operations; lifecycle and migration commands have no business-use-case
 wrapper. Fx providers are lazy: `brickschi.Module` forces server construction,
-which reaches grouped routes, handlers, decorators and their real dependencies.
+which reaches grouped routes, handlers, concrete use cases and their dependencies.
+The default graph has no use-case decorator module. Add its module/publication
+only for an explicit request or an existing decorated use case being changed;
+other decorated operations do not change the default for a new use case.
 
 ## Base configuration
 
@@ -98,13 +100,6 @@ app:
     app_name: project
     app_version: local
     trace_enabled: false
-  ucdecorator:
-    enabled: true
-    debug_mode: false
-    logging: true
-    metrics: true
-    tracing: true
-    translation: true
   i18n:
     language: en
 ```

@@ -17,7 +17,7 @@ of an implicit larger transaction.
 
 ## Example: adapter-local scope and participants
 
-`internal/modules/order/repository/order_transaction.go`. The methods below are
+`internal/modules/order/repository/order_transaction_repository.go`. The methods below are
 additions to the canonical adapter, not another constructor or database provider.
 
 ```go

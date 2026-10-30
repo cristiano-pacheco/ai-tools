@@ -18,7 +18,8 @@ resource ownership. These links are conditional, not a requirement to load every
 platform guide. A calculation gets no database and a server gets no Redis solely
 because the framework provides them.
 
-New HTTP/public-operation stacks follow the JBN approach: concrete raw
-constructors, public decorated publication, existing framework route/error
-contracts, and module-owned SQL/locale contributions. Preserve an established
-project's accepted infrastructure/profile outside the requested scope.
+New HTTP/public-operation stacks use concrete use cases directly, existing
+framework route/error contracts, and required module-owned SQL/locale
+contributions. Select decorators only when explicitly requested or when modifying
+an existing decorated use case; a decorated project does not automatically
+decorate new operations. Preserve accepted infrastructure outside the change scope.

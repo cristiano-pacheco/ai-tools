@@ -14,9 +14,12 @@ only when the changed guarantee needs it.
 
 ## Example: registered business command
 
-`cmd/order_get_test.go`. The embedded port is an
+`cmd/order_get_command_test.go`. The embedded port is an
 unused fallback: an unexpected write has no implementation and fails the test;
 the only supplied behavior is the read needed by this boundary scenario.
+The real concrete `*usecase.OrderGetUseCase` is passed directly to the command,
+matching the default [CLI data flow](data-flow-cli.md); this test makes no
+claim about decorator behavior.
 
 ```go
 package cmd_test

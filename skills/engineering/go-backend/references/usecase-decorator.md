@@ -1,9 +1,10 @@
 # Usecase decorator
 
-Read when introducing/changing public operation publication or decorators.
-A local business-rule edit with verified publication does not load this guide.
-Default a new Bricks application to the JBN decorated profile; preserve an
-established direct profile without migrating it as a side effect.
+Opt-in recipe: read only for explicitly requested decoration or changes to an
+existing decorated use case's publication/chain. [Use case](usecase.md#execution-profile)
+defines direct execution as the default. A new operation does not inherit
+another operation's decorated profile. A local business-rule edit with verified
+unchanged publication does not load this guide.
 
 ## Decorated profile
 
@@ -50,14 +51,17 @@ func provideDecoratedUseCases(in decorateUseCasesIn) decorateUseCasesOut {
 1. Implement the raw operation using [Use case](usecase.md): noun/action names,
    explicit input/output, input validation first, application policy and injected
    outbound ports. `NewOrderGetUseCase` and `NewOrderCreateUseCase` stay concrete.
-2. Register both raw constructors once in the owning [Fx module](fx.md#example-module-composition).
-   Add each operation to the one publication provider's input, output and `Wrap`
-   call. Pass the raw instance to `Wrap` exactly once.
+2. Register the selected operations' raw constructors once in the owning
+   [Fx module](fx.md#example-module-composition), then register
+   `provideDecoratedUseCases`. The example above assumes both get and create
+   were selected for decoration; include only opted-in operations in the provider's
+   input, output and `Wrap` calls. Pass each raw instance to `Wrap` exactly once.
 3. Consumers request `ucdecorator.UseCase[OperationInput, OperationOutput]` through
-   constructor injection. [HTTP handler](http-handler.md) and [CLI](cli.md) show
-   this contract. Cross-module application calls use that same published contract.
-4. Register framework dependencies once at the process owner; [Server](server.md)
-   shows the graph and base YAML. Resolve every new public specialization in
+   constructor injection. Adapt only the opted-in consumers from the direct
+   [HTTP handler](http-handler.md) and [CLI](cli.md) examples to this generic
+   interface. Cross-module calls to the decorated operation use that same contract.
+4. Add decorator framework dependencies/configuration to the direct
+   [Server](server.md) graph only for this opted-in profile. Resolve every selected public specialization in
    composition proof. An unused lazy provider is not evidence of publication.
 5. Verify raw behavior separately from public decoration. Read
    [Usecase decorator test](usecase-decorator-test.md) when adding/changing
@@ -75,6 +79,30 @@ and publication provider as separate graph nodes. A raw use case never injects
 its own published specialization: that introduces a dependency cycle. A
 cross-module call can inject another operation's specialization, keeping imports
 and the runtime dependency graph acyclic.
+
+## Opt-in process configuration
+
+Add `ucdecorator.Module` at the process owner alongside its required config,
+logger, metrics and i18n/translator providers. Retain their real registered
+modules from [Server](server.md); flags do not remove factory dependencies.
+Register the publication provider in the owning module, separate from the
+concrete constructors. Only opted-in consumers inject its generic outputs.
+
+Declare the desired chain explicitly, for example:
+
+```yaml
+app:
+  ucdecorator:
+    enabled: true
+    debug_mode: false
+    logging: true
+    metrics: true
+    tracing: true
+    translation: true
+```
+
+This configuration belongs only to the selected decorated profile, not the
+default server template. Verify effects at the public decorated boundary.
 
 ## Framework contract
 
@@ -119,7 +147,7 @@ boundary claimed. Static Fx validation alone does not prove execution effects.
 
 ## Direct profile
 
-When the project deliberately publishes concrete use cases, callers receive
-`*usecase.OrderGetUseCase` and Fx provides the raw constructor directly. Register
+This is the default defined in [Use case](usecase.md#execution-profile): callers
+receive `*usecase.OrderGetUseCase` and Fx provides its constructor directly. Register
 neither a second public interface binding nor a decorator chain solely to match
 this example. Constructor return types remain concrete in both profiles.

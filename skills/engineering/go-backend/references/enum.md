@@ -7,9 +7,10 @@ schema changes under Model and transition orchestration under Use case.
 ## Recipe: closed string value
 
 Create `enum/<name>_enum.go` in this order: constants, membership set, wrapper,
-concrete-value constructor, `String`, then the private acceptance helper when
-local rules permit it. Keep the inner value private so construction establishes
-the invariant. Normalize only if the external contract explicitly permits it.
+concrete-value constructor, `String`, then any unexported receiver methods.
+Keep constructor acceptance checks inline, as below, and the inner value private
+so construction establishes the invariant. Normalize only if the external
+contract explicitly permits it.
 
 Before construction, list accepted values and define the stable invalid-value
 error. The example's values are illustrative; product transitions require the

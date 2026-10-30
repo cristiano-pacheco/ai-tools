@@ -6,8 +6,8 @@ call. [Data flow](data-flow.md) owns the shared execution/ownership contract;
 
 ## Files and execution
 
-A new business command has its entrypoint in `cmd/<noun>_<action>.go`.
-`cmd/order_get.go` owns `NewOrderGetCommand` and its `RunE`. `cmd/root.go` owns
+A new business command has its entrypoint in `cmd/<noun>_<action>_command.go`.
+`cmd/order_get_command.go` owns `NewOrderGetCommand` and its `RunE`. `cmd/root.go` owns
 the root command; `RegisterOrderGetCommand` attaches the operation to that root.
 A module's use case contains the business operation, regardless of its transport.
 
@@ -18,12 +18,9 @@ app order:get --id 42
 Cobra parses --id as uint64; checks arguments
   |
   v
-cmd/order_get.go: RunE                         CLI ENTRYPOINT
+cmd/order_get_command.go: RunE                 CLI ENTRYPOINT
   | cmd.Context() + trusted session -> actor 7
   | constructs OrderGetInput{ID: 42, ActorID: 7}
-  v
-public ucdecorator.UseCase[OrderGetInput, OrderGetOutput].Execute
-  | enabled decorators
   v
 usecase.OrderGetUseCase.Execute                APPLICATION OPERATION
   | validates the complete Input
@@ -33,7 +30,7 @@ usecase.OrderGetUseCase.Execute                APPLICATION OPERATION
   | calls injected OrderAccessValidator.Validate(7, 7)
   | creates OrderGetOutput{ID: 42, Status: "pending"}
   v
-Output/error returns through decorators
+Output/error returns directly to RunE
   |
   v
 RunE writes "42\tpending\n" to cmd.OutOrStdout(), returns writer error or nil
@@ -48,7 +45,7 @@ not a requirement that every validator follows persistence access.
 
 ## Complete command and registration
 
-`cmd/order_get.go`. Replace the module import path. Trusted CLI authentication
+`cmd/order_get_command.go`. Replace the module import path. Trusted CLI authentication
 supplies `CommandActorID`; the command does not accept an actor/tenant flag as
 proof of identity. Its constructor returns `*cobra.Command`.
 
@@ -60,13 +57,12 @@ import (
 	"fmt"
 
 	"example.com/project/internal/modules/order/usecase"
-	"github.com/cristiano-pacheco/bricks/pkg/ucdecorator"
 	"github.com/spf13/cobra"
 )
 
 type CommandActorID func(context.Context) (uint64, error)
 
-func NewOrderGetCommand(orderGet ucdecorator.UseCase[usecase.OrderGetInput, usecase.OrderGetOutput], actorID CommandActorID) *cobra.Command {
+func NewOrderGetCommand(orderGet *usecase.OrderGetUseCase, actorID CommandActorID) *cobra.Command {
 	var orderID uint64
 	command := &cobra.Command{
 		Use:   "order:get",
@@ -93,31 +89,33 @@ func NewOrderGetCommand(orderGet ucdecorator.UseCase[usecase.OrderGetInput, usec
 }
 
 func RegisterOrderGetCommand(root *cobra.Command,
-	operation ucdecorator.UseCase[usecase.OrderGetInput, usecase.OrderGetOutput],
+	operation *usecase.OrderGetUseCase,
 	actorID CommandActorID,
 ) {
 	root.AddCommand(NewOrderGetCommand(operation, actorID))
 }
 ```
 
-At bootstrap, call `RegisterOrderGetCommand` with the root, published decorated
-operation and trusted identity resolver. With those dependencies in Fx, use
-`fx.Invoke`. Registration does not execute the operation. The executable later
-calls `root.ExecuteContext(callerContext)`.
+At bootstrap, call `RegisterOrderGetCommand` with the root, concrete
+`*usecase.OrderGetUseCase` and trusted identity resolver. With those dependencies
+in Fx, use `fx.Invoke`. Registration does not execute the operation. The executable
+later calls `root.ExecuteContext(callerContext)`.
 
 The business CLI graph needs its application dependencies, not an HTTP server.
-[Fx](fx.md) and [Usecase decorator](usecase-decorator.md) define publication.
-Permitted isolated command tests may inject the raw instance; those tests prove
-CLI mapping, not decoration.
+[Fx](fx.md) defines concrete constructor registration. The example and its
+[Command test](command-test.md) use the default direct operation. Only when
+explicitly requested or when changing an already decorated operation, follow
+[Usecase decorator](usecase-decorator.md) and adapt its consumer signature to the
+published decorated contract; a decorated application alone does not select it.
 
 ## Success and rejection
 
 | Situation | Execution stops at | Result |
 | --- | --- | --- |
 | `--id abc` | Cobra uint64 parser | RunE/use case are not invoked; process receives parse error |
-| `--id 0` or omitted ID in this example | Raw use-case input validation | Returned validation error; no repository lookup |
+| `--id 0` or omitted ID in this example | Use-case input validation | Returned validation error; no repository lookup |
 | Session resolution fails | RunE before operation call | Original authentication error; no operation invocation |
-| Actor 7 asks for actor 8's stored order | Use-case access validator | Published rejection reaches RunE; no success output |
+| Actor 7 asks for actor 8's stored order | Use-case access validator | Rejection reaches RunE directly; no success output |
 | Valid owned record | RunE after Output | One formatted line on the command's output writer |
 | Output writer fails | RunE after operation completed | Writer error; do not execute the operation again |
 

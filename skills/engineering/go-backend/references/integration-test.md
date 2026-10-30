@@ -11,11 +11,11 @@ fresh SUT/providers per scenario. Follow visible Arrange/Act/Assert. Assert outp
 persisted state, promised effects and negative state on failure. Concurrency claims
 need competing real connections; sequential callbacks do not prove lock behavior.
 
-## Example: migrated raw operation and persistence suite
+## Example: migrated direct operation and persistence suite
 
 `test/integration/modules/order/usecase/order_get_usecase_test.go`. Following the
 JBN suite shape, this uses real Bricks validation, GORM adapters, module migration
-and the same concrete raw constructor registered by Fx. No DSN flag, manual schema,
+and the same concrete constructor registered by Fx. No DSN flag, manual schema,
 ORM AutoMigrate or alternate production wiring is needed. The example module's
 SQL has no external foreign keys, so its single owned migration path is complete.
 
@@ -213,5 +213,7 @@ Pass the production module filesystems, including foreign-key owners, in full;
 
 Run the real integration command with Docker available; fail on required missing
 infrastructure. A skipped/compile-only run is explicitly unrun, never acceptance
-proof. Use the public decorated graph for decoration/translation claims; its
-code/status assertions differ from raw pointer identity as [Error](error.md) explains.
+proof. The direct operation above is the default. Only for an explicitly
+requested decorator or an existing decorated use case being changed, use the
+public decorated graph for decoration/translation claims; its code/status
+assertions differ from original error identity as [Error](error.md) explains.

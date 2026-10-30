@@ -24,7 +24,8 @@ PATCH omission/null/value semantics require a presence type.
 Return parser errors unchanged to `response.ErrorHandler.Error(w, err)`.
 The parser already creates `*errs.Error` with the proper code/status.
 Replacing them all with a generic bad-request error loses 413 and 415 semantics.
-Decode failures skip operation decorators and keep framework messages. If the
+Decode failures occur before use-case execution and keep framework messages;
+they also bypass decorators when the operation is explicitly decorated. If the
 API localizes them, apply translation at its shared HTTP error boundary.
 
 | Input | Code | HTTP status |

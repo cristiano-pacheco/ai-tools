@@ -1,19 +1,23 @@
 # Observability
 
 Read for log/span/metric behavior or operation decoration, not every business
-method edit. Use Bricks `logger`, `metrics`, `otel/trace` and `ucdecorator`;
-register their process-wide modules once at the composition owner.
+method edit. Use Bricks `logger`, `metrics` and `otel/trace` for the selected
+observability needs; register consumed process-wide modules once at the
+composition owner. Direct use cases are the default: decorator logging, metrics,
+tracing and translation are not implicit guarantees.
 
-The decorated profile owns generic operation success/failure logs, duration,
-success/error counters, application span and error translation. Keep that chain
-out of `Execute`. The framework logger wraps Zap; its `Field` and field helpers
+Only an explicit decorator request or modification of an existing decorated
+use case selects `ucdecorator`. In that branch, the decorated profile owns
+generic operation success/failure logs, duration, success/error counters,
+application span and error translation; keep that chain out of `Execute`.
+The framework logger wraps Zap; its `Field` and field helpers
 are not slog attributes. The HTTP server separately uses its own slog logger and
 Chi request middleware; installing `logger.Module` does not automatically bridge
 those loggers.
 
 ## Adapter span
 
-`internal/modules/order/repository/order_exists.go`. This optional repository
+`internal/modules/order/repository/order_exists_repository.go`. This optional repository
 method illustrates a contextual I/O span; add its port method only when consumed.
 
 ```go
@@ -55,8 +59,9 @@ must not pretend those are per-module resources.
 Do not log raw operation inputs/outputs, credentials, tokens or provider payloads.
 Record an unexpected returned failure at the established reporting owner once;
 use adapter spans for additional technical location without duplicate error logs.
-For a direct profile, inspect its error-reporting owner rather than assuming a
-decorator exists. [Usecase decorator](usecase-decorator.md) owns profile selection.
+For the default direct profile, define or preserve its error-reporting owner
+rather than assuming a decorator exists. Read [Usecase decorator](usecase-decorator.md)
+only for the explicitly selected or existing decorated branch.
 
 ## Trace configuration in the baseline
 

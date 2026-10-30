@@ -8,8 +8,10 @@ repositories, transactions, cache and external providers stay behind the use cas
 ## Recipe
 
 1. Create a concrete handler in `http/chi/handler/<resource>_handler.go`.
-   Inject `ucdecorator.UseCase[Input, Output]` for the default decorated profile.
-   Preserve a documented direct profile in an existing project.
+   Inject the concrete `*usecase.<Name>UseCase` by default. Follow
+   [Usecase decorator](usecase-decorator.md) only when explicitly requested or
+   when changing an operation already decorated; a decorated application alone
+   does not opt a new use case into that contract.
 2. Use `r.Context()`. Decode path/query/body into HTTP-owned DTOs, rejecting
    malformed/overflowed identifiers before invoking policy. Trusted actor/tenant
    comes from middleware, independently of caller-controlled fields.

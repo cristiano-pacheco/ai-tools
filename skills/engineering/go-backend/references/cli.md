@@ -38,14 +38,14 @@ when it changes; `RunE` returning an error does not itself exit the process.
 
 ## Implementation example
 
-[CLI data flow](data-flow-cli.md) owns the complete `cmd/order_get.go` example,
+[CLI data flow](data-flow-cli.md) owns the complete `cmd/order_get_command.go` example,
 root registration and concrete Input/Output trace. Read it when creating/changing
 a business entrypoint or clarifying that boundary; existing verified command
 policy does not require loading unrelated HTTP or storage examples.
 
 ## Example: server process command
 
-`cmd/server.go`. The caller supplies the required real Fx modules; the command
+`cmd/server_command.go`. The caller supplies the required real Fx modules; the command
 starts/stops their graph instead of wrapping lifecycle in a business use case.
 Its parent executes with a signal-cancelled context. Each resource owns its hooks
 and any cleanup needed for its own failed startup.

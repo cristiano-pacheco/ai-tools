@@ -22,6 +22,30 @@ description: Develop, fix, refactor, test, investigate, or review Go backends. R
 - **Proof.** Test the claimed behavior at its execution boundary. Compilation,
   mocks and unavailable tools do not prove untested runtime behavior.
 
+Before choosing a playbook, read [Anti-patterns](references/anti-patterns.md)
+in full on every invocation. Apply all entries relevant to the task; this is
+a living reference, not an optional package-design guide.
+
+## File and helper conventions
+
+- **Role suffixes.** Before creating, renaming, or reviewing Go filenames, read
+  [Naming](references/naming.md): the required filename/declaration matrix for
+  every component, ports, split files, tests, and explicit infrastructure
+  exceptions. A package name or neighboring suffixless file does not replace
+  the role suffix. New roles require an explicit naming decision.
+- **Receiver-owned helpers.** For every component struct with a constructor
+  (usecase, repository, validator, service, client, provider, cache, handler,
+  router, middleware, or another concrete component),
+  implement component-internal helpers as unexported methods on that struct,
+  even when they do not access fields. Keep constructor-only preparation inline
+  or in a function-local closure. Do not add unexported package-level functions
+  there or move them to a sibling file to bypass ownership: Go visibility is
+  package-wide, not file-local. Constructors remain package-level factories.
+  Classify the behavior first: conversion belongs in Mapper, reusable acceptance
+  in Validator, and other reusable capabilities in their proper component.
+  Pure function-only components such as mappers keep their function-based design;
+  do not create a struct/constructor just to host a function.
+
 ## Choose a playbook
 
 Select by requested outcome and read the playbook in full:
@@ -54,15 +78,21 @@ when evidence changes ownership, scope or an unverified contract.
   and Input/Output return paths; select its CLI or HTTP branch.
 - [Bricks](references/bricks.md) resolves package/API/version choices;
   [Bootstrap](references/bootstrap.md) selects process stack recipes.
-- [Usecase decorator](references/usecase-decorator.md) defines public publication
-  and decoration, the default for new Bricks applications.
+- [Use case](references/usecase.md) defaults to direct concrete execution.
+  [Usecase decorator](references/usecase-decorator.md) applies only when explicitly
+  requested or maintaining an already-decorated use case; its presence elsewhere
+  in the project does not opt new operations in.
 
 Code examples stay inline in the selected Markdown reference. Adapt module
 imports and project contracts; an example does not require unrelated dependencies.
 
 ## Completion
 
-Check ownership, representations, registration and playbook acceptance criteria
-against the final diff. Run required project checks and report executed evidence,
-failed/unrun checks and blockers. Required checks must pass before completion.
+Check ownership, representations, registration, applicable anti-pattern entries
+and playbook acceptance criteria against the final diff. Apply the Naming
+completion check to every added/renamed Go file and verify receiver ownership for every added/changed helper under the
+conventions above; include sibling files so moving a free function does not
+bypass the check.
+Run required project checks and report executed evidence, failed/unrun checks and
+blockers. Required checks must pass before completion.
 Skill edits also exercise [Routing cases](test/routing-case.md).

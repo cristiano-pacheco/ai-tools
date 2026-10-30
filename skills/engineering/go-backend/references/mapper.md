@@ -6,11 +6,14 @@
    application/model conversion belongs to the module; CLI output conversion
    belongs to the command boundary. Keep imports acyclic.
 2. Keep a trivial field copy inline. Extract reused, nested, parsed, or complex
-   conversion as a pure function in `mapper`. Name exported functions `To<X>`
-   for the destination. Collection conversion calls the item conversion.
+   conversion as a pure function in `mapper/<purpose>_mapper.go`.
+   Name exported functions `To<X>` for the destination. Collection conversion
+   calls the item conversion.
 3. Pass source values explicitly. Return one destination, plus `error` only for
    fallible conversion. Preserve units, null/zero distinctions, enums, and
-   collection semantics. Respect the project's private-function convention.
+   collection semantics. This function-only component follows the skill's
+   file and helper conventions; conversion does not become a receiver helper
+   on its caller merely to avoid a package-level function.
 4. Load additional data before mapping. A mapper owns no struct, interface,
    constructor, context, I/O, validation policy, logging, or runtime registration.
 

@@ -17,17 +17,18 @@ version. Do not add an interface-returning application factory to perform a bind
 External framework factories keep their declared APIs; [Bricks](bricks.md) records
 that boundary when choosing a framework package.
 
-Provide raw use cases concretely. For the default new-project profile, expose
-public operations through [Usecase decorator](usecase-decorator.md), preserving raw
-constructor return types. That named `fx.Out` publication is separate composition.
+Provide use cases concretely and inject their concrete pointers into consumers
+by default. Add [Usecase decorator](usecase-decorator.md) publication only when
+explicitly requested or when modifying an existing decorated use case. Other
+decorated operations in the project do not opt a new operation into that profile.
 
 ## Example: module composition
 
 `internal/modules/order/fx.go`. This example publishes get/create application operations; its HTTP router exposes GET.
 Constructors and assets live in their respective packages/recipes; they are
 registered here at their owner, following the JBN composition approach.
-The process provides `*database.ProjectDB`, Bricks validation/decorator/response/
-logger dependencies and the real trusted `handler.ActorID` integration.
+The process provides `*database.ProjectDB`, Bricks validation/response/logger
+dependencies and the real trusted `handler.ActorID` integration.
 
 ```go
 package order
@@ -49,7 +50,6 @@ var Module = fx.Module("order",
 		fx.Annotate(validator.NewOrderAccessValidator, fx.As(new(port.OrderAccessValidator))),
 		usecase.NewOrderGetUseCase,
 		usecase.NewOrderCreateUseCase,
-		provideDecoratedUseCases,
 		handler.NewOrderHandler,
 		fx.Annotate(router.NewOrderRouter,
 			fx.As(new(brickschi.Route)), fx.ResultTags(`group:"routes"`)),
@@ -67,11 +67,13 @@ without loading every referenced component guide.
 
 ## Example: binding construction proof
 
-`internal/modules/order/fx_test.go`. An inert database wrapper satisfies the raw
-constructor: this test performs no SQL and proves only raw port resolution.
-Decorated/public-route proof must consume that public path with real/stubbed
+`internal/modules/order/fx_test.go`. An inert database wrapper satisfies the
+constructor: this test performs no SQL and proves only direct use-case/port resolution.
+Route proof must consume the registered HTTP path with real/stubbed
 infrastructure appropriate to the guarantee, as [Integration bootstrap](integration-bootstrap.md)
-explains. Lazy providers not reached by this invoke remain untested.
+explains. For an explicitly selected or existing decorated operation, composition
+proof must also consume its decorated publication. Lazy providers not reached
+by this invoke remain untested.
 
 ```go
 package order_test

@@ -51,7 +51,10 @@ The service always loads English fallback and then the configured language;
 provide `en.json` even when the configured language is Portuguese. Malformed/
 missing files are skipped by the baseline loader, so graph success alone cannot
 prove key completeness. Compare every owned catalog code against every required
-locale and exercise a translated outcome through the public decorated operation.
+locale and exercise a translated outcome through the actual translation
+boundary. Default direct use cases do not translate errors automatically. Use
+the public decorated path only for an explicit decorator request or modification
+of an existing decorated use case; locale assets alone do not select decorators.
 
 Translations reconstruct typed errors; [Error](error.md) owns the resulting
 code/status versus pointer-identity contract. Do not translate or modify the

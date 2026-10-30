@@ -24,7 +24,7 @@ release, and these examples do not require a version change.
 | Zap logging | `logger` | [Observability](observability.md) |
 | Prometheus operation metrics | `metrics` | [Observability](observability.md) |
 | OpenTelemetry lifecycle and spans | `otel/trace` | [Observability](observability.md) |
-| Public operation decorators | `ucdecorator` | [Usecase decorator](usecase-decorator.md) |
+| Explicitly requested or existing operation decorators | `ucdecorator` | [Usecase decorator](usecase-decorator.md) |
 | Page parsing/normalization/metadata | `paginator` | [Pagination](pagination.md) |
 | Redis connection lifecycle | `redis` | [Redis](redis.md), [Cache](cache.md) |
 | Embedded SQL runner | `migration` | [Migration](migration.md) |

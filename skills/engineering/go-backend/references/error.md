@@ -7,7 +7,7 @@ For a new Bricks-backed module, use `pkg/errs` and own stable codes in module
 safe catalog text; unknown driver/SDK errors retain their causes and become a
 generic internal error through `response.ErrorHandler`.
 
-`internal/modules/order/errs/order.go`. Codes below illustrate one module's
+`internal/modules/order/errs/order_error.go`. Codes below illustrate one module's
 allocation; allocate from the real catalog rather than duplicating these IDs.
 
 ```go

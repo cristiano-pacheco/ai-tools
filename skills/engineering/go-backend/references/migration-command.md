@@ -5,7 +5,7 @@ collection or runner invocation. [Migration](migration.md) owns SQL and assets.
 
 ## Migration command: reuse assets, start only the runner
 
-`cmd/migrate.go`. The same business module contributes SQL through its real Fx
+`cmd/migrate_command.go`. The same business module contributes SQL through its real Fx
 provider. The command resolves those assets and config without constructing its
 unused repository, HTTP handler, decorators, database wrapper or HTTP server.
 The runner owns its transient migration connections. Configuration/schema errors

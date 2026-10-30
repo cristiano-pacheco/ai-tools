@@ -12,7 +12,8 @@ startup, mapped addresses, connections, migration invocation and teardown.
 | Persistence, constraint, transaction | `StartPostgres`; apply owned SQL; `TruncateTables(t)` per scenario; real repository/use case |
 | Cache hit/miss/TTL/invalidation | `StartRedis`; `kit.Redis()`; reset the isolated test Redis per scenario; real cache |
 | DB plus cache | One kit starts both; reset both; fresh SUT per scenario |
-| Public decorated operation or module graph | Same real adapters plus production `Module`; resolve the public generic operation |
+| Direct operation or module graph | Same real adapters plus production `Module`; resolve the concrete use-case pointer |
+| Explicitly requested or existing decorated operation | Same real adapters plus production `Module`; resolve the decorated generic operation |
 | HTTP protocol without DB policy changes | Registered Bricks router with `httptest`; start DB only if the assertion crosses into real persistence |
 | Uncontrolled third-party effect | Replace only its application port, preserving the real controlled stack |
 
@@ -57,11 +58,17 @@ and dependency order; grouped Fx slices do not order migrations.
 ## Composed proof
 
 For a claim about runtime publication, use the owner module's actual `Module`.
-Supply the kit's concrete shared database wrapper and Bricks validator. Provide
-real fixture configuration for logger/i18n/decorators, and a controlled metrics
-implementation if creating repeated graphs in one process would duplicate global
-Prometheus registration. Resolve `ucdecorator.UseCase[Input, Output]`; invoking
-only the raw pointer does not exercise public publication/translation.
+Supply the kit's concrete shared database wrapper and Bricks validator; resolve
+the concrete use-case pointer by default. Supply other configuration and
+resources only when the actual tested consumer needs them.
+
+Only an explicit decorator request or modification of an existing decorated
+use case selects decorated proof. In that branch, provide real fixture
+configuration for logger/i18n/decorators and a controlled metrics implementation
+if repeated graphs would duplicate global Prometheus registration. Resolve
+`ucdecorator.UseCase[Input, Output]`; invoking only the concrete pointer does not
+exercise decorated publication/translation. Other decorated operations in the
+project do not opt a new use case into this branch.
 
 For an HTTP group claim, consume `[]brickschi.Route` through `fx.In`, register
 those real contributions on a Bricks server and call `SetupRoutes` before serving

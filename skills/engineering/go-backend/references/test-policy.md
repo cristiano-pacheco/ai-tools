@@ -22,3 +22,27 @@ usecase or service into a unit test by default. If a requested guarantee has no
 applicable default test boundary, report the verification gap rather than adding
 an excluded test or claiming it was proven. An explicit request for an excluded
 boundary permits that specific test; do not expand the exception to other targets.
+
+## HTTP boundary decision
+
+For business behavior exposed over HTTP, call the usecase or service public
+operation directly in its integration suite. Adding an endpoint, changing a
+handler, fixing a bug, or requesting integration coverage does not authorize a
+handler suite. A real database, Fx graph, registered router, or placement under
+`test/integration/` does not change the component under test.
+
+For HTTP transport coverage, use an API end-to-end suite: start the application
+with its production composition, routes, middleware and required real controlled
+adapters; send requests with an HTTP client through a listening server. An
+isolated handler or router wrapped in `httptest.NewServer` is still a component
+test. Calling a handler method or `Router().ServeHTTP` with a recorder is not
+API end-to-end proof. Reuse the project's end-to-end harness when available;
+otherwise build that boundary or report the missing verification.
+
+Before adding a test, identify its target, invocation boundary and applicable
+policy row. Apply the same check to the final diff. Reject direct handler,
+router, middleware, parser or renderer unit/integration suites unless the user
+explicitly requested that target or a project contract mandates it. Move business
+assertions to usecase/service integration coverage and transport assertions to
+API end-to-end coverage. Renaming or relocating a component test does not make
+it compliant.

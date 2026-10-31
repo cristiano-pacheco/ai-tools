@@ -14,7 +14,7 @@ startup, mapped addresses, connections, migration invocation and teardown.
 | DB plus cache | One kit starts both; reset both; fresh SUT per scenario |
 | Direct operation or module graph | Same real adapters plus production `Module`; resolve the concrete use-case pointer |
 | Explicitly requested or existing decorated operation | Same real adapters plus production `Module`; resolve the decorated generic operation |
-| HTTP protocol without DB policy changes | Registered Bricks router with `httptest`; start DB only if the assertion crosses into real persistence |
+| HTTP API transport behavior | Select API end-to-end coverage under [Test policy](test-policy.md), outside this usecase/service integration fixture |
 | Uncontrolled third-party effect | Replace only its application port, preserving the real controlled stack |
 
 ## Fixture ownership
@@ -70,10 +70,10 @@ if repeated graphs would duplicate global Prometheus registration. Resolve
 exercise decorated publication/translation. Other decorated operations in the
 project do not opt a new use case into this branch.
 
-For an HTTP group claim, consume `[]brickschi.Route` through `fx.In`, register
-those real contributions on a Bricks server and call `SetupRoutes` before serving
-its `Router()` through `httptest`. This exercises discovery without fixed ports.
-A real listener readiness claim requires an actual listener test too.
+For HTTP route publication or listener readiness, use the API end-to-end
+boundary defined by [Test policy](test-policy.md). Exercise the application's
+production route discovery and setup through its listening server. Resolving a
+route group or calling `Router().ServeHTTP` does not prove API end-to-end behavior.
 
 In v0.1.21 Chi `OnStart` launches listeners asynchronously and can return before
 a bind failure; the inspected newer checkout binds synchronously. Keep those

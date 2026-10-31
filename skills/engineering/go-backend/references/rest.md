@@ -22,5 +22,8 @@ and [Fx](fx.md) for changed providers or bindings. A SQL-only correction needs n
 HTTP changes. Use [Routing](routing.md) for other application responsibilities.
 
 Update API docs/generation when required by the public change or project rules.
-Test changed method/path, decoding, middleware, mapping, status and payload
-through the registered HTTP handler. Add storage proof when the claim includes it.
+Select coverage through [Test policy](test-policy.md) before adding tests.
+Verify changed method/path, decoding, middleware, status and payload through
+API end-to-end coverage. Business behavior belongs in usecase/service integration
+coverage; pure mapping follows the unit-test policy. This recipe does not
+authorize direct handler, router or middleware suites.

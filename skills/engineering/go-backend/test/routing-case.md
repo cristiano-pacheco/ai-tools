@@ -87,10 +87,17 @@ proof. These are routing checks, not claims that generated Go code was executed.
 | Count/page or multi-table join changes | Repository -> Repository query; Model for changed view/criteria; real-storage proof for totals, stable order, and join cardinality. |
 | Actual primary/replica connection selection changes | Repository topology; Database for connection ownership and Fx contribution for names; no automatic topology for ordinary CRUD. |
 | HTTP wire field/tag edit only | REST -> HTTP DTO and affected conversion/proof. Do not load HTTP handler/body/router or persistence unless another contract changes. |
-| HTTP byte limit, media type, null/trailing body behavior | REST -> HTTP body plus affected handler proof. No application/schema rewrite because body parsing changed. |
+| HTTP byte limit, media type, null/trailing body behavior | REST -> HTTP body plus API end-to-end proof under Test policy. No direct parser/handler suite or application/schema rewrite. |
 | Pure mapper tests | Test policy -> Unit test and Mapper; no mocks, Cobra example, integration fixture, or Fx module by default. |
 | Generate integration tests for a module | Test policy -> Integration test for usecases and services, including pure services. No direct repository, model, cache, command, or transport component tests. |
 | Cover an HTTP or gRPC API | Test policy -> end-to-end test through the actual API transport; no direct handler, router, or middleware tests. |
+| "Expose LinkGet over HTTP and add integration coverage" | Implementation -> REST + Test policy; integration coverage invokes LinkGetUseCase.Execute directly. No `test/integration/modules/shortener/http/link_get_handler_test.go`; HTTP assertions use API end-to-end coverage. |
+| Handler suite uses real PostgreSQL, Fx and the registered router under `test/integration/` | Review -> Test policy; still an excluded component suite. Infrastructure and directory do not authorize it; move business assertions to usecase/service integration coverage. |
+| Proposed HTTP test invokes a handler or `Router().ServeHTTP` with `httptest.NewRecorder` | Test policy rejects direct component proof by default; exercise transport through the application's listening server with an HTTP client. |
+| Isolated handler/router is wrapped in `httptest.NewServer` and called end-to-end | Test policy; still a component test. Use production application composition/routes/middleware and required real adapters for API end-to-end proof. |
+| User explicitly requests unit tests for LinkHandler | Allow only the explicitly requested handler target; generic endpoint, regression or integration coverage requests do not grant this exception. |
+| HTTP parser/renderer guide contains status and payload contracts | Apply Test policy before creating tests; use contracts as API end-to-end assertions, not standalone request/response helper suites. |
+| HTTP end-to-end harness or required infrastructure is unavailable | Report the transport verification gap. Do not substitute a direct handler/router suite or claim compilation proves HTTP behavior. |
 | Cover a Cobra command or a cache | No direct tests by default; report any unverified guarantee. An explicit request for that specific test overrides the default. |
 | User explicitly requests repository unit tests | The explicit request overrides the default for that target only; do not add unrelated model or cache tests. |
 | New migration with existing data | Migration and Model when representation changes; real upgrade/fresh/reversal proof; no DB pool guide without changed pool behavior. |

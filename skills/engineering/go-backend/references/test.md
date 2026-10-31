@@ -8,7 +8,7 @@ proof by observable contract, not every dependency constructed by the suite.
 | --- | --- |
 | Dependency-free behavior eligible for unit tests | [Unit test](unit-test.md) |
 | Usecase or service public operation and its effects | [Integration test](integration-test.md) |
-| HTTP or gRPC API transport behavior | End-to-end test through the actual API boundary |
+| HTTP or gRPC API transport behavior | End-to-end test through the actual API boundary as defined by [Test policy](test-policy.md) |
 | Explicitly requested Cobra command test | [Command test](command-test.md) |
 | Explicitly required Fx dependency reachability/binding proof | [Fx](fx.md); distinguish graph validation from runtime proof |
 

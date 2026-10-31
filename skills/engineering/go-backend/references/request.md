@@ -50,72 +50,13 @@ or `}` can pass, and unread trailing bytes may not consume the read bound.
 When the API requires whole-body validation, adapt the shared request helper
 and test those inputs. Do not claim the stock helper enforces that contract.
 
-## Executable contract examples
+## Verification
 
-`internal/shared/http/request_test.go`. These tests distinguish library behavior
-from endpoint policy. The closing-delimiter case records a library limitation;
-it is not an instruction to accept that payload in a stricter API.
-
-```go
-package http_test
-
-import (
-	"errors"
-	"net/http/httptest"
-	"strings"
-	"testing"
-
-	brickserrs "github.com/cristiano-pacheco/bricks/pkg/errs"
-	"github.com/cristiano-pacheco/bricks/pkg/http/request"
-)
-
-func TestBricksRequestContract(t *testing.T) {
-	cases := []struct {
-		name, body, contentType, code string
-		status                        int
-		null                          bool
-	}{
-		{name: "object", body: `{}`, contentType: "application/json"},
-		{name: "missing content type", body: `{}`},
-		{name: "charset", body: `{}`, contentType: "application/json; charset=utf-8"},
-		{name: "null needs endpoint rejection", body: `null`, null: true},
-		{name: "empty", body: ``, code: "BAD_REQUEST", status: 400},
-		{name: "malformed", body: `{`, code: "BAD_REQUEST", status: 400},
-		{name: "wrong field type", body: `{"notes":1}`, code: "BAD_REQUEST", status: 400},
-		{name: "unknown field", body: `{"owner_id":7}`, code: "BAD_REQUEST", status: 400},
-		{name: "second value", body: `{} {}`, code: "BAD_REQUEST", status: 400},
-		{name: "wrong media", body: `{}`, contentType: "text/plain", code: "UNSUPPORTED_MEDIA_TYPE", status: 415},
-		{name: "oversize", body: `{"notes":"` + strings.Repeat("a", 128) + `"}`, code: "REQUEST_ENTITY_TOO_LARGE", status: 413},
-		{name: "baseline trailing delimiter limitation", body: `{} ]`},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest("POST", "/orders", strings.NewReader(tc.body))
-			if tc.contentType != "" {
-				r.Header.Set("Content-Type", tc.contentType)
-			}
-			w := httptest.NewRecorder()
-			var body *struct {
-				Notes *string `json:"notes"`
-			}
-			err := request.ReadJSONWithMaxSize(w, r, &body, 64)
-			if tc.code != "" {
-				var coded *brickserrs.Error
-				if !errors.As(err, &coded) || coded.Code != tc.code || coded.Status != tc.status {
-					t.Fatalf("expected %s/%d, got %v", tc.code, tc.status, err)
-				}
-				return
-			}
-			if err != nil {
-				t.Fatal(err)
-			}
-			if (body == nil) != tc.null {
-				t.Fatalf("unexpected null body: %#v", body)
-			}
-		})
-	}
-}
-```
+Apply [Test policy](test-policy.md): verify endpoint decoding through API
+end-to-end coverage. Use the input cases and statuses above, including null,
+trailing delimiters and unread bytes when strict whole-body validation is
+required. These library contracts do not authorize a direct parser suite in
+the consuming application.
 
 *Check:* pointer destination, object/null policy, read bound, unknown fields,
 parser code/status preservation and no operation call after a decode failure.

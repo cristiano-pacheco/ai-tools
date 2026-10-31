@@ -19,9 +19,11 @@ description: Develop, fix, refactor, test, investigate, or review Go backends. R
   decisions; resolve technical facts from the repository.
 - **Boundaries.** One business entrypoint invokes one public operation. Its
   Input/Output contain no HTTP, Cobra, storage or vendor types.
-- **Proof.** When planning or changing tests, read [Test policy](references/test-policy.md)
-  before choosing boundaries. Compilation, mocks and unavailable tools do not
-  prove untested runtime behavior; report gaps where the policy excludes a test.
+- **Proof.** Before defining acceptance proof or planning, generating, changing,
+  or reviewing tests, read [Test policy](references/test-policy.md). Apply it
+  before selecting test boundaries, fixtures, or filenames, including HTTP work.
+  Compilation, mocks and unavailable tools do not prove untested runtime
+  behavior; report gaps where the policy excludes a test.
 
 Before choosing a playbook, read [Anti-patterns](references/anti-patterns.md)
 in full on every invocation. Apply all entries relevant to the task; this is

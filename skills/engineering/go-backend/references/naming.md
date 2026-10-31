@@ -60,6 +60,8 @@ such as `order_response_handler.go` or `order_policy_service.go`, only when
 the split has a real responsibility. Component-private helpers remain receiver
 methods under the skill's helper convention, including in split files.
 
+Select an allowed boundary under [Test policy](test-policy.md) before naming
+any test; filename conventions do not authorize excluded component suites.
 Tests append `_test` to the complete production basename:
 `order_get_usecase_test.go`, `order_access_validator_test.go`,
 `password_hash_service_test.go`. Integration paths retain the same role-bearing

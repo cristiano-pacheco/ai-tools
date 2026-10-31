@@ -15,9 +15,10 @@ and provider behavior out. Constructor returns the concrete router pointer.
 3. Publish a newly constructed router through the module's Fx contribution
    consumed by its server. [Fx contribution](fx-contribution.md) has grouped-contribution examples. Adding
    a path to an already constructed router does not change the provider graph.
-4. Extend the registered-router proof for method/path, middleware scope, handler
-   invocation, response serialization, and error status. An unregistered handler
-   test cannot prove runtime route discovery.
+4. Apply [Test policy](test-policy.md) and extend API end-to-end coverage for
+   method/path, middleware scope, response serialization and error status through
+   the application's listening server. Direct router/handler tests are excluded
+   by default, including tests using a registered router.
 
 ## Example: router
 

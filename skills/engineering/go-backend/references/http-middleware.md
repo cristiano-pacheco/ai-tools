@@ -9,7 +9,8 @@ A dependency-free enrichment can be a package function. Stateful middleware has
 a concrete-pointer constructor, explicit dependencies, and Fx registration.
 If it can reject, reuse the established error renderer rather than inventing an
 envelope. Apply it through the router's smallest affected group; order is part
-of the contract and must be tested when it changes.
+of the contract; verify changes through API end-to-end coverage under
+[Test policy](test-policy.md).
 
 ## Example: scoped context enrichment
 

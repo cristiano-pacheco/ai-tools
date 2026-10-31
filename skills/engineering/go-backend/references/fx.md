@@ -93,7 +93,9 @@ func TestModuleBindings(t *testing.T) {
 	var operation *usecase.OrderGetUseCase
 	app := fx.New(fx.NopLogger, order.Module, bricksvalidator.Module,
 		fx.Supply(&database.ProjectDB{DB: &gorm.DB{}}),
-		fx.Invoke(func(uc *usecase.OrderGetUseCase) { operation = uc }),
+		fx.Invoke(func(uc *usecase.OrderGetUseCase) {
+			operation = uc
+		}),
 	)
 	if err := app.Err(); err != nil {
 		t.Fatal(err)

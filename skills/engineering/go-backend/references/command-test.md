@@ -58,7 +58,9 @@ func TestRegisteredCobraCommand(t *testing.T) {
 	repository := &readOnlyRepository{}
 	uc := usecase.NewOrderGetUseCase(repository, inputValidator, validator.NewOrderAccessValidator())
 	root := &cobra.Command{Use: "app"}
-	cmd.RegisterOrderGetCommand(root, uc, func(context.Context) (uint64, error) { return 7, nil })
+	cmd.RegisterOrderGetCommand(root, uc, func(context.Context) (uint64, error) {
+		return 7, nil
+	})
 	var stdout, stderr bytes.Buffer
 	root.SetOut(&stdout)
 	root.SetErr(&stderr)

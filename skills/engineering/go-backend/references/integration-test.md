@@ -52,7 +52,9 @@ type OrderGetUseCaseTestSuite struct {
 	sut        *usecase.OrderGetUseCase
 }
 
-func TestOrderGetUseCaseSuite(t *testing.T) { suite.Run(t, new(OrderGetUseCaseTestSuite)) }
+func TestOrderGetUseCaseSuite(t *testing.T) {
+	suite.Run(t, new(OrderGetUseCaseTestSuite))
+}
 
 func (s *OrderGetUseCaseTestSuite) SetupSuite() {
 	cfg := itestkit.DefaultConfig()

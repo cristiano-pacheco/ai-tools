@@ -7,6 +7,11 @@ in `port/<name>_provider.go` in the consumer module, SDK implementation in
 An HTTP-based vendor is still a provider; Client owns a remote-service protocol
 when that is the actual responsibility.
 
+Choose this role through [Component classification](component-classification.md).
+Local computation such as random code generation belongs to Service when it is
+a reusable capability. Neither an Fx provider function nor a constructor makes
+the constructed component a Provider.
+
 ## Recipe: SDK capability
 
 1. Read the pinned SDK's constructor, request/result types, error classification,

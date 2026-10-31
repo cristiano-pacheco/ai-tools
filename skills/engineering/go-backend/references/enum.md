@@ -45,7 +45,9 @@ func NewOrderStatusEnum(value string) (OrderStatusEnum, error) {
 	return OrderStatusEnum{value: value}, nil
 }
 
-func (e OrderStatusEnum) String() string { return e.value }
+func (e OrderStatusEnum) String() string {
+	return e.value
+}
 ```
 
 If transitions are part of the value contract, expose a focused method such as

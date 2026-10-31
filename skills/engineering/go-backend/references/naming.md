@@ -8,6 +8,9 @@ alone do not establish such a contract. Report an intentional deviation.
 
 ## Role contract
 
+Select the semantic role using [Component classification](component-classification.md)
+before applying this matrix; suffixes do not determine responsibility.
+
 Use lowercase `snake_case` filenames ending in the artifact's semantic role.
 The package name does not replace the suffix. Use singular package names and
 one primary component per file; its constructor and receiver methods stay with
@@ -42,8 +45,9 @@ HTTP-owned DTO/mapper paths are relative to `http/`. A port keeps its semantic
 role even when the implementation lives in a different mechanism package:
 `port/transaction_provider.go` and `repository/transaction_provider.go` define
 and implement `TransactionProvider`; do not rename it to a repository merely
-because it uses GORM. Additional roles require an explicit responsibility and
-an agreed suffix before creating files, not an improvised generic name.
+because it uses GORM. For additional or unresolved roles, use the classification
+decision gate: present 2–3 justified options and obtain user agreement on the
+responsibility and suffix before creating files.
 
 ## Splits and tests
 

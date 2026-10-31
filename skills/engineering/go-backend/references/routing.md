@@ -11,6 +11,7 @@ documentation selects its subject. The skill entrypoint owns the stopping rule.
 | Changed contract | Read |
 | --- | --- |
 | Package ownership, naming, imports, or reuse; also mandatory for every invocation | [Anti-patterns](anti-patterns.md) |
+| Creating, reclassifying, or reviewing component responsibilities; ambiguous or unlisted roles | [Component classification](component-classification.md), then the selected component recipe |
 | Creating, renaming, or reviewing Go filenames, split files, ports, or test basenames | [Naming](naming.md) |
 | Bricks package choice, framework API/version, new platform capability | [Bricks](bricks.md) |
 | Process stack creation/change, server or migration graph | [Bootstrap](bootstrap.md) |

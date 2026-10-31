@@ -95,5 +95,7 @@ type OrderItemModel struct {
 	Description string  `gorm:"not null"`
 }
 
-func (*OrderItemModel) TableName() string { return "order_items" }
+func (*OrderItemModel) TableName() string {
+	return "order_items"
+}
 ```

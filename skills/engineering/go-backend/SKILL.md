@@ -29,6 +29,10 @@ a living reference, not an optional package-design guide.
 
 ## File and helper conventions
 
+- **Classify before naming.** Before creating, reclassifying, or reviewing a
+  component, read [Component classification](references/component-classification.md).
+  Map responsibility to a predefined role before selecting its recipe or suffix;
+  unresolved roles require user choice after 2–3 justified options.
 - **Role suffixes.** Before creating, renaming, or reviewing Go filenames, read
   [Naming](references/naming.md): the required filename/declaration matrix for
   every component, ports, split files, tests, and explicit infrastructure
@@ -89,11 +93,11 @@ imports and project contracts; an example does not require unrelated dependencie
 
 ## Completion
 
-Check ownership, representations, registration, applicable anti-pattern entries
-and playbook acceptance criteria against the final diff. Apply the Naming
-completion check to every added/renamed Go file and verify receiver ownership for every added/changed helper under the
-conventions above; include sibling files so moving a free function does not
-bypass the check.
+Check ownership, role-classification evidence, representations, registration,
+applicable anti-pattern entries and playbook acceptance criteria against the
+final diff. Apply the Naming completion check to every added/renamed Go file
+and verify receiver ownership for every added/changed helper under the conventions
+above; include sibling files so moving a free function does not bypass the check.
 Run required project checks and report executed evidence, failed/unrun checks and
 blockers. Required checks must pass before completion.
 Skill edits also exercise [Routing cases](test/routing-case.md).

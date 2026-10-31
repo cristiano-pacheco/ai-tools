@@ -39,6 +39,33 @@ When changing code that already uses one, identify the proper owner and remove
 or replace the in-scope usage where the task permits. Report remaining legacy
 violations and any scope blocker instead of silently adopting the pattern.
 
+## AP-002 — Single-line function bodies
+
+**Pattern:** Putting a function's opening brace, statements, and closing brace
+on one line, even for trivial constructors, getters, test helpers or callbacks.
+
+```go
+// Anti-pattern
+func NewCodeGeneratorService() *CodeGeneratorService { return &CodeGeneratorService{} }
+```
+
+**Why:** Compact bodies hide the executable step and make examples inconsistent
+with the required multiline style. A trivial implementation is not an exception;
+`gofmt` alone does not enforce this rule.
+
+**Use instead:** Put the body on indented lines and the closing brace on its own
+line. Apply this to functions, methods and anonymous functions, including tests.
+
+```go
+func NewCodeGeneratorService() *CodeGeneratorService {
+	return &CodeGeneratorService{}
+}
+```
+
+**Check:** Inspect every added/changed function body, including constructors,
+methods and callbacks. Expand single-line bodies before completion; formatting
+success alone is insufficient. Inline composite literals are not function bodies.
+
 ## Maintaining this reference
 
 Add new anti-patterns as separate entries with a stable `AP-NNN` identifier,

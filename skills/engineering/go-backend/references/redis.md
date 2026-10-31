@@ -20,7 +20,9 @@ import (
 
 var RedisModule = fx.Module("shared-redis",
 	bricksredis.Module,
-	fx.Provide(func(loaded bricksconfig.Config[bricksredis.Config]) bricksredis.Config { return loaded.Get() }),
+	fx.Provide(func(loaded bricksconfig.Config[bricksredis.Config]) bricksredis.Config {
+		return loaded.Get()
+	}),
 )
 ```
 

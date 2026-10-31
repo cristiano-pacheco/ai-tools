@@ -8,14 +8,9 @@ like `Build`, `Check`, or `Load`, I/O, or several callers does not establish tha
 ownership. Loading can be service-owned while checks delegate to Validator and
 conversion delegates to Mapper. Private helper bodies use the same test.
 
-| Behavior | Owner |
-| --- | --- |
-| One public operation's policy and workflow | Usecase |
-| Reusable acceptance/rejection, including external evidence | Validator |
-| Convert supplied data, format representation, assemble DTO | Mapper |
-| Persist/query | Repository |
-| Remote-service protocol / third-party SDK | Client / Provider |
-| Remaining reusable capability | Service |
+Use [Component classification](component-classification.md) for the authoritative
+role map and unknown-role decision gate. A local code generator is a Service
+when it is a reusable capability, not a Provider merely because it returns codes.
 
 ## Recipe: pure capability
 
@@ -36,7 +31,9 @@ import "golang.org/x/crypto/bcrypt"
 
 type PasswordHashService struct{}
 
-func NewPasswordHashService() *PasswordHashService { return &PasswordHashService{} }
+func NewPasswordHashService() *PasswordHashService {
+	return &PasswordHashService{}
+}
 
 func (s *PasswordHashService) Generate(password []byte) ([]byte, error) {
 	return bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)

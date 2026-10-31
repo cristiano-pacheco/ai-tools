@@ -55,9 +55,17 @@ type recordingOrderMetrics struct {
 	failure  map[string]int
 }
 
-func (m *recordingOrderMetrics) ObserveDuration(name string, _ time.Duration) { m.duration[name]++ }
-func (m *recordingOrderMetrics) IncSuccess(name string)                       { m.success[name]++ }
-func (m *recordingOrderMetrics) IncError(name string)                         { m.failure[name]++ }
+func (m *recordingOrderMetrics) ObserveDuration(name string, _ time.Duration) {
+	m.duration[name]++
+}
+
+func (m *recordingOrderMetrics) IncSuccess(name string) {
+	m.success[name]++
+}
+
+func (m *recordingOrderMetrics) IncError(name string) {
+	m.failure[name]++
+}
 
 type publishedOrderOperations struct {
 	get    ucdecorator.UseCase[usecase.OrderGetInput, usecase.OrderGetOutput]
@@ -86,7 +94,9 @@ func (s *OrderGetUseCaseTestSuite) publishedOperations(t *testing.T, enabled boo
 	cfg.OutputPaths, cfg.ErrorOutputPaths = nil, nil
 	log, err := logger.New(cfg)
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, log.Sync()) })
+	t.Cleanup(func() {
+		require.NoError(t, log.Sync())
+	})
 	observed := &recordingOrderMetrics{duration: map[string]int{}, success: map[string]int{}, failure: map[string]int{}}
 	var operations publishedOrderOperations
 	app := fx.New(fx.NopLogger,

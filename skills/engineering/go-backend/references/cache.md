@@ -110,7 +110,9 @@ func (c *OrderSummaryCache) Delete(ctx context.Context, id uint64) error {
 	return c.client.Del(ctx, c.key(id)).Err()
 }
 
-func (c *OrderSummaryCache) key(id uint64) string { return fmt.Sprintf("order:summary:v1:%d", id) }
+func (c *OrderSummaryCache) key(id uint64) string {
+	return fmt.Sprintf("order:summary:v1:%d", id)
+}
 ```
 
 *Check:* real controlled Redis proof for hit/miss/failure, key namespace,

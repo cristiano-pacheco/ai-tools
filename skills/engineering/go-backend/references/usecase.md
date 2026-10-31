@@ -1,5 +1,11 @@
 # Use case
 
+A usecase is the public application entrypoint for a business operation and owns
+its policy and orchestration. HTTP/Cobra decode and render around this operation;
+they do not bypass it to invoke a service, repository, or provider directly.
+Apply [Component classification](component-classification.md) when deciding
+whether behavior is operation-local or an independently justified collaborator.
+
 ## Naming contract
 
 Create one operation per `internal/modules/<module>/usecase/<noun>_<action>_usecase.go`.

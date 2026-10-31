@@ -77,7 +77,9 @@ type OrderConflictError struct {
 func NewOrderConflictError(orderID uint64, cause error) *OrderConflictError {
 	return &OrderConflictError{OrderID: orderID, Cause: cause}
 }
-func (e *OrderConflictError) Error() string { return fmt.Sprintf("order %d conflict", e.OrderID) }
+func (e *OrderConflictError) Error() string {
+	return fmt.Sprintf("order %d conflict", e.OrderID)
+}
 func (e *OrderConflictError) Unwrap() []error {
 	if e.Cause == nil {
 		return []error{ErrOrderConflict}

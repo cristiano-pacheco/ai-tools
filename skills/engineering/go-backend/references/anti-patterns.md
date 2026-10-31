@@ -66,6 +66,53 @@ func NewCodeGeneratorService() *CodeGeneratorService {
 methods and callbacks. Expand single-line bodies before completion; formatting
 success alone is insufficient. Inline composite literals are not function bodies.
 
+## AP-003 — Abbreviated dependency names
+
+**Pattern:** Shortening injected collaborator fields or constructor parameters to
+names such as `create`, `get`, or `errors`. Do not shorten existing descriptive
+names.
+
+```go
+// Before
+func NewLinkHandler(
+	create *usecase.LinkCreateUseCase,
+	get *usecase.LinkGetUseCase,
+	errors response.ErrorHandler,
+) *LinkHandler {
+	return &LinkHandler{create: create, get: get, errors: errors}
+}
+```
+
+**Why:** Short names obscure which component each dependency represents.
+
+**Use instead:** Name fields and constructor parameters for the collaborator
+and its role. Use the same names in assignments and calls.
+
+```go
+// After
+type LinkHandler struct {
+	linkCreateUseCase *usecase.LinkCreateUseCase
+	linkGetUseCase    *usecase.LinkGetUseCase
+	errorHandler      response.ErrorHandler
+}
+
+func NewLinkHandler(
+	linkCreateUseCase *usecase.LinkCreateUseCase,
+	linkGetUseCase *usecase.LinkGetUseCase,
+	errorHandler response.ErrorHandler,
+) *LinkHandler {
+	return &LinkHandler{
+		linkCreateUseCase: linkCreateUseCase,
+		linkGetUseCase:    linkGetUseCase,
+		errorHandler:      errorHandler,
+	}
+}
+```
+
+**Check:** Inspect added or changed dependency fields, constructor parameters,
+assignments and uses. Preserve descriptive existing names and replace shortened
+names in scope with names identifying the collaborator and its role.
+
 ## Maintaining this reference
 
 Add new anti-patterns as separate entries with a stable `AP-NNN` identifier,

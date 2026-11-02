@@ -11,7 +11,8 @@ alone do not establish such a contract. Report an intentional deviation.
 Select the semantic role using [Component classification](component-classification.md)
 before applying this matrix; suffixes do not determine responsibility.
 
-Use lowercase `snake_case` filenames ending in the artifact's semantic role.
+Use lowercase `snake_case` filenames ending in the artifact's semantic role,
+except for Cobra CLI files under `cmd/` as defined below.
 The package name does not replace the suffix. Use singular package names and
 one primary component per file; its constructor and receiver methods stay with
 it unless a real concern warrants a split. Do not combine unrelated components
@@ -36,8 +37,8 @@ in `helpers.go`, `utils.go`, `common.go`, or a generic package-named file.
 | HTTP handler | `http/chi/handler/<resource>_handler.go` | `<Resource>Handler`, `New<Resource>Handler` |
 | HTTP router | `http/chi/router/<resource>_router.go` | `<Resource>Router`, `New<Resource>Router` |
 | HTTP middleware | `http/chi/middleware/<purpose>_middleware.go` | Named middleware function or concrete component as behavior requires |
-| Cobra business command | `cmd/<noun>_<action>_command.go` | `New<Noun><Action>Command` |
-| Cobra infrastructure command | `cmd/<purpose>_command.go` | `New<Purpose>Command` |
+| Cobra business command | `cmd/<noun>_<action>.go` | `New<Noun><Action>Command` |
+| Cobra infrastructure command | `cmd/<purpose>.go` | `New<Purpose>Command` |
 | Module error catalog | `errs/<module>_error.go` | Stable named error values |
 | Specialized error type | `errs/<purpose>_error.go` | Concrete error type; concrete constructor when needed |
 
@@ -48,6 +49,16 @@ and implement `TransactionProvider`; do not rename it to a repository merely
 because it uses GORM. For additional or unresolved roles, use the classification
 decision gate: present 2–3 justified options and obtain user agreement on the
 responsibility and suffix before creating files.
+
+## Cobra CLI exception
+
+Go files under the Cobra CLI's `cmd/` directory, including subdirectories, are
+exempt from mandatory role suffixes. Use purpose-based names such as
+`cmd/order_get.go`, `cmd/server.go`, or `cmd/migrate.go`; existing `_command.go`
+names remain valid. This exception concerns filenames only; command constructors
+retain their `Command` names. Split files use purpose-based names, and tests
+append `_test` to the production basename, such as `cmd/order_get_test.go`.
+Components outside `cmd/` retain the role suffixes in the matrix.
 
 ## Splits and tests
 
@@ -84,7 +95,8 @@ composition/resource files keep their purpose-based names:
   generator. Inspect generator/config evidence before treating a file as generated.
 
 These are scoped exceptions, not permission for `service/service.go`,
-`validator/validator.go`, or suffixless business components. Tests of the listed
+`validator/validator.go`, or suffixless business components outside the Cobra
+`cmd/` exception. Tests of the listed
 infrastructure files retain their basenames, such as `config_test.go` or
 `fx_test.go`. SQL migration and locale filenames follow their own recipes.
 

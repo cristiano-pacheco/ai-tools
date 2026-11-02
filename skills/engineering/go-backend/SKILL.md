@@ -37,9 +37,9 @@ a living reference, not an optional package-design guide.
   unresolved roles require user choice after 2–3 justified options.
 - **Role suffixes.** Before creating, renaming, or reviewing Go filenames, read
   [Naming](references/naming.md): the required filename/declaration matrix for
-  every component, ports, split files, tests, and explicit infrastructure
-  exceptions. A package name or neighboring suffixless file does not replace
-  the role suffix. New roles require an explicit naming decision.
+  every component, ports, split files, tests, and explicit Cobra `cmd/` and
+  infrastructure exceptions. A package name or neighboring suffixless file
+  does not replace the role suffix. New roles require an explicit naming decision.
 - **Receiver-owned helpers.** For every component struct with a constructor
   (usecase, repository, validator, service, client, provider, cache, handler,
   router, middleware, or another concrete component),

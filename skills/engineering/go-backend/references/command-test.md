@@ -1,5 +1,8 @@
 # Command test
 
+Read only when an explicit request or project contract overrides the default
+exclusion of direct Cobra tests in [Test policy](test-policy.md).
+
 Use the closest Cobra acceptance boundary. Prove changed flags/args map to the public
 input, malformed syntax fails before application execution, caller context reaches
 one operation, output goes to the declared writer, and errors remain classifiable.
@@ -19,7 +22,10 @@ unused fallback: an unexpected write has no implementation and fails the test;
 the only supplied behavior is the read needed by this boundary scenario.
 The real concrete `*usecase.OrderGetUseCase` is passed directly to the command,
 matching the default [CLI data flow](data-flow-cli.md); this test makes no
-claim about decorator behavior.
+claim about decorator behavior. The functions below are scenario helpers, not
+a complete test file. Call them from an authorized test after constructing the
+application's real input validator as `port.InputValidator`. Framework setup
+belongs to the conditional [Bricks handoff](bricks.md).
 
 ```go
 package cmd_test
@@ -34,7 +40,6 @@ import (
 	"example.com/project/internal/modules/order/port"
 	"example.com/project/internal/modules/order/usecase"
 	"example.com/project/internal/modules/order/validator"
-	bricksvalidator "github.com/cristiano-pacheco/bricks/pkg/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -50,11 +55,8 @@ func (r *readOnlyRepository) FindByID(ctx context.Context, id uint64) (model.Ord
 	return model.OrderModel{ID: id, OwnerID: 7, Status: "pending"}, nil
 }
 
-func TestRegisteredCobraCommand(t *testing.T) {
-	inputValidator, validationErr := bricksvalidator.New()
-	if validationErr != nil {
-		t.Fatal(validationErr)
-	}
+func checkRegisteredCobraCommand(t *testing.T, inputValidator port.InputValidator) {
+	t.Helper()
 	repository := &readOnlyRepository{}
 	uc := usecase.NewOrderGetUseCase(repository, inputValidator, validator.NewOrderAccessValidator())
 	root := &cobra.Command{Use: "app"}
@@ -78,11 +80,8 @@ func TestRegisteredCobraCommand(t *testing.T) {
 	}
 }
 
-func TestRegisteredCommandRejectsMalformedIDBeforeInvocation(t *testing.T) {
-	inputValidator, err := bricksvalidator.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+func checkMalformedIDBeforeInvocation(t *testing.T, inputValidator port.InputValidator) {
+	t.Helper()
 	repository := &readOnlyRepository{}
 	uc := usecase.NewOrderGetUseCase(repository, inputValidator, validator.NewOrderAccessValidator())
 	root := &cobra.Command{Use: "app", SilenceErrors: true, SilenceUsage: true}

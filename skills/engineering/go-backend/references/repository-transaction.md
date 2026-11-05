@@ -30,7 +30,6 @@ import (
 	"example.com/project/internal/modules/order/errs"
 	"example.com/project/internal/modules/order/model"
 	"example.com/project/internal/modules/order/port"
-	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -38,8 +37,6 @@ import (
 var _ port.OrderTransactionalRepository = (*OrderRepository)(nil)
 
 func (r *OrderRepository) FindByIDTX(ctx context.Context, tx *gorm.DB, id uint64) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.FindByIDTX")
-	defer span.End()
 	var order model.OrderModel
 	err := tx.WithContext(ctx).Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("id = ?", id).Limit(1).First(&order).Error
@@ -53,16 +50,12 @@ func (r *OrderRepository) FindByIDTX(ctx context.Context, tx *gorm.DB, id uint64
 }
 
 func (r *OrderRepository) WithTX(ctx context.Context, fn func(*gorm.DB) error) error {
-	ctx, span := trace.Span(ctx, "OrderRepository.WithTX")
-	defer span.End()
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		return fn(tx.WithContext(ctx))
 	})
 }
 
 func (r *OrderRepository) CreateTX(ctx context.Context, tx *gorm.DB, order model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.CreateTX")
-	defer span.End()
 	if err := gorm.G[model.OrderModel](tx.WithContext(ctx)).Create(ctx, &order); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return model.OrderModel{}, errs.ErrOrderConflict
@@ -73,8 +66,6 @@ func (r *OrderRepository) CreateTX(ctx context.Context, tx *gorm.DB, order model
 }
 
 func (r *OrderRepository) UpdateTX(ctx context.Context, tx *gorm.DB, order model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.UpdateTX")
-	defer span.End()
 	db := tx.WithContext(ctx)
 	result := db.Model(&model.OrderModel{}).Where("id = ?", order.ID).
 		Select("status", "notes").Updates(&order)

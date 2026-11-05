@@ -82,12 +82,9 @@ import (
 	"context"
 
 	"example.com/project/internal/modules/order/model"
-	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
 )
 
 func (r *OrderRepository) FindSummariesByOwnerID(ctx context.Context, ownerID uint64) ([]model.OrderSummaryView, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.FindSummariesByOwnerID")
-	defer span.End()
 	rows := make([]model.OrderSummaryView, 0)
 	err := r.db.WithContext(ctx).Model(&model.OrderModel{}).
 		Select("orders.id AS order_id, orders.owner_id, COUNT(oi.id) AS item_count").

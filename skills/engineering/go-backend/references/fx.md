@@ -1,117 +1,61 @@
 # Fx
 
-Read for provider/interface bindings, module inclusion, publication, contributions
-or hooks. A method/query change with verified unchanged wiring does not load Fx.
+Read for provider bindings, module inclusion, publication, contributions, or hooks. A method change with verified unchanged wiring does not load this guide.
 
-## Concrete construction and interface publication
+## 1. Keep constructors concrete
 
-Every application-owned struct constructor returns its concrete instance, usually
-`*Type` or `(*Type, error)`; value constructors return `Type`. Bind an adapter
-with `fx.Provide(fx.Annotate(NewImplementation, fx.As(new(port.Interface))))`.
-Assert conformance beside the implementation. The pointer passed to `fx.As`
-is a type token, not the adapter instance. Register the constructor once.
+Application struct constructors return `*Type`, `Type`, or the same concrete result with an error. Assert interface conformance beside the adapter. Bind the consumer-owned port at composition:
 
-`fx.As` replaces the concrete result's exposed type. Add `fx.As(fx.Self())`
-on the same provider only for an actual concrete consumer and a compatible Fx
-version. Do not add an interface-returning application factory to perform a bind.
-External framework factories keep their declared APIs; [Bricks](bricks.md) records
-that boundary when choosing a framework package.
+```go
+fx.Provide(fx.Annotate(
+    repository.NewOrderRepository,
+    fx.As(new(port.OrderRepository)),
+))
+```
 
-Provide use cases concretely and inject their concrete pointers into consumers
-by default. Add [Usecase decorator](usecase-decorator.md) publication only when
-explicitly requested or when modifying an existing decorated use case. Other
-decorated operations in the project do not opt a new operation into that profile.
+The pointer passed to `fx.As` is a type token, not an adapter instance. `fx.As` replaces the exposed result type. Add `fx.As(fx.Self())` on the same provider only when a real consumer also needs the concrete value and the installed Fx version supports it. Register the constructor once.
+
+External factories keep their declared signatures. A bridge to a framework-provided interface is not permission to make application constructors return interfaces.
 
 ## Example: module composition
 
-`internal/modules/order/fx.go`. This example publishes get/create application operations; its HTTP router exposes GET.
-Constructors and assets live in their respective packages/recipes; they are
-registered here at their owner, following the JBN composition approach.
-The process provides `*database.ProjectDB`, Bricks validation/response/logger
-dependencies and the real trusted `handler.ActorID` integration.
+`internal/modules/order/fx.go`:
 
 ```go
 package order
 
 import (
-	"example.com/project/internal/modules/order/http/chi/handler"
-	"example.com/project/internal/modules/order/http/chi/router"
-	"example.com/project/internal/modules/order/port"
-	"example.com/project/internal/modules/order/repository"
-	"example.com/project/internal/modules/order/usecase"
-	"example.com/project/internal/modules/order/validator"
-	brickschi "github.com/cristiano-pacheco/bricks/pkg/http/server/chi"
-	"go.uber.org/fx"
+    "example.com/project/internal/modules/order/port"
+    "example.com/project/internal/modules/order/repository"
+    "example.com/project/internal/modules/order/usecase"
+    "example.com/project/internal/modules/order/validator"
+    "go.uber.org/fx"
 )
 
 var Module = fx.Module("order",
-	fx.Provide(
-		fx.Annotate(repository.NewOrderRepository, fx.As(new(port.OrderRepository))),
-		fx.Annotate(validator.NewOrderAccessValidator, fx.As(new(port.OrderAccessValidator))),
-		usecase.NewOrderGetUseCase,
-		usecase.NewOrderCreateUseCase,
-		handler.NewOrderHandler,
-		fx.Annotate(router.NewOrderRouter,
-			fx.As(new(brickschi.Route)), fx.ResultTags(`group:"routes"`)),
-		fx.Annotate(provideMigrationFileSystem, fx.ResultTags(`group:"migration_filesystems"`)),
-		fx.Annotate(provideLocaleFileSystem, fx.ResultTags(`group:"locale_filesystems"`)),
-	),
+    fx.Provide(
+        fx.Annotate(repository.NewOrderRepository, fx.As(new(port.OrderRepository))),
+        fx.Annotate(validator.NewOrderAccessValidator, fx.As(new(port.OrderAccessValidator))),
+        usecase.NewOrderGetUseCase,
+        usecase.NewOrderCreateUseCase,
+    ),
 )
 ```
 
-Add only operations/adapters the requested behavior consumes. A module without
-REST or persistence omits those providers and assets. [Fx contribution](fx-contribution.md)
-loads only for names/groups, [Migration](migration.md) for schema/runner assets,
-and [Locale](locale.md) for translation assets. Inspect unchanged constructors
-without loading every referenced component guide.
+The process supplies the shared database wrapper and the existing input validator under the `port.InputValidator` contract used by the example operations. The module registers only its owned components. Add handlers and framework contributions only when that transport or asset is required. This fragment does not claim to expose HTTP by itself.
 
-## Example: binding construction proof
+Provide use cases concretely by default. Select [Usecase decorator](usecase-decorator.md) only for requested decoration or changes to an existing decorated operation.
 
-`internal/modules/order/fx_test.go`. An inert database wrapper satisfies the
-constructor: this test performs no SQL and proves only direct use-case/port resolution.
-Route proof must consume the registered HTTP path with real/stubbed
-infrastructure appropriate to the guarantee, as [Integration bootstrap](integration-bootstrap.md)
-explains. For an explicitly selected or existing decorated operation, composition
-proof must also consume its decorated publication. Lazy providers not reached
-by this invoke remain untested.
+## 2. Register contributions at their owner
 
-```go
-package order_test
+Use [Fx contribution](fx-contribution.md) for names and groups. Use the server's actual route interface and asset contracts rather than creating parallel registries. For Bricks-specific providers, bindings, groups, or forcing invokes, follow [Bricks handoff](bricks.md) to the selected framework guide.
 
-import (
-	"testing"
+Read unchanged constructor signatures without loading every collaborator's recipe.
 
-	"example.com/project/internal/modules/order"
-	"example.com/project/internal/modules/order/usecase"
-	"example.com/project/internal/shared/database"
-	bricksvalidator "github.com/cristiano-pacheco/bricks/pkg/validator"
-	"go.uber.org/fx"
-	"gorm.io/gorm"
-)
+## 3. Prove reachability and runtime separately
 
-func TestModuleBindings(t *testing.T) {
-	var operation *usecase.OrderGetUseCase
-	app := fx.New(fx.NopLogger, order.Module, bricksvalidator.Module,
-		fx.Supply(&database.ProjectDB{DB: &gorm.DB{}}),
-		fx.Invoke(func(uc *usecase.OrderGetUseCase) {
-			operation = uc
-		}),
-	)
-	if err := app.Err(); err != nil {
-		t.Fatal(err)
-	}
-	if operation == nil {
-		t.Fatal("use case was not constructed")
-	}
-}
-```
+`fx.ValidateApp` checks types without running constructors or hooks. Force the intended consumer when validating its dependencies. Construction proof must also consume it because providers are lazy. Neither check establishes a live database or listening HTTP server.
 
-`fx.ValidateApp` checks types without running constructors/hooks. Force the intended
-consumer in both validation and construction proof; unused provider registration
-establishes neither reachability nor external resource health. Select
-[Runtime](runtime.md) when resource/lifecycle behavior changes and
-[Bootstrap](bootstrap.md) when changing the process stack.
+For public-operation integration proof, use the production module and real controlled adapters under [Integration bootstrap](integration-bootstrap.md). For API transport proof, use the actual listening application under [Test policy](test-policy.md). A decorated operation's publication must be consumed when decoration is the claim.
 
-*Check:* concrete constructor, matching interface assertion/binding, one provider,
-process inclusion, intended consumer reachability and separately proved runtime
-behavior. No graph-only claim of database or HTTP readiness.
+Done when each instance has one provider, bindings match consumer contracts, required consumers are reachable, and changed runtime behavior has separate execution evidence.

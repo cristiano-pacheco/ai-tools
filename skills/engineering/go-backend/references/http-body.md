@@ -1,75 +1,21 @@
 # HTTP body
 
-Read when a handler accepts JSON. [Request](request.md) owns decoding, limits,
-null handling and parser code/status contracts. [Response](response.md) owns
-success/error rendering. Keep application validation in the use case.
+Read when an endpoint accepts JSON. [Request](request.md) owns the application's syntax and limits policy. [Response](response.md) owns its published wire contract.
 
-## Example: create boundary
-
-`internal/modules/order/http/chi/handler/order_create_handler.go`. This follows
-the framework parser's documented behavior above, with a 64 KiB read bound.
-Provide its constructor and concrete `*usecase.OrderCreateUseCase` in the owner's
-Fx graph and attach `HandleCreateOrder` to the resource's POST route when creation
-is exposed. Preserve a decorated consumer only when changing an already decorated
-operation, or introduce it when explicitly requested; see
-[Usecase decorator](usecase-decorator.md).
+1. Resolve trusted identity from the existing middleware context. Keep it separate from caller-controlled JSON.
+2. Decode into an HTTP-owned DTO with the selected body limit and null policy. Return the parser's classified error through the shared renderer. Do not invoke policy after a decode failure.
+3. Build explicit application input. For creation, map allowed fields rather than embedding the request:
 
 ```go
-package handler
-
-import (
-	"net/http"
-
-	"example.com/project/internal/modules/order/errs"
-	httpdto "example.com/project/internal/modules/order/http/dto"
-	"example.com/project/internal/modules/order/usecase"
-	"github.com/cristiano-pacheco/bricks/pkg/http/request"
-	"github.com/cristiano-pacheco/bricks/pkg/http/response"
-	"github.com/cristiano-pacheco/bricks/pkg/logger"
-)
-
-const maxOrderCreateBodyBytes = 64 << 10
-
-type OrderCreateHandler struct {
-	operation    *usecase.OrderCreateUseCase
-	actorID      ActorID
-	errorHandler response.ErrorHandler
-	logger       logger.Logger
-}
-
-func NewOrderCreateHandler(
-	operation *usecase.OrderCreateUseCase,
-	actorID ActorID, errorHandler response.ErrorHandler, log logger.Logger,
-) *OrderCreateHandler {
-	return &OrderCreateHandler{operation: operation, actorID: actorID, errorHandler: errorHandler, logger: log}
-}
-
-func (h *OrderCreateHandler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
-	actorID, authenticated := h.actorID(r.Context())
-	if !authenticated || actorID == 0 {
-		h.errorHandler.Error(w, errs.ErrUnauthenticated)
-		return
-	}
-	var body *httpdto.OrderCreateRequest
-	if err := request.ReadJSONWithMaxSize(w, r, &body, maxOrderCreateBodyBytes); err != nil {
-		h.errorHandler.Error(w, err)
-		return
-	}
-	if body == nil {
-		h.errorHandler.Error(w, errs.ErrInvalidInput)
-		return
-	}
-	output, err := h.operation.Execute(r.Context(), usecase.OrderCreateInput{ActorID: actorID, Notes: body.Notes})
-	if err != nil {
-		h.errorHandler.Error(w, err)
-		return
-	}
-	result := httpdto.OrderCreateResponse{ID: output.ID, Status: output.Status}
-	if err := response.JSON(w, http.StatusCreated, result, nil); err != nil {
-		h.logger.Error("write created order response", logger.Error(err))
-	}
+input := usecase.OrderCreateInput{
+    ActorID: actorID,
+    Notes: body.Notes,
 }
 ```
 
-*Check:* decode into the HTTP DTO, reject a null object, keep trusted identity
-separate, preserve parser errors and invoke the operation only after decoding.
+4. Invoke the concrete public use case once with the request context. It owns field validation and business decisions. Preserve an already decorated consumer only when that is the selected operation's contract.
+5. Map output to an HTTP response DTO and render the promised creation status. Report a terminal write failure without attempting a second response.
+
+For Bricks decoder and renderer code, follow [Bricks handoff](bricks.md). Its `recipes/http-flow.md` includes a complete body-based application with separate wire and operation values. `references/http/request/usage.md` supplies the actual limit, null, content-type, and trailing-data guarantees.
+
+Done when identity cannot come from the body, malformed input cannot reach policy, and the operation's result maps to one compatible response. Verify transport through [Test policy](test-policy.md).

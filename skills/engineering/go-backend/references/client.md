@@ -73,7 +73,6 @@ import (
 	"example.com/project/internal/modules/order/dto"
 	"example.com/project/internal/modules/order/errs"
 	"example.com/project/internal/modules/order/port"
-	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
 )
 
 const maxQuoteBodyBytes = 1 << 20
@@ -102,8 +101,6 @@ func NewShippingClient(baseURL string, httpClient *http.Client) (*ShippingClient
 }
 
 func (c *ShippingClient) Quote(ctx context.Context, input dto.ShippingQuoteInput) (dto.ShippingQuote, error) {
-	ctx, span := trace.Span(ctx, "ShippingClient.Quote")
-	defer span.End()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/quotes/"+url.PathEscape(input.PostalCode), nil)
 	if err != nil {
 		return dto.ShippingQuote{}, fmt.Errorf("build shipping quote: %w", err)

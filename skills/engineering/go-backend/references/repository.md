@@ -88,7 +88,6 @@ import (
 	"example.com/project/internal/modules/order/model"
 	"example.com/project/internal/modules/order/port"
 	"example.com/project/internal/shared/database"
-	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -103,8 +102,6 @@ func NewOrderRepository(db *database.ProjectDB) *OrderRepository {
 }
 
 func (r *OrderRepository) FindByID(ctx context.Context, id uint64) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.FindByID")
-	defer span.End()
 	order, err := gorm.G[model.OrderModel](r.db.DB).Where("id = ?", id).Limit(1).First(ctx)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return model.OrderModel{}, errs.ErrOrderNotFound
@@ -116,8 +113,6 @@ func (r *OrderRepository) FindByID(ctx context.Context, id uint64) (model.OrderM
 }
 
 func (r *OrderRepository) Create(ctx context.Context, order model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.Create")
-	defer span.End()
 	if err := gorm.G[model.OrderModel](r.db.DB).Create(ctx, &order); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return model.OrderModel{}, errs.ErrOrderConflict
@@ -128,8 +123,6 @@ func (r *OrderRepository) Create(ctx context.Context, order model.OrderModel) (m
 }
 
 func (r *OrderRepository) Update(ctx context.Context, order model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.Update")
-	defer span.End()
 	result := r.db.WithContext(ctx).Model(&model.OrderModel{}).
 		Where("id = ?", order.ID).
 		Select("status", "notes").Updates(&order)
@@ -143,8 +136,6 @@ func (r *OrderRepository) Update(ctx context.Context, order model.OrderModel) (m
 }
 
 func (r *OrderRepository) Delete(ctx context.Context, order model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "OrderRepository.Delete")
-	defer span.End()
 	rows, err := gorm.G[model.OrderModel](r.db.DB).Where("id = ?", order.ID).Delete(ctx)
 	if err != nil {
 		return model.OrderModel{}, err

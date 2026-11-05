@@ -14,69 +14,9 @@ matching. Assert side-effect absence when rejection must precede I/O.
 A fresh fixture/SUT per case prevents state leakage. Do not assert span
 internals, logger formatting, or private helper calls as a proxy for behavior.
 
-The optional example below uses a controlled collaborator and is appropriate only
-when an explicit user request or project contract overrides the default boundary.
-It does not replace public-operation integration proof.
-
-## Example: input validation proof
-
-`internal/modules/order/usecase/order_get_usecase_test.go`. The concrete input
-validator checks tags; the controlled repository makes any premature I/O fail.
-The access validator is the named implementation from its recipe.
-
-```go
-package usecase_test
-
-import (
-	"context"
-	"errors"
-	"testing"
-
-	"example.com/project/internal/modules/order/model"
-	"example.com/project/internal/modules/order/usecase"
-	"example.com/project/internal/modules/order/validator"
-	bricksvalidator "github.com/cristiano-pacheco/bricks/pkg/validator"
-	validation "github.com/go-playground/validator/v10"
-)
-
-type orderRepositoryFunc func(context.Context, uint64) (model.OrderModel, error)
-
-func (f orderRepositoryFunc) FindByID(ctx context.Context, id uint64) (model.OrderModel, error) {
-	return f(ctx, id)
-}
-
-func (f orderRepositoryFunc) Create(context.Context, model.OrderModel) (model.OrderModel, error) {
-	return model.OrderModel{}, errors.New("unexpected create in read-only test")
-}
-
-func (f orderRepositoryFunc) Update(context.Context, model.OrderModel) (model.OrderModel, error) {
-	return model.OrderModel{}, errors.New("unexpected update in read-only test")
-}
-
-func (f orderRepositoryFunc) Delete(context.Context, model.OrderModel) (model.OrderModel, error) {
-	return model.OrderModel{}, errors.New("unexpected delete in read-only test")
-}
-
-func TestOrderGetRejectsInvalidInputBeforeIO(t *testing.T) {
-	repository := orderRepositoryFunc(func(context.Context, uint64) (model.OrderModel, error) {
-		t.Fatal("invalid input reached storage")
-		return model.OrderModel{}, nil
-	})
-	inputValidator, validationErr := bricksvalidator.New()
-	if validationErr != nil {
-		t.Fatal(validationErr)
-	}
-	uc := usecase.NewOrderGetUseCase(repository, inputValidator, validator.NewOrderAccessValidator())
-	for _, input := range []usecase.OrderGetInput{{ID: 0, ActorID: 7}, {ID: 42, ActorID: 0}} {
-		output, err := uc.Execute(context.Background(), input)
-		var failures validation.ValidationErrors
-		if !errors.As(err, &failures) || output != (usecase.OrderGetOutput{}) {
-			t.Fatalf("got %#v, %v", output, err)
-		}
-	}
-}
-```
-
+Usecase input-validation proof belongs to the public-operation integration suite
+by default. Only an explicit request or project contract selects a controlled-port
+unit test for that target. Such a test does not replace real-adapter proof.
 
 *Check:* each assertion would catch the named behavioral regression, fixtures are
 fresh, expected errors keep identity, and no infrastructure guarantee is claimed

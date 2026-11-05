@@ -113,21 +113,29 @@ repository evidence. CLI recipes use Cobra.
 
 ## Bricks adaptation cases
 
+These cases check the handoff. Framework API details live in the Bricks skill,
+not in backend implementation guides.
+
 | Prompt / evidence | Expected route and proof |
 | --- | --- |
-| New service with the standard stack | Implementation; Bricks + Bootstrap, affected module/component recipes. Reuse platform packages and process ownership; no custom loader/renderer/route registry/container test setup. |
-| New database integration test | Test -> Integration test -> Integration bootstrap. Use itestkit defaults, scoped cleanup before startup, real owned migrations and fresh raw SUT; no DSN-skip path. |
-| Integration suite needs Redis but no PostgreSQL | Start only Redis; build config from DefaultConfig so New does not overwrite supplied settings; test real TTL and isolated reset. |
+| New service with the standard stack | Implementation; Bootstrap and affected application recipes. Follow Bricks handoff for unverified framework contracts, then only selected specialist guides. Reuse existing platform mechanisms. |
+| New database integration test | Test policy, Integration test, Integration bootstrap, then the selected Bricks fixture guide. Invoke a public usecase or service with real owned migrations and isolated storage. No direct repository suite or DSN-skip path. |
+| Integration suite needs Redis but no PostgreSQL | Bricks handoff selects its Redis testkit guide, not PostgreSQL. Test real TTL and isolated reset through the allowed public-operation boundary. |
 | Cross-module foreign keys in integration | Use the complete embedded production migration set through the verified fixture bridge. No fake referenced table, fabricated kit DSN method or reliance on Fx group order. |
 | App constructor returns interface to implement a port | Keep concrete result and bind with Fx. A Bricks external factory such as validator.New keeps its real public signature; do not invent its private implementation type. |
 | User explicitly requests a new decorated use case | Usecase decorator; register raw constructor once; extend the one named fx.Out publication provider; HTTP/Cobra consume the generic public operation. Resolve it through production Module in composition proof. |
-| New coded rejection | Error + Locale, module code/status and every required language entry. Raw singleton and translated error use different identity assertions. |
+| New coded rejection | Error and affected Locale ownership; Bricks handoff selects actual error or translation APIs. Do not add translation infrastructure unless required. Check raw and translated contracts separately. |
 | Query local fix with verified pinned framework and graph | Repository + affected storage proof; no Bricks catalog, Bootstrap, Locale or decorators merely because those packages exist. |
-| Shared Docker host running unrelated suites | Use scoped kit.Cleanup. The v0.1.21 TestMain/CleanupAll global label cleanup is not a run-scoped teardown. |
-| README uses a method absent from the resolved module | Installed source wins. Correct the example and version evidence before using it. |
-| New checkout supports SQLite/listener addresses, project pins v0.1.21 | Do not use newer APIs without an explicit dependency change and its own proof. |
+| Shared Docker host running unrelated suites | Follow the selected Bricks fixture guide's scoped cleanup. No global removal of containers owned by other suites. |
+| README uses a method absent from the resolved module | Installed source wins. Use the Bricks local-source guide before adapting the example. |
+| Bricks skill is not installed | Follow the bounded offline source fallback in Bricks handoff. Report unavailable source or tooling. Do not invent APIs, download modules, or use machine-wide searches. |
+| Framework-only configuration question | Bricks alone is sufficient. Do not impose the backend workflow or application layout. |
+| Pure mapper correction | Keep the selected backend playbook and pure mapping proof. Load no Bricks guide. |
+| Response field changes but framework rendering is verified | HTTP DTO and affected mapping only, plus required proof. No Bricks handoff, database setup, or server bootstrap. |
+| Several changed contracts select the same Bricks recipe | Read the Bricks router and shared destination once. Do not recursively load unchanged collaborator guides. |
+| New checkout offers APIs absent from the selected dependency | Bricks handoff selects local-source verification. Do not use newer APIs or change dependencies to fit an example. |
 | Strict request EOF is required | HTTP body; inspect the actual helper's limitations, strengthen the shared boundary and test trailing closing delimiters/unread bytes. Do not claim ReadJSON proves strict whole-body validity. |
-| HTTP Fx Start succeeds under v0.1.21 | Report type/lifecycle evidence separately from real listener readiness; test the actual listener when that is the claim. |
+| HTTP Fx Start succeeds | Keep graph, startup, and actual listener-readiness claims separate. Use the selected Bricks server contract and real API end-to-end proof. |
 
 | Decorated profile maintenance case | Expected route and proof |
 | --- | --- |

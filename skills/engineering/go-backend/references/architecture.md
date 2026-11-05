@@ -9,7 +9,7 @@ A verified local edit does not automatically load either broader guide.
 
 Transport imports public operation Input/Output and consumes its concrete
 use-case pointer by default. Use cases consume application interfaces and values;
-Bricks provides shared shape validation. A repository implements its port and
+the shared input validator checks shape. A repository implements its port and
 receives the initialized concrete database wrapper. Fx imports constructors and
 binds their concrete instances to interfaces at the owner composition root.
 

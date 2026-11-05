@@ -40,47 +40,13 @@ type OrderListResponse struct {
 *Check:* explicit accepted values and caps; no SQL-shaped caller input;
 consistent filters/count; stable order; documented metadata and empty-list shape.
 
-## Bricks paginator
+## Framework parsing and metadata
 
-Use `pkg/paginator.ParseQueryParams`, `NormalizeParams`, `Params.Offset/Limit`
-and `Metadata` rather than another parser. Its default wire names are `page` and
-`per_page`; preserve an established API's different names explicitly. Parsing
-rejects nonpositive provided values but does not cap page size or prevent offset
-integer overflow. Normalize and bound those values before repository arithmetic.
-Never let normalization silently turn malformed supplied values into defaults.
+For Bricks query parsing, normalization, offset helpers, and response metadata,
+follow [Bricks handoff](bricks.md) to `recipes/pagination-response.md`. Keep the
+application's published query and response names. A helper's default metadata
+does not authorize changing `page_size` or `total` in an existing API.
 
-`internal/modules/order/http/mapper/order_page_mapper.go`. This boundary returns
-application primitives; repository criteria remain storage-owned. The page cap
-below is an example policy and bounds offset arithmetic on supported Go targets.
-
-```go
-package mapper
-
-import (
-	"fmt"
-	"net/url"
-
-	"example.com/project/internal/modules/order/errs"
-	"github.com/cristiano-pacheco/bricks/pkg/paginator"
-)
-
-const maxOrderPage = 1_000_000
-const maxOrderPerPage = 100
-
-func ToOrderPage(query url.Values) (int, int, error) {
-	parsed, err := paginator.ParseQueryParams(query, 1, 20)
-	if err != nil {
-		return 0, 0, fmt.Errorf("%w: %w", errs.ErrInvalidInput, err)
-	}
-	if parsed.Page > maxOrderPage {
-		return 0, 0, errs.ErrInvalidInput
-	}
-	normalized := paginator.NormalizeParams(parsed.Page, parsed.PerPage, 1, 20, maxOrderPerPage)
-	return normalized.Page, normalized.PerPage, nil
-}
-```
-
-Map stable totals with `paginator.TotalPages(total, perPage)`. For a new collection
-DTO, use `paginator.Metadata` only if that is the chosen public wire contract;
-its fields are `total_count`, `page`, `per_page`, `total_pages`. Do not silently
-replace the existing `page_size`/`total` example contract with those names.
+Reject malformed supplied values before normalization. Bound page size and
+offset arithmetic even if the selected helper does not. Pass application
+primitives to the use case and storage-owned criteria to the repository.

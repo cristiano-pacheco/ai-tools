@@ -1,61 +1,11 @@
 # Locale
 
-Read when adding/changing coded module errors, locale files, language selection,
-or asset publication for `i18n.Module`. Localized text belongs to the owning
-module; the process owns the language configuration and framework infrastructure.
+Read when changing translated application messages or locale ownership.
 
-Use singular `locale/` in new modules. Bricks expects filenames `<language>.json`
-at each contributed filesystem root. Its loader merges map-shaped JSON sections;
-for errors, the section is `errors` keyed by stable code. This is not the exported
-`i18n/dto.Locale` wrapper shape. Keep keys globally unique because merging repeated
-keys overwrites them and Fx group order is unspecified.
+1. Keep each module's locale assets beside its owned error catalog. Use singular `locale/` for new modules. The process owns language selection and translation infrastructure.
+2. Allocate stable globally unique message keys. Do not rely on module registration or Fx group order to resolve duplicate keys.
+3. For Bricks JSON shape, fallback language, filesystem contribution, and translation behavior, follow [Bricks handoff](bricks.md) to `references/i18n/usage.md`. Load the locale support guide only when changing its direct contract.
+4. Compare every owned error code with every required locale. Exercise a translated outcome through the actual public translation boundary. Loaded files or a valid graph do not establish message completeness.
+5. Preserve direct use-case execution by default. Locale files do not opt an operation into decorators. Read [Usecase decorator](usecase-decorator.md) only for selected decoration work.
 
-`internal/modules/order/locale/en.json`.
-
-```json
-{"errors":{"ORDER_01":"Invalid order input","ORDER_02":"Order not found","ORDER_03":"Order access forbidden","ORDER_04":"Authentication required","ORDER_05":"Request body too large","ORDER_06":"Unsupported media type","ORDER_07":"Order conflict","ORDER_08":"Invalid order status","ORDER_09":"Invalid date","ORDER_10":"Dependency unavailable"}}
-```
-
-`internal/modules/order/locale/pt_BR.json`.
-
-```json
-{"errors":{"ORDER_01":"Dados do pedido inválidos","ORDER_02":"Pedido não encontrado","ORDER_03":"Acesso ao pedido negado","ORDER_04":"Autenticação necessária","ORDER_05":"Corpo da requisição excede o limite","ORDER_06":"Tipo de conteúdo não suportado","ORDER_07":"Conflito no pedido","ORDER_08":"Status do pedido inválido","ORDER_09":"Data inválida","ORDER_10":"Dependência indisponível"}}
-```
-
-`internal/modules/order/locale_fs.go`. The concrete provider is registered with
-`group:"locale_filesystems"` in the module's `fx.go`; `i18n.Module` consumes it.
-
-```go
-package order
-
-import (
-	"embed"
-	"io/fs"
-
-	brickslocale "github.com/cristiano-pacheco/bricks/pkg/i18n/locale"
-)
-
-//go:embed locale/*.json
-var localeFiles embed.FS
-
-func provideLocaleFileSystem() (brickslocale.FileSystem, error) {
-	files, err := fs.Sub(localeFiles, "locale")
-	if err != nil {
-		return brickslocale.FileSystem{}, err
-	}
-	return brickslocale.New(files), nil
-}
-```
-
-The service always loads English fallback and then the configured language;
-provide `en.json` even when the configured language is Portuguese. Malformed/
-missing files are skipped by the baseline loader, so graph success alone cannot
-prove key completeness. Compare every owned catalog code against every required
-locale and exercise a translated outcome through the actual translation
-boundary. Default direct use cases do not translate errors automatically. Use
-the public decorated path only for an explicit decorator request or modification
-of an existing decorated use case; locale assets alone do not select decorators.
-
-Translations reconstruct typed errors; [Error](error.md) owns the resulting
-code/status versus pointer-identity contract. Do not translate or modify the
-shared error singleton inside a repository, handler or use-case method.
+Done when required messages resolve, duplicate keys cannot depend on load order, and translation preserves the published code and status. [Error](error.md) owns identity and cause assertions.

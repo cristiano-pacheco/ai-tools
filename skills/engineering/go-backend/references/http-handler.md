@@ -1,9 +1,10 @@
 # HTTP handler
 
 A handler owns transport syntax, trusted identity, one public operation call,
-wire mapping and rendering. Use Bricks `http/response`, its `ErrorHandler`, and
-`logger.Logger`; the process provides their Fx modules once. Business policy,
-repositories, transactions, cache and external providers stay behind the use case.
+wire mapping and rendering. Reuse the application's shared renderer and reporting
+owner. For Bricks APIs and dependencies, follow [Bricks handoff](bricks.md).
+Business policy, repositories, transactions, cache, and external providers stay
+behind the use case.
 
 ## Recipe
 
@@ -21,9 +22,10 @@ repositories, transactions, cache and external providers stay behind the use cas
 
 ## Implementation example
 
-[HTTP data flow](data-flow-http.md) owns the complete `OrderHandler` example and
-its request/Input/Output/response trace. Read it when implementing/changing the
-entrypoint or clarifying mapping; its GET and body-based branches are explicit.
+[HTTP data flow](data-flow-http.md) traces the request, Input, Output, and response.
+Read it when changing the entrypoint or mapping. For a complete Bricks handler,
+its conditional pointer selects the specialist tutorial. A verified unchanged
+handler does not require that tutorial.
 
 Select [HTTP DTO](http-dto.md) for wire changes, [Mapper](mapper.md) for conversion,
 and [HTTP body](http-body.md) for body/media/limit behavior. Inspect an unchanged

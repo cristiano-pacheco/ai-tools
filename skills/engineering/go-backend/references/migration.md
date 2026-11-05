@@ -63,58 +63,18 @@ var Files embed.FS
 
 ## Framework contribution and runner
 
-`internal/modules/order/migration_fs.go`. The module `fx.go` publishes the
-concrete result with `group:"migration_filesystems"`.
+Follow [Bricks handoff](bricks.md) for filesystem wrappers, group bindings,
+runner APIs, collision behavior, and backend execution. Keep the selected
+framework's existing types and runner. The application owns global version
+allocation and schema dependency order. Fx group order cannot establish SQL order.
 
-```go
-package order
+The deployment process consumes the contributions. Do not execute schema changes
+implicitly on an application request. Select [Migration command](migration-command.md)
+for a separate process or preserve the project's explicit startup policy.
 
-import (
-	ordermigration "example.com/project/internal/modules/order/migration"
-	bricksmigration "github.com/cristiano-pacheco/bricks/pkg/migration"
-)
-
-func provideMigrationFileSystem() bricksmigration.FileSystem {
-	return bricksmigration.New(ordermigration.Files)
-}
-```
-
-`internal/shared/migration/runner.go`. This bridge consumes module contributions
-and returns the framework's concrete runner, not a new migration implementation.
-The migration process consumes it; the server does not run schema changes implicitly.
-
-```go
-package migration
-
-import (
-	bricksmigration "github.com/cristiano-pacheco/bricks/pkg/migration"
-	"go.uber.org/fx"
-)
-
-type Params struct {
-	fx.In
-	Files []bricksmigration.FileSystem `group:"migration_filesystems"`
-}
-
-func NewRunner(params Params) *bricksmigration.Runner {
-	return bricksmigration.NewRunner(params.Files)
-}
-
-var Module = fx.Module("migration", fx.Provide(NewRunner))
-```
-
-`Runner.Up(postgresURL)` merges SQL filenames and uses golang-migrate. Versions
-must be globally unique across modules and ordered by schema dependencies;
-the order of the injected filesystem slice does not establish SQL order. In
-v0.1.21 duplicate filenames overwrite during merge rather than producing a
-reliable diagnostic. Allocate timestamp versions across the whole application
-and check duplicates before running. Keep SQL files at the contribution root.
-
-[Migration command](migration-command.md) shows the Cobra migration process consuming this graph.
-`itestkit.RunMigrations` accepts one path, not a slice of module filesystems;
-[Integration bootstrap](integration-bootstrap.md) shows how to use the same
-embedded runner for a multi-module test. Do not manually recreate foreign-key
-target tables to make a partial migration set pass.
+[Integration bootstrap](integration-bootstrap.md) selects the complete production
+migration set for tests. Do not manually create foreign-key targets to make a
+partial migration set pass.
 
 *Check:* global unique versions, model/schema agreement, existing-data compatibility,
 real grouped contribution/consumer, fresh/upgrade/reversal storage proof and no

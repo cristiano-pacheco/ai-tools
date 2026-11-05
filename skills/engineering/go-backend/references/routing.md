@@ -13,14 +13,14 @@ documentation selects its subject. The skill entrypoint owns the stopping rule.
 | Package ownership, naming, imports, or reuse; also mandatory for every invocation | [Anti-patterns](anti-patterns.md) |
 | Creating, reclassifying, or reviewing component responsibilities; ambiguous or unlisted roles | [Component classification](component-classification.md), then the selected component recipe |
 | Creating, renaming, or reviewing Go filenames, split files, ports, or test basenames | [Naming](naming.md) |
-| Bricks package choice, framework API/version, new platform capability | [Bricks](bricks.md) |
+| Unverified Bricks API, configuration, module, or lifecycle | [Bricks handoff](bricks.md), then only the selected specialist guide |
 | Process stack creation/change, server or migration graph | [Bootstrap](bootstrap.md) |
 | New module, selecting packages, or deciding/changing module ownership/public boundary | [Module](module.md) |
 | End-to-end operation, entrypoint location, collaborator sequence, or Input/Output return path | [Data flow](data-flow.md) |
 | Dependency direction, representation boundary, or cross-module imports being designed/assessed | [Architecture](architecture.md) |
 | HTTP DTO, decoding, route, middleware, pagination, response behavior | [REST](rest.md) |
-| Bricks JSON decoding or decode error contract | [Request](request.md) |
-| Bricks success/error rendering, validation details or response-write behavior | [Response](response.md) |
+| HTTP decoding policy, media type, body limit, or decode errors | [Request](request.md); follow its Bricks pointer only for framework mechanics |
+| HTTP status, envelope, error safety, or response-write policy | [Response](response.md); follow its Bricks pointer only for framework mechanics |
 | Cobra command, flags, output, command registration, infrastructure command | [CLI](cli.md) |
 | Consumer-owned interface, signature, representation, adapter conformance | [Port](port.md) |
 | Shared application value, operation wrapper ownership, alias/embedding/compatibility | [Application DTO](dto.md) |
@@ -59,6 +59,11 @@ documentation selects its subject. The skill entrypoint owns the stopping rule.
   not select REST, and an unchanged schema/model does not select model.
 - **Pure mapper correction:** mapper and its behavioral proof. No module
   blueprint, runtime graph, or database guide without evidence of another change.
+
+For a framework-only question, the standalone `bricks` skill is sufficient.
+When both skills apply, retain this playbook and load Bricks only for the affected
+framework contract. Deduplicate repeated destinations. A verified unchanged
+collaborator does not select its guide or the Bricks handoff.
 
 For multi-step work, record the playbook, selected guides, triggering evidence
 and material unknowns. Update that record when the scope changes.

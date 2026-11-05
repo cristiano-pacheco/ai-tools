@@ -1,9 +1,11 @@
 ---
 name: go-backend
-description: Develop, fix, refactor, test, investigate, or review Go backends. Routes module design, REST/Cobra operations, GORM persistence, and Fx composition to focused playbooks and component recipes.
+description: Develop, fix, refactor, test, investigate, or review Go backends using opinionated workflows and application architecture. Covers modules, REST/Cobra operations, GORM persistence, and Fx composition. For Bricks-only package usage, use bricks.
 ---
 
 # Go backend
+
+This skill owns backend workflow and application architecture. For unverified Bricks APIs, configuration, or lifecycle, follow the conditional [Bricks handoff](references/bricks.md). The standalone `bricks` skill owns those framework instructions. A business change with verified unchanged infrastructure does not load it.
 
 ## Principles
 
@@ -83,8 +85,8 @@ when evidence changes ownership, scope or an unverified contract.
 - [Module](references/module.md) defines package ownership and module boundaries.
 - [Data flow](references/data-flow.md) defines entrypoints, collaborator sequence
   and Input/Output return paths; select its CLI or HTTP branch.
-- [Bricks](references/bricks.md) resolves package/API/version choices;
-  [Bootstrap](references/bootstrap.md) selects process stack recipes.
+- [Bootstrap](references/bootstrap.md) selects process responsibilities.
+  [Bricks handoff](references/bricks.md) selects framework guidance only when a Bricks contract needs work.
 - [Use case](references/usecase.md) defaults to direct concrete execution.
   [Usecase decorator](references/usecase-decorator.md) applies only when explicitly
   requested or maintaining an already-decorated use case; its presence elsewhere

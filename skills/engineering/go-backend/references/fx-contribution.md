@@ -29,18 +29,16 @@ var ReadWriteRepository = fx.Provide(fx.Annotate(
 
 ## Grouped contributions
 
-Use the framework's existing types and groups:
+Use the selected framework's real contribution types. The provider's result
+tag must match the consumer's `fx.In` field tag and element type. A framework
+may prescribe a group name, or the application may choose it. Verify which
+contract applies rather than assuming every group is framework-owned.
 
-| Contribution | Concrete provider result / Fx exposure | Real consumer |
-| --- | --- | --- |
-| HTTP route | `*router.OrderRouter` -> `brickschi.Route`, `group:"routes"` | `brickschi.Module` collects `[]Route` and invokes `Setup(*Server)` |
-| SQL assets | `migration.FileSystem`, `group:"migration_filesystems"` | Application migration runner receives the tagged slice |
-| Locale assets | `locale.FileSystem`, `group:"locale_filesystems"` | `i18n.Module` collects the slice |
-
-There is no application-owned parallel `Route` interface or second registry.
-[HTTP router](http-router.md) implements the actual framework interface;
-[Migration](migration.md) and [Locale](locale.md) define concrete asset providers.
-The module's [Fx example](fx.md#example-module-composition) registers them.
+Follow [Bricks handoff](bricks.md) only when a Bricks route, SQL filesystem,
+or locale contribution needs implementation. Its selected guide supplies the
+actual provider and consumer. Keep application ownership in [HTTP router](http-router.md),
+[Migration](migration.md), and [Locale](locale.md). Do not create a parallel
+route interface or registry to avoid the framework's existing contract.
 
 For a singular named dependency, use matching `fx.ParamTags` or an `fx.In`
 field with the same name. Multiple interfaces on one instance use multiple

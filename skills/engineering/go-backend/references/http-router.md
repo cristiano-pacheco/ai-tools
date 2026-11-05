@@ -1,58 +1,29 @@
 # HTTP router
 
-Own method/path registration, route groups, and middleware attachment in
-`http/chi/router/<resource>_router.go`. Keep policy, mapping, validation, storage,
-and provider behavior out. Constructor returns the concrete router pointer.
+Own method/path registration, route groups, and middleware attachment in `http/chi/router/<resource>_router.go`. Keep policy, mapping, validation, and I/O out. Its constructor returns the concrete router pointer.
 
-## Recipe: register a route
+## 1. Preserve public routes
 
-1. Inspect the closest route and published contract. Default to versioned plural
-   resource paths under `/api/v1`, with `{id}` and explicit owned sub-resources.
-   Use GET for retrieval, POST for creation/action, PUT for replacement, PATCH
-   for partial mutation, DELETE for removal; preserve established public semantics.
-2. Register the handler's `Handle...` method directly. Keep group scope and
-   middleware order visible. Attach auth to the smallest required group.
-3. Publish a newly constructed router through the module's Fx contribution
-   consumed by its server. [Fx contribution](fx-contribution.md) has grouped-contribution examples. Adding
-   a path to an already constructed router does not change the provider graph.
-4. Apply [Test policy](test-policy.md) and extend API end-to-end coverage for
-   method/path, middleware scope, response serialization and error status through
-   the application's listening server. Direct router/handler tests are excluded
-   by default, including tests using a registered router.
+Inspect the closest route and its published contract. Default new routes to versioned plural resource paths under `/api/v1`, with `{id}` and explicit owned sub-resources. Use GET for retrieval, POST for creation or actions, PUT for replacement, PATCH for partial mutation, and DELETE for removal. Preserve established semantics.
 
-## Example: router
+## 2. Register handler methods
 
-`internal/modules/order/http/chi/router/order_router.go`. Attach required auth
-middleware through the established route group; the handler also rejects a
-missing trusted identity.
+Keep middleware order visible. Attach authentication to the smallest required group. A focused Chi registration fragment is:
 
 ```go
-package router
-
-import (
-	"example.com/project/internal/modules/order/http/chi/handler"
-	brickschi "github.com/cristiano-pacheco/bricks/pkg/http/server/chi"
-)
-
-type OrderRouter struct {
-	handler *handler.OrderHandler
-}
-
-var _ brickschi.Route = (*OrderRouter)(nil)
-
-func NewOrderRouter(handler *handler.OrderHandler) *OrderRouter {
-	return &OrderRouter{handler: handler}
-}
-
-func (r *OrderRouter) Setup(server *brickschi.Server) {
-	server.Router().Get("/api/v1/orders/{id}", r.handler.HandleGetOrder)
-}
+router.Get("/api/v1/orders/{id}", orderHandler.HandleGetOrder)
 ```
 
-*Check:* direct registration, published method/path, correct middleware group,
-actual inclusion in the process graph, and no application logic in router code.
+This registers a method. It does not execute application policy. Use the existing server's route contribution rather than creating another registry or interface.
 
-Publish with `fx.As(new(brickschi.Route))` and `group:"routes"`; the Bricks
-server owns collection and setup. Keep authentication order inside the route
-group, independently of Fx group enumeration. Read [Bootstrap](bootstrap.md)
-only when server/process composition changes.
+## 3. Publish at composition
+
+For Bricks `Route`, `Setup`, group tags, and server collection, follow [Bricks handoff](bricks.md) to its Chi guide. Bind the concrete application router through Fx. Adding a path to an already constructed router does not require changing its provider graph.
+
+Read [Fx contribution](fx-contribution.md) only when bindings or tags change. Read [Bootstrap](bootstrap.md) only when the process changes.
+
+## 4. Verify the actual API
+
+Apply [Test policy](test-policy.md). Test changed paths, middleware scope, serialization, and statuses through the application's listening server. A registered router or isolated handler remains a component test and is excluded by default.
+
+Done when routes reach the intended handlers, middleware has the required scope, the process includes the contribution, and transport proof uses the allowed boundary.

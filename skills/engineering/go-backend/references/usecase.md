@@ -46,8 +46,9 @@ not require loading that guide for a local policy edit.
    aliases or embedded operation contracts.
 2. Put simple shape constraints in input `validate` tags. Inject the established
    input validator and validate the complete input as the first action of `Execute`.
-   Use Bricks `validator.Validator.Validate`; provide `validator.Module` once at
-   the process owner. Named business rules retain their own module ports.
+   Keep the validator's framework setup at the process owner. Follow
+   [Bricks handoff](bricks.md) only when that setup or its API needs work.
+   Named business rules retain their own module ports.
 3. Inject consumer-owned interfaces from `port`. Use the module's model values
    internally, while public input/output remain explicit application values with
    no GORM model, transport tags, HTTP/Cobra type, or SDK payload.
@@ -67,6 +68,21 @@ representation; each helper has the right owner; required effects precede succes
 
 ## Example: query operation
 
+The examples use a consumer-owned input-validation port. In
+`internal/modules/order/port/input_validator.go`:
+
+```go
+package port
+
+type InputValidator interface {
+	Validate(any) error
+}
+```
+
+Bind the existing input validator to this port at composition. Reuse the project's
+accepted validator contract when it already has one. This port does not introduce
+a second validation implementation. The Bricks guide supplies its framework setup.
+
 `internal/modules/order/usecase/order_get_usecase.go`. The repository and access
 validator contracts are in their respective recipes. Replace the module path.
 
@@ -77,7 +93,6 @@ import (
 	"context"
 
 	"example.com/project/internal/modules/order/port"
-	bricksvalidator "github.com/cristiano-pacheco/bricks/pkg/validator"
 )
 
 type OrderGetInput struct {
@@ -92,13 +107,13 @@ type OrderGetOutput struct {
 
 type OrderGetUseCase struct {
 	orderRepository      port.OrderRepository
-	validator            bricksvalidator.Validator
+	validator            port.InputValidator
 	orderAccessValidator port.OrderAccessValidator
 }
 
 func NewOrderGetUseCase(
 	orderRepository port.OrderRepository,
-	validator bricksvalidator.Validator,
+	validator port.InputValidator,
 	orderAccessValidator port.OrderAccessValidator,
 ) *OrderGetUseCase {
 	return &OrderGetUseCase{
@@ -144,7 +159,6 @@ import (
 	"example.com/project/internal/modules/order/enum"
 	"example.com/project/internal/modules/order/model"
 	"example.com/project/internal/modules/order/port"
-	bricksvalidator "github.com/cristiano-pacheco/bricks/pkg/validator"
 )
 
 type OrderCreateInput struct {
@@ -159,10 +173,10 @@ type OrderCreateOutput struct {
 
 type OrderCreateUseCase struct {
 	orderRepository port.OrderRepository
-	validator       bricksvalidator.Validator
+	validator       port.InputValidator
 }
 
-func NewOrderCreateUseCase(repository port.OrderRepository, validator bricksvalidator.Validator) *OrderCreateUseCase {
+func NewOrderCreateUseCase(repository port.OrderRepository, validator port.InputValidator) *OrderCreateUseCase {
 	return &OrderCreateUseCase{orderRepository: repository, validator: validator}
 }
 

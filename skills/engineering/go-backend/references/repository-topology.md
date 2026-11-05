@@ -35,7 +35,6 @@ import (
 	"example.com/project/internal/modules/order/errs"
 	"example.com/project/internal/modules/order/model"
 	"example.com/project/internal/modules/order/port"
-	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -62,14 +61,10 @@ func (r *ReadWriteOrderRepository) find(ctx context.Context, db *gorm.DB, id uin
 }
 
 func (r *ReadWriteOrderRepository) FindByID(ctx context.Context, id uint64) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "ReadWriteOrderRepository.FindByID")
-	defer span.End()
 	return r.find(ctx, r.readDB, id)
 }
 
 func (r *ReadWriteOrderRepository) Create(ctx context.Context, value model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "ReadWriteOrderRepository.Create")
-	defer span.End()
 	if err := gorm.G[model.OrderModel](r.writeDB).Create(ctx, &value); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return model.OrderModel{}, errs.ErrOrderConflict
@@ -80,8 +75,6 @@ func (r *ReadWriteOrderRepository) Create(ctx context.Context, value model.Order
 }
 
 func (r *ReadWriteOrderRepository) Update(ctx context.Context, value model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "ReadWriteOrderRepository.Update")
-	defer span.End()
 	result := r.writeDB.WithContext(ctx).Model(&model.OrderModel{}).Where("id = ?", value.ID).
 		Select("status", "notes").Updates(&value)
 	if result.Error != nil {
@@ -94,8 +87,6 @@ func (r *ReadWriteOrderRepository) Update(ctx context.Context, value model.Order
 }
 
 func (r *ReadWriteOrderRepository) Delete(ctx context.Context, value model.OrderModel) (model.OrderModel, error) {
-	ctx, span := trace.Span(ctx, "ReadWriteOrderRepository.Delete")
-	defer span.End()
 	rows, err := gorm.G[model.OrderModel](r.writeDB).Where("id = ?", value.ID).Delete(ctx)
 	if err != nil {
 		return model.OrderModel{}, err

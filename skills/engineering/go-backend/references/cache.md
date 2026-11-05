@@ -41,7 +41,7 @@ type OrderSummaryCache interface {
 ```
 
 `internal/modules/order/cache/order_summary_cache.go`. Use the project's pinned
-Redis client and transport lifecycle; this example consumes the go-redis v9 universal interface published by Bricks.
+Redis client and transport lifecycle; this example consumes the process-owned go-redis v9 universal interface.
 
 ```go
 package cache
@@ -55,7 +55,6 @@ import (
 
 	"example.com/project/internal/modules/order/dto"
 	"example.com/project/internal/modules/order/port"
-	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -75,8 +74,6 @@ func NewOrderSummaryCache(client redis.UniversalClient) *OrderSummaryCache {
 }
 
 func (c *OrderSummaryCache) Get(ctx context.Context, id uint64) (dto.OrderSummary, bool, error) {
-	ctx, span := trace.Span(ctx, "OrderSummaryCache.Get")
-	defer span.End()
 	data, err := c.client.Get(ctx, c.key(id)).Bytes()
 	if errors.Is(err, redis.Nil) {
 		return dto.OrderSummary{}, false, nil
@@ -95,8 +92,6 @@ func (c *OrderSummaryCache) Get(ctx context.Context, id uint64) (dto.OrderSummar
 }
 
 func (c *OrderSummaryCache) Set(ctx context.Context, value dto.OrderSummary) error {
-	ctx, span := trace.Span(ctx, "OrderSummaryCache.Set")
-	defer span.End()
 	data, err := json.Marshal(orderSummaryValue{ID: value.ID, Status: value.Status})
 	if err != nil {
 		return fmt.Errorf("encode order cache: %w", err)
@@ -105,8 +100,6 @@ func (c *OrderSummaryCache) Set(ctx context.Context, value dto.OrderSummary) err
 }
 
 func (c *OrderSummaryCache) Delete(ctx context.Context, id uint64) error {
-	ctx, span := trace.Span(ctx, "OrderSummaryCache.Delete")
-	defer span.End()
 	return c.client.Del(ctx, c.key(id)).Err()
 }
 
@@ -120,29 +113,18 @@ serialization compatibility, delete, TTL, and cancellation. Application proof
 covers declared fallback and post-commit invalidation; a cache mock alone does
 not prove Redis expiration or delivery semantics.
 
-## Bricks Redis composition
+## Connection setup
 
-Use `bricks/pkg/redis.Module` for `redis.UniversalClient`, or `ClientModule` for
-the concrete Bricks wrapper when namespacing/stats are needed. Include one, not
-both. In v0.1.21 they provide `config.Config[redis.Config]` but the constructor
-consumes plain `redis.Config`; add one explicit projection provider at the shared
-owner, as [Redis](redis.md) shows.
-
-`UniversalClient()` does not automatically prefix keys. The adapter above owns
-its key prefix; with a Bricks wrapper, call `WithNamespace` explicitly. Inspect
-password/TLS behavior before configuring a plain local Redis: this baseline
-auto-enables TLS when a password is set. A metrics flag is not proof that every
-raw-client command is instrumented; inspect the actual instrumentation path.
-
-The baseline client parses `URL` and then overwrites its password and database
-with `Config.Password` and `Config.DB`. Supply credentials/DB through those
-actual fields; a password or `/1` embedded only in the URL is not sufficient.
+The adapter borrows the process-owned Redis connection. Follow [Redis](redis.md)
+only when client exposure or connection ownership changes. For Bricks APIs,
+topology, namespacing, credentials, or instrumentation, use the conditional
+[Bricks handoff](bricks.md). The cache guide owns policy, not connection mechanics.
 
 ## Publish the cache port
 
 `internal/modules/order/cache_fx.go`. Include this option in the owning module
 only when an operation consumes the cache port. The process provides the Redis
-universal interface through its shared Bricks composition; the adapter opens no
+universal interface through its shared connection composition; the adapter opens no
 new connection and its constructor still returns the concrete cache instance.
 
 ```go

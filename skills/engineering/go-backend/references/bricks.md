@@ -1,42 +1,28 @@
-# Bricks package selection
+# Bricks handoff
 
-Read when choosing infrastructure for a new project, introducing a Bricks
-package, or checking a framework API/version. A local business edit with verified
-infrastructure does not load this catalog.
+Read only for an unverified Bricks API, configuration field, module, or lifecycle contract. A business change with verified unchanged infrastructure does not load this guide.
 
-Resolve Bricks from go.mod and any replace directive. Check the selected
-package's implementation and Fx module. Examples were verified against v0.1.21,
-the JBN baseline. A newer local checkout does not establish support in that
-release, and these examples do not require a version change.
+## 1. Keep application policy here
 
-| Need | Bricks package under `github.com/cristiano-pacheco/bricks/pkg/` | Selected recipe |
-| --- | --- | --- |
-| YAML base/overlay, `env://`, typed subtree | `config` | [Configuration](configuration.md) |
-| PostgreSQL GORM pool, retry, shutdown | `database` | [Database](database.md) |
-| SQLite GORM pool | `database/sqlite`, only if present in the resolved version | [Database](database.md); verify dialect-specific transactions/migrations |
-| Structured code/status/detail | `errs` | [Error](error.md) |
-| Bounded JSON body | `http/request` | [Request](request.md) |
-| Envelope and error renderer | `http/response` | [Response](response.md) |
-| Server lifecycle and collected `Route` | `http/server/chi` | [HTTP router](http-router.md), [Bootstrap](bootstrap.md) |
-| Tagged input validation | `validator` | [Use case](usecase.md) |
-| Named acceptance rule | Application `port` + `validator` | [Validator](validator.md); the framework validates shape, not business eligibility |
-| Locale files and error translation | `i18n`, `i18n/locale` | [Locale](locale.md) |
-| Zap logging | `logger` | [Observability](observability.md) |
-| Prometheus operation metrics | `metrics` | [Observability](observability.md) |
-| OpenTelemetry lifecycle and spans | `otel/trace` | [Observability](observability.md) |
-| Explicitly requested or existing operation decorators | `ucdecorator` | [Usecase decorator](usecase-decorator.md) |
-| Page parsing/normalization/metadata | `paginator` | [Pagination](pagination.md) |
-| Redis connection lifecycle | `redis` | [Redis](redis.md), [Cache](cache.md) |
-| Embedded SQL runner | `migration` | [Migration](migration.md) |
-| PostgreSQL/Redis containers and resets | `itestkit` | [Integration bootstrap](integration-bootstrap.md) |
+`go-backend` owns the workflow, responsibilities, naming, and test boundaries. The standalone `bricks` skill owns framework usage. Project contracts override either skill's defaults. Application constructors stay concrete. External factories keep their actual signatures.
 
-Application-owned constructors return concrete instances. Consume external APIs
-as actually declared: for example, `validator.New() (validator.Validator, error)`
-returns the framework's interface; its implementation type is private. Register
-`validator.Module` once instead of inventing an application constructor that
-pretends to return that private type.
+## 2. Load the specialist guide
 
-Create only needed infrastructure. A calculation needs no database; an added
-HTTP field needs no new server; an established project keeps its accepted stack.
-Reuse Bricks mechanisms instead of creating parallel loaders, renderers,
-route registries, metrics chains, or container fixtures.
+Locate `bricks` through the available skill list. Read its `SKILL.md` once and select the smallest matching guide or recipe. Any Bricks destination named by a backend reference is relative to that skill directory, not this one.
+
+Read each destination once. Do not load guides for every imported dependency. Adapt examples to the application's owned components and accepted layout. A framework tutorial does not select decoration or authorize a test boundary.
+
+## 3. Verify uncertain APIs
+
+Use tutorials first for ordinary usage. For version-sensitive behavior, undocumented APIs, or discrepancies, follow Bricks `references/local-source.md`. A newer checkout does not establish support in the application's selected dependency. Do not upgrade the dependency to fit an example.
+
+If the skill is unavailable, inspect only the relevant locally installed package and its callers:
+
+1. Set `GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOVCS='*:off'` before Go queries.
+2. Preserve workspace, replacements, vendor mode, alternate module file, and overlays. Resolve the requested package with `go list -find -json` using effective vendor mode or `-mod=readonly`.
+3. Read the returned source directory and relevant callers. Stop when the requested contract is supported. Do not fetch modules, modify dependency files, or search the machine for another version.
+4. If source or tooling is unavailable, report the limitation and request the missing guide or source. Do not invent framework behavior.
+
+## 4. Resume the backend task
+
+Continue the original playbook. Apply [Test policy](test-policy.md) to the affected guarantees. Record execution evidence and unverified checks. Framework inspection does not prove runtime behavior.

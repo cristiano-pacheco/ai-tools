@@ -70,5 +70,7 @@ establishes none of those external guarantees.
 
 Read [Bootstrap](bootstrap.md) when process composition changes and
 [Observability](observability.md) when reporting/span/metric behavior changes.
-Bricks resource acquisition and readiness vary by version; use the actual
-constructor/hook contract rather than inferring it from the `Module` name.
+Resource acquisition and readiness depend on the selected implementation. Use
+the actual constructor and hook contract rather than inferring it from a module
+name. Follow [Bricks handoff](bricks.md) only when that framework contract needs
+verification.

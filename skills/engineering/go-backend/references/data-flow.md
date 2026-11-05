@@ -48,7 +48,7 @@ no executable step.
 | --- | --- | --- |
 | Process start | Executable main and `cmd/root.go` | Build required graph; register commands; call root ExecuteContext |
 | Business CLI entrypoint | `cmd/<noun>_<action>_command.go`, Cobra RunE | Parse/map command values; invoke one public operation; write Output |
-| HTTP process | `cmd/server_command.go` and Bricks server | Run HTTP lifecycle; no business operation for starting a server |
+| HTTP process | `cmd/server_command.go` and the application server | Run HTTP lifecycle; no business operation for starting a server |
 | HTTP route | `http/chi/router/<resource>_router.go` | Attach method/path/middleware to handler method |
 | HTTP business entrypoint | `http/chi/handler/<resource>_handler.go` | Decode/map request; invoke one public operation; render HTTP DTO/error |
 | HTTP wire values | `http/dto/<resource>_dto.go` | Request/response structures; no application workflow |
@@ -148,7 +148,7 @@ The exact collaborator subset and ordering must be stated before implementation.
 | Operation Input | Entrypoint -> operation | Application-owned contract, independent of wire/storage/SDK types |
 | Model value | Repository -> its module's application code | No model exposed as public Output or HTTP response |
 | Operation Output | Application -> entrypoint | Transport maps it to its own output representation |
-| HTTP response DTO | Handler -> Bricks JSON response | HTTP wire contract only |
+| HTTP response DTO | Handler -> shared response renderer | HTTP wire contract only |
 | Error | Failed collaborator -> use case -> entrypoint | No success result rendered; shared boundary owns external representation |
 
 Use `cmd.Context()` or `r.Context()` as the invocation context, and forward it

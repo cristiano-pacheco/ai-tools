@@ -1,117 +1,41 @@
 # Server bootstrap
 
-Read when creating/changing the server process graph, root command or its
-base platform configuration. [CLI](cli.md) owns the Cobra lifecycle runner.
+Read when creating or changing the server process graph. [CLI](cli.md) owns the Cobra lifecycle runner. [Fx](fx.md) owns construction and interface bindings.
 
-## Default server graph
+## 1. Select the required resources
 
-`cmd/application.go`. This graph mirrors the JBN approach: shared infrastructure
-once, business modules once, HTTP lifecycle once. A project's actual module list
-and authentication integration replace the example choices. Only add Redis when
-an operation needs it. Optional resources remain behind consumers.
+List the public operations and transports the process exposes. Include shared infrastructure once and each business module once. Add a database, Redis, translation, metrics, or tracing only when the selected behavior needs it. Keep authentication connected to real middleware or session infrastructure. Never fabricate a default actor.
 
-```go
-package cmd
+## 2. Compose the process
 
-import (
-	"example.com/project/internal/modules/order"
-	"example.com/project/internal/shared/database"
-	"github.com/cristiano-pacheco/bricks/pkg/http/response"
-	brickschi "github.com/cristiano-pacheco/bricks/pkg/http/server/chi"
-	"github.com/cristiano-pacheco/bricks/pkg/i18n"
-	"github.com/cristiano-pacheco/bricks/pkg/logger"
-	"github.com/cristiano-pacheco/bricks/pkg/metrics"
-	"github.com/cristiano-pacheco/bricks/pkg/otel/trace"
-	"github.com/cristiano-pacheco/bricks/pkg/validator"
-	"go.uber.org/fx"
-)
-
-var ServerModule = fx.Module("server",
-	logger.Module, validator.Module, response.Module,
-	metrics.Module, i18n.Module, trace.Module,
-	database.Module, order.Module, brickschi.Module,
-)
-```
-
-`cmd/root.go`. The caller supplies trusted identity resolution from real
-middleware/session infrastructure. There is no fabricated default actor.
-[CLI](cli.md) owns `NewServerCommand` and cancellation/shutdown behavior.
+`cmd/application.go` can expose application composition without hard-coding framework modules in each business module:
 
 ```go
 package cmd
 
-import (
-	"example.com/project/internal/modules/order"
-	"example.com/project/internal/modules/order/http/chi/handler"
-	"github.com/spf13/cobra"
-	"go.uber.org/fx"
-)
+import "go.uber.org/fx"
 
-func NewRootCommand(actorID handler.ActorID) *cobra.Command {
-	root := &cobra.Command{Use: "app", SilenceErrors: true, SilenceUsage: true}
-	root.AddCommand(
-		NewServerCommand(ServerModule, fx.Supply(actorID)),
-		NewMigrateCommand(order.Module),
-	)
-	return root
+func ServerOptions(platform fx.Option, businessModules ...fx.Option) fx.Option {
+    options := []fx.Option{platform}
+    options = append(options, businessModules...)
+    return fx.Options(options...)
 }
 ```
 
-The executable supplies a signal-cancelled context to `ExecuteContext`, prints
-one returned error and sets the process exit status. Business commands consume
-published operations; lifecycle and migration commands have no business-use-case
-wrapper. Fx providers are lazy: `brickschi.Module` forces server construction,
-which reaches grouped routes, handlers, concrete use cases and their dependencies.
-The default graph has no use-case decorator module. Add its module/publication
-only for an explicit request or an existing decorated use case being changed;
-other decorated operations do not change the default for a new use case.
+The caller supplies the actual platform and business modules. This example is a composition fragment, not a complete server. For a Bricks server, follow [Bricks handoff](bricks.md) to its Chi setup or complete HTTP recipe. Add only the component guides needed for missing contracts. Do not load all package guides simply because the server imports them.
 
-## Base configuration
+Provide concrete use cases directly. Add decorator dependencies and publication only for an explicit request or an existing decorated operation being changed.
 
-`config/base.yaml`. This contains the actual fields expected by v0.1.21 modules,
-not settings copied from a newer checkout. HTTP ports are distinct and required;
-this version always starts a separate metrics listener. OTel is initialized once
-with export disabled locally. Supply real database credentials externally.
+## 3. Connect the command
 
-```yaml
-app:
-  database:
-    host: localhost
-    port: 5432
-    name: project
-    user: "env://DATABASE_USER"
-    password: "env://DATABASE_PASSWORD"
-    sslmode: false
-    maxopenconnections: 10
-    maxidleconnections: 5
-  logger:
-    level: info
-    encoding: json
-    outputpaths: [stdout]
-    erroroutputpaths: [stderr]
-  http:
-    port: 8080
-    metricsport: 9090
-    readtimeout: 15s
-    writetimeout: 15s
-    idletimeout: 60s
-    shutdowntimeout: 10s
-  open-telemetry:
-    app_name: project
-    app_version: local
-    trace_enabled: false
-  i18n:
-    language: en
-```
+Use the existing `NewServerCommand` from [CLI](cli.md). Supply trusted identity and process options at the root. The executable uses a signal-cancelled context, prints one returned error, and sets the exit status after cleanup.
 
-Validate required project secrets/pool bounds at startup. A config file alone
-does not prove valid required values; [Configuration](configuration.md) owns
-loader semantics. A newer resolved version may support listener addresses,
-disabling metrics, synchronous binds and SQLite; inspect that version before
-using those options. `/healthz` in this baseline is a static HTTP response,
-not a database/Redis readiness probe.
+Keep migration execution in its separate [migration command](migration-command.md) when that is the project's deployment contract. A migration-only command does not start HTTP.
 
+## 4. Verify startup and readiness
 
-*Check:* one process owner for each platform module, real trusted identity,
-reachable routes/public operations, matching config fields and actual readiness
-evidence. Migration and Redis setup load only for those capabilities.
+Use fields supported by the application's resolved dependency. Do not copy a newer version's YAML into an older release. Validate project secrets and pool bounds before use.
+
+Force the intended server consumer in the graph. Distinguish construction, startup, listener readiness, and dependency health. A static health route does not prove database readiness. Listener startup behavior can differ by framework version, so verify the actual installed contract when that guarantee matters.
+
+Done when required routes and operations are reachable, each resource has one owner, configuration loads, and readiness and shutdown have execution evidence or explicit gaps.

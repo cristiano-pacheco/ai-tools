@@ -97,7 +97,6 @@ import (
 	"example.com/project/internal/modules/order/enum"
 	"example.com/project/internal/modules/order/errs"
 	"example.com/project/internal/modules/order/port"
-	bricksvalidator "github.com/cristiano-pacheco/bricks/pkg/validator"
 	"gorm.io/gorm"
 )
 
@@ -114,13 +113,13 @@ type OrderConfirmOutput struct {
 type OrderConfirmUseCase struct {
 	orders       port.OrderTransactionalRepository
 	transactions port.TransactionProvider
-	validator    bricksvalidator.Validator
+	validator    port.InputValidator
 	access       port.OrderAccessValidator
 }
 
 func NewOrderConfirmUseCase(
 	orders port.OrderTransactionalRepository, transactions port.TransactionProvider,
-	validator bricksvalidator.Validator, access port.OrderAccessValidator,
+	validator port.InputValidator, access port.OrderAccessValidator,
 ) *OrderConfirmUseCase {
 	return &OrderConfirmUseCase{orders: orders, transactions: transactions, validator: validator, access: access}
 }

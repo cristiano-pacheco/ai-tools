@@ -27,9 +27,11 @@ Reusable skills and reference material for AI-assisted engineering work.
 | `ai-update-standards` | Recording session lessons in coding standards |
 | `commit` | Committing staged changes with a Conventional Commit message |
 | `deslop` | Removing unnecessary AI-generated complexity from a diff |
+| `go-backend` | Routing modular Go backend work through focused recipes and Bricks infrastructure |
 | `go-modular-bricks` | Routing REST and CLI development through Bricks contracts |
 | `go-modular-bricks-review` | Reviewing Go Bricks diffs against source contracts, local standards, and ADR exceptions |
 | `go-modular-bricks-standards` | Generating self-contained project coding standards from Bricks contracts for review subagents |
+| `unslop` | Removing AI tells from prose such as docs, commit messages, and PR text |
 
 Each skill defines its own trigger and instructions in its `SKILL.md`. Read that file before using or changing a skill.
 

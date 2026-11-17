@@ -1,0 +1,5 @@
+interface:
+  display_name: "ai-implement-ticket"
+  short_description: "Implement, review, and commit one ticket"
+policy:
+  allow_implicit_invocation: true

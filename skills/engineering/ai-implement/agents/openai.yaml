@@ -1,5 +1,5 @@
 interface:
   display_name: "ai-implement"
-  short_description: "Build work from a spec or tickets"
+  short_description: "Implement one ticket"
 policy:
   allow_implicit_invocation: false

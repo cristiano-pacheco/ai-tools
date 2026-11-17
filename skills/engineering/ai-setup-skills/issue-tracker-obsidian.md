@@ -17,9 +17,8 @@ Write specs, tickets, wayfinding maps, and tracker comments directly to the user
 - One directory per feature
 - The spec is `spec.md`
 - Write one file per implementation ticket at `issues/<NN>-<slug>.md`. Number tickets from `01` in dependency order, blockers first. Never combine tickets into one file
-- Record triage state in a `Status:` line near the top of each issue file. Use the role strings from `triage-labels.md`. Preserve existing Markdown formatting, including `**Status:**`, when updating the field
-- Implementation tickets declare `Blocked by` using numbers/titles within the same feature, or `None (can start immediately)`. Every blocker must identify an existing ticket. Missing or ambiguous references block execution
-- Claim a ticket by updating its existing status field to `claimed` and saving before work starts. Only one agent works a claimed ticket at a time. Filesystem edits do not provide atomic claims, so concurrent agents require external coordination
+- Implementation tickets carry YAML frontmatter, defined in [Implementation ticket frontmatter](#implementation-ticket-frontmatter)
+- Claim a ticket by setting its status to `claimed` and saving before work starts. Only one agent works a claimed ticket at a time. Filesystem edits do not provide atomic claims, so one dispatcher (a person or `ai-implement-spec`) starts each ticket
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 ## When a skill says "publish to the issue tracker"
@@ -30,13 +29,39 @@ Create the artifact at the path defined in Conventions or Wayfinding operations.
 
 Read the complete referenced file, including comments. Resolve an issue number within the identified feature's `issues/` directory; if the feature or ticket is ambiguous, ask for the exact path rather than selecting by similarity or recency.
 
+## Implementation ticket frontmatter
+
+Implementation issues (the `issues/NN-slug.md` tickets produced from a spec) start with this frontmatter:
+
+```yaml
+---
+status: ready-for-agent
+type: task
+blocked_by: ["01", "03"]
+---
+```
+
+- `status` is one of `ready-for-agent`, `claimed`, `needs-human`, `resolved`, or a triage role from `triage-labels.md`.
+- `blocked_by` lists the two-digit numbers of tickets in the same feature that must be resolved first, or `[]`. Every entry must name an existing ticket. A missing or ambiguous entry blocks execution.
+- Change one field by editing its frontmatter line. Preserve the rest of the file.
+
 ## Implementation ticket lifecycle
 
-Implementation issues (the `issues/NN-slug.md` tickets produced from a spec) move through `ready-for-agent → claimed → resolved` on their `Status:` line. A ticket is claimable when its status is `ready-for-agent` and every ticket listed in its `Blocked by` field is `resolved`; claim per [Conventions](#conventions), then:
+Tickets move `ready-for-agent → claimed → resolved`, or `claimed → needs-human`. A ticket is claimable when its status is `ready-for-agent` and every ticket in `blocked_by` is `resolved`. A person clears a `needs-human` obstacle and sets the status back to `ready-for-agent`.
 
-- The `- [ ]` checklist items are the **acceptance criteria** — they define when the ticket may resolve. Tick each to `- [x]` the moment it is verifiably done (code, config, and tests all observable), as you go rather than in bulk at the end.
-- Resolve only after every criterion is ticked, `ai-implement`'s required checks pass, the review has no unresolved Standards or Spec findings, and the reviewed change is committed. Append a completion comment under `## Comments` with the commit hash, gates run, review findings, and deferred follow-ups. Set the existing status field to `resolved` and read back the file to verify the saved state.
-- If work fails or is interrupted, preserve the worktree and claim. Leave unverified criteria unchecked. Report the ticket path, current state, and blocker. Record the blocker under `## Comments` when the file is writable.
+- The `- [ ]` checklist items are the **acceptance criteria**. Tick each to `- [x]` as soon as it is verifiably done (code, config, and tests all observable).
+- Resolve only after every criterion is ticked, the required checks pass, the review has no unresolved Standards or Spec findings, and the reviewed change is committed. Set `status: resolved` and read back the file to verify the saved state. A resolved ticket gets no comment; the commit records the work.
+- To mark a ticket as needing a person, set `status: needs-human`, leave unverified criteria unticked, and preserve the worktree. Append the failure comment below under `## Comments`.
+
+The failure comment records only what went wrong, one fact per line, with no prose:
+
+```markdown
+- needs-human: <the obstacle in one sentence>
+- action: <what a person must do>
+- review: <file:line> <unresolved finding>
+```
+
+Write one `review:` line per unresolved review finding and omit the line when there are none.
 
 ## Wayfinding operations
 

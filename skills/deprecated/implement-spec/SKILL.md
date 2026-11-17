@@ -1,5 +1,5 @@
 ---
-name: ai-implement-spec
+name: implement-spec
 description: "Implement the result of /ai-to-spec and /ai-to-tickets in code."
 disable-model-invocation: true
 ---

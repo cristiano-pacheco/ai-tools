@@ -39,7 +39,7 @@ Summarize what exists and what setup would replace. Ask one section at a time, w
 
 - **GitHub**: GitHub Issues through `gh`;
 - **GitLab**: GitLab Issues through `glab`;
-- **Beads**: the Beads workspace at `$BEADS_DIR` or the repo's `.beads/`, through `bd`, with `<project-name>` set to the basename of the repository root, or of the current directory when it is not in a git repo, never the Beads workspace name;
+- **Beads**: the Beads workspace at `$BEADS_DIR` or the repo's `.beads/`, through `bd`, with `<project-name>` set to the basename of the repository root, or of the current directory when it is not in a git repo, never the Beads workspace name, and `<project-repo>` set to the canonical repository path from step 1, or the current directory's absolute path when it is not in a git repo;
 - **Local markdown**: files under `.scratch/<feature>/`;
 - **Obsidian**: files under `$OBSIDIAN_AI_VAULT/engineering/<project>/workplans/<feature>/`;
 - **Workplan**: the local tracker through `wp --json` and its Workplan skills;

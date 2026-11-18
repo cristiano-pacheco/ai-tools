@@ -1,0 +1,5 @@
+interface:
+  display_name: "ai-resolve-pr-comments"
+  short_description: "Reply to and resolve unresolved PR review comments"
+policy:
+  allow_implicit_invocation: false

@@ -20,8 +20,8 @@ Reusable skills and reference material for AI-assisted engineering work.
 | `ai-execute-plan` | Executing an implementation plan |
 | `ai-full-code-review` | Production-risk review of a branch diff |
 | `ai-implement` | Implementing one ticket by hand |
-| `ai-implement-spec` | Implementing every ticket of a spec in parallel worktrees |
-| `ai-implement-ticket` | The single-ticket workflow that `ai-implement` and `ai-implement-spec` run |
+| `ai-implement-ticket` | The single-ticket workflow that `ai-implement` runs |
+| `ai-resolve-pr-comments` | Replying to and resolving every unresolved PR review comment |
 | `ai-review-changes` | Reviewing a diff against standards and its spec |
 | `ai-setup-skills` | Configuring issue tracking, triage labels, and domain docs |
 | `ai-to-spec` | Turning a conversation into a tracker spec |

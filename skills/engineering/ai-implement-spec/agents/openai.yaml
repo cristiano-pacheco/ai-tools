@@ -1,5 +1,0 @@
-interface:
-  display_name: "ai-implement-spec"
-  short_description: "Implement every ticket of a spec in parallel"
-policy:
-  allow_implicit_invocation: false

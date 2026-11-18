@@ -1,10 +1,10 @@
 ---
-name: address-pr-comments
+name: ai-resolve-pr-comments
 description: Replies to and resolves all unresolved review comments on a pull request.
 disable-model-invocation: true
 ---
 
-# Address PR Comments
+# Resolve PR Comments
 
 Process every unresolved review comment on a pull request until zero unresolved threads remain. For each comment: reply (rebut or fix), push if needed, reply on the thread, then resolve the thread.
 

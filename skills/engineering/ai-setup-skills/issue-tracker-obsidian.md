@@ -1,5 +1,7 @@
 # Issue tracker: Obsidian
 
+Implementation tickets follow `docs/agents/ticket-lifecycle.md`. Read it before you claim, move, or resolve one.
+
 ## Output to Obsidian
 
 Write specs, tickets, wayfinding maps, and tracker comments directly to the user's Obsidian vault on the local filesystem, without MCP. Group them by project.
@@ -12,14 +14,43 @@ Write specs, tickets, wayfinding maps, and tracker comments directly to the user
 2. If no project is configured and the command fails, propose a kebab-case name from `basename "$PWD"` and confirm it with the user before writing.
 3. Paths below are relative to the feature directory, `<vault>/engineering/<project>/workplans/<feature>/`.
 
+## Preflight
+
+Run this once per session, before the first tracker call:
+
+```sh
+vault="${OBSIDIAN_AI_VAULT:-$HOME/Documents/obsidian/obsidian}"
+test -d "$vault" || { echo "vault not found: $vault"; exit 1; }
+test -d "$vault/engineering/<project>/workplans" || echo "no workplans yet for <project>"
+```
+
+If the vault is missing, stop the tracker operation and tell the user to set `OBSIDIAN_AI_VAULT`. A missing `workplans` directory is fine before the first publish; for any other operation, stop and report it.
+
+## Model
+
+- **Spec**: one feature directory, with the spec in `spec.md`.
+- **Ticket**: one file at `issues/<NN>-<slug>.md` inside its spec's feature directory.
+- **IDs**: a ticket's ID is its two-digit `NN`, unique within the feature. Refer to a ticket outside its feature as `<feature>/<NN>`.
+- **Project**: the `<project>` directory. Every ticket of a feature belongs to that project.
+
+Obsidian has no locking or cycle detection. Edits are plain file writes, so read a ticket immediately before every change and read it back after.
+
 ## Conventions
 
-- One directory per feature
-- The spec is `spec.md`
-- Write one file per implementation ticket at `issues/<NN>-<slug>.md`. Number tickets from `01` in dependency order, blockers first. Never combine tickets into one file
-- Implementation tickets carry YAML frontmatter, defined in [Implementation ticket frontmatter](#implementation-ticket-frontmatter)
-- Claim a ticket by setting its status to `claimed` and saving before work starts. Only one agent works a claimed ticket at a time. Filesystem edits do not provide atomic claims, so one dispatcher (a person or `ai-implement-spec`) starts each ticket
-- Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- **Create a spec**: write `spec.md` in a new feature directory.
+- **Create a ticket**: write `issues/<NN>-<slug>.md` with the frontmatter below. Number tickets from `01` in dependency order, blockers first. Never combine tickets into one file.
+- **Blocking**: the `blocked_by` frontmatter list. Every entry names an existing ticket in the same feature. A missing or ambiguous entry blocks execution. A ticket is unblocked when every listed ticket is `resolved`. Before adding an edge, follow the blocker's own `blocked_by` chain and refuse the edge if it leads back to the blocked ticket.
+- **Count open blockers**: read each ticket in `blocked_by` and count those whose `status` is not `resolved`. 0 means startable.
+- **List dependents**: `grep -l -E '^blocked_by:.*"<NN>"' <feature>/issues/*.md`
+- **Read a ticket**: read the complete file, including frontmatter and comments.
+- **List tickets**: `grep -H -E '^(status|assignee|labels):' <feature>/issues/*.md`, in file-name order. Filter the output by status or label; read the hits that need body or comments.
+- **List specs**: `ls -d <vault>/engineering/<project>/workplans/*/`
+- **Comment on a ticket**: append under a `## Comments` heading at the bottom of the file, creating the heading if absent. Start each comment with `### <author> · <ISO-8601 time>`, where `<author>` is `git config user.name` or the agent's role.
+- **Apply / remove labels**: edit the `labels` frontmatter list. Use only labels from `triage-labels.md` or ones already in use; check with `grep -h '^labels:' <feature>/issues/*.md`.
+- **Change one field**: edit its frontmatter line and preserve the rest of the file.
+- **Update a body**: read the file immediately before, then change only the intended part. Ticking an acceptance criterion turns `- [ ]` into `- [x]`.
+- **Reopen**: set `status: ready-for-agent` and clear `resolution`.
+- **Delete**: remove the file only for a ticket that should never have existed, after **List dependents** shows none. Otherwise use wontfix.
 
 ## When a skill says "publish to the issue tracker"
 
@@ -28,6 +59,10 @@ Create the artifact at the path defined in Conventions or Wayfinding operations.
 ## When a skill says "fetch the relevant ticket"
 
 Read the complete referenced file, including comments. Resolve an issue number within the identified feature's `issues/` directory; if the feature or ticket is ambiguous, ask for the exact path rather than selecting by similarity or recency.
+
+## When a skill says "resolve a ticket" or "close work"
+
+Use **Resolve** under Ticket lifecycle.
 
 ## Implementation ticket frontmatter
 
@@ -38,30 +73,42 @@ Implementation issues (the `issues/NN-slug.md` tickets produced from a spec) sta
 status: ready-for-agent
 type: task
 blocked_by: ["01", "03"]
+assignee: ""
+labels: []
+resolution: ""
 ---
 ```
 
-- `status` is one of `ready-for-agent`, `claimed`, `needs-human`, `resolved`, or a triage role from `triage-labels.md`.
-- `blocked_by` lists the two-digit numbers of tickets in the same feature that must be resolved first, or `[]`. Every entry must name an existing ticket. A missing or ambiguous entry blocks execution.
-- Change one field by editing its frontmatter line. Preserve the rest of the file.
+- `status` is a state from `ticket-lifecycle.md` or a triage role from `triage-labels.md`.
+- `blocked_by` lists the two-digit numbers of tickets in the same feature that must be resolved first, or `[]`.
+- `assignee` names the agent holding a `claimed` ticket, and is empty otherwise.
+- `labels` lists extra labels, or `[]`.
+- `resolution` is set when the ticket reaches a terminal state, and is empty otherwise.
 
-## Implementation ticket lifecycle
+A missing `assignee`, `labels`, or `resolution` line counts as empty. Add the line when you first set it.
 
-Tickets move `ready-for-agent → claimed → resolved`, or `claimed → needs-human`. A ticket is claimable when its status is `ready-for-agent` and every ticket in `blocked_by` is `resolved`. A person clears a `needs-human` obstacle and sets the status back to `ready-for-agent`.
+## Ticket lifecycle
 
-- The `- [ ]` checklist items are the **acceptance criteria**. Tick each to `- [x]` as soon as it is verifiably done (code, config, and tests all observable).
-- Resolve only after every criterion is ticked, the required checks pass, the review has no unresolved Standards or Spec findings, and the reviewed change is committed. Set `status: resolved` and read back the file to verify the saved state. A resolved ticket gets no comment; the commit records the work.
-- To mark a ticket as needing a person, set `status: needs-human`, leave unverified criteria unticked, and preserve the worktree. Append the failure comment below under `## Comments`.
+`docs/agents/ticket-lifecycle.md` defines the states and who moves a ticket between them. Obsidian stores them as:
 
-The failure comment records only what went wrong, one fact per line, with no prose:
+| State | Storage |
+| --- | --- |
+| `ready-for-agent` | `status: ready-for-agent`, empty `assignee` |
+| `claimed` | `status: claimed`, `assignee` is the holder |
+| `needs-human` | `status: needs-human`, empty `assignee` |
+| `resolved` | `status: resolved`, `resolution: "resolved: <commit-sha>"` |
+| `wontfix` | `status: wontfix`, `resolution: "wontfix: <why>"` |
 
-```markdown
-- needs-human: <the obstacle in one sentence>
-- action: <what a person must do>
-- review: <file:line> <unresolved finding>
-```
+Each move below is guarded: read the file first and confirm the From state. On a mismatch, write nothing; the ticket moved, so report it. After writing, read the file back and confirm the saved frontmatter.
 
-Write one `review:` line per unresolved review finding and omit the line when there are none.
+- **Check a named ticket**: read its frontmatter. It is claimable when `status` is `ready-for-agent`, `assignee` is empty, and **Count open blockers** is 0.
+- **Next ticket**: scan `issues/*.md` in file-name order. The first claimable ticket is next.
+- **Claim**: set `status: claimed` and `assignee: <you>`, then read the file back and confirm both. The claim is not atomic, so a single dispatcher, a person or one agent, starts each ticket.
+- **Resolve**: set `status: resolved` and `resolution: "resolved: <commit-sha>"`, clear `assignee`, and read back the file.
+- **Needs a person**: append the failure comment under `## Comments`, then set `status: needs-human` and clear `assignee`. Leave unverified criteria unticked and preserve the worktree.
+- **Person clears**: from `needs-human`, set `status: ready-for-agent`.
+- **Release an abandoned claim**: from `claimed`, set `status: ready-for-agent` and clear `assignee`.
+- **Wontfix**: **List dependents**; each must be `wontfix` or have this ticket removed from its `blocked_by`. Then set `status: wontfix` and `resolution: "wontfix: <why>"`.
 
 ## Wayfinding operations
 

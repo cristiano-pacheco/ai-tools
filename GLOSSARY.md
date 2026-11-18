@@ -23,7 +23,7 @@ A declared dependency meaning one ticket cannot start until another is resolved.
 _Avoid_: Dependency, prerequisite, blocker
 
 **Frontier**:
-The set of ready-for-agent and fix-code-review tickets whose blocking edges all point to resolved tickets.
+The set of unclaimed ready-for-agent tickets whose blocking edges all point to resolved tickets.
 _Avoid_: Queue, backlog, next tickets
 
 ### Ticket status
@@ -31,32 +31,24 @@ _Avoid_: Queue, backlog, next tickets
 **ready-for-agent**:
 A ticket fully specified for an agent to implement without a person.
 
-**in-progress**:
-A ticket one implementer has taken and is working on.
-_Avoid_: Claimed, started
-
-**ready-for-agent-review**:
-A ticket whose work is committed on its branch and waits for a reviewer.
-_Avoid_: In review, pending review
-
-**fix-code-review**:
-A ticket whose review found problems, waiting for an implementer to fix them.
-_Avoid_: Changes requested, rejected
+**claimed**:
+A ticket one agent holds and is working on; no other agent may take it.
+_Avoid_: In progress, started, assigned
 
 **needs-human**:
-A ticket an agent stopped on during implementation or review because only a person can clear the obstacle; it returns to ready-for-agent once cleared.
+A ticket an agent stopped on because only a person can clear the obstacle; it returns to ready-for-agent once cleared.
 _Avoid_: Blocked, stuck, failed
 
 **ready-for-human**:
 A ticket decided at triage to be implemented by a person, never picked by an agent.
 
 **resolved**:
-A ticket whose acceptance criteria are met, whose review found no problems, and whose work is merged.
+A ticket whose acceptance criteria are met, whose review has no unresolved findings, and whose work is committed.
 _Avoid_: Done, closed, complete
 
-**cancelled**:
-An accepted ticket a person dropped before it was resolved.
-_Avoid_: Wontfix, abandoned, deleted
+**wontfix**:
+A ticket a person decided will not be done, at triage or after acceptance.
+_Avoid_: Cancelled, abandoned, deleted
 
 ### Execution
 

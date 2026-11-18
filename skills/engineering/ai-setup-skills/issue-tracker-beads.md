@@ -1,5 +1,7 @@
 # Issue tracker: Beads
 
+Implementation tickets follow `docs/agents/ticket-lifecycle.md`. Read it before you claim, move, or resolve one.
+
 Issues and specs live in a Beads workspace that can hold several projects. Use the `bd` CLI for all operations.
 
 ## Preflight
@@ -12,7 +14,7 @@ bd where
 bd config get status.custom
 ```
 
-If `bd` is missing, stop the tracker operation and tell the user to install Beads. `bd where` prints the workspace: the `BEADS_DIR` path when that variable is set, even outside this repo, otherwise the repo's `.beads/` directory. If `bd where` errors, stop and tell the user to check `BEADS_DIR` or run `bd init`. If `status.custom` lacks `ready_for_agent_review`, `fix_code_review`, or `needs_human`, stop and tell the user to rerun `/ai-setup-skills`.
+If `bd` is missing, stop the tracker operation and tell the user to install Beads. `bd where` prints the workspace: the `BEADS_DIR` path when that variable is set, even outside this repo, otherwise the repo's `.beads/` directory. If `bd where` errors, stop and tell the user to check `BEADS_DIR` or run `bd init`. If `status.custom` lacks `needs_human`, stop and tell the user to rerun `/ai-setup-skills`.
 
 ## Model
 
@@ -57,7 +59,7 @@ Read it as in **Read an issue** above.
 
 ## When a skill says "resolve a ticket" or "close work"
 
-Run `bd close <id> --reason "resolved: <commit-sha>"`, then `bd show <id>` and confirm the status is `closed` with that reason. Closing unblocks the ticket's dependents. A ticket in `ready-for-agent-review` is resolved by its reviewer instead, with **Resolve** under Ticket lifecycle.
+Run `bd close <id> --reason "resolved: <commit-sha>"`, then `bd show <id>` and confirm the status is `closed` with that reason. Closing unblocks the ticket's dependents.
 
 ## Ticket lifecycle
 
@@ -65,28 +67,22 @@ Run `bd close <id> --reason "resolved: <commit-sha>"`, then `bd show <id>` and c
 
 | State | Storage |
 | --- | --- |
-| `ready-for-agent` | status `open`, label `ready-for-agent` |
-| `in-progress` | status `in_progress`, assignee is the implementer |
-| `ready-for-agent-review` | status `ready_for_agent_review`, assignee empty until a reviewer takes it |
-| `fix-code-review` | status `fix_code_review`, no assignee |
+| `ready-for-agent` | status `open`, label `ready-for-agent`, no assignee |
+| `claimed` | status `in_progress`, assignee is the holder |
 | `needs-human` | status `needs_human`, no assignee |
-| `resolved` | closed, reason `resolved: <merge-sha>` |
-| `cancelled` | closed, reason `cancelled: <why>`, label `cancelled` |
+| `resolved` | closed, reason `resolved: <commit-sha>` |
+| `wontfix` | closed, reason `wontfix: <why>`, label `wontfix` |
 
-The review round is the `review_round` metadata key, absent until the first review. The three custom statuses keep dependents blocked. Every `--if-status` or `--if-assignee` guard writes nothing on a mismatch and exits 13; treat 13 as "the ticket moved" and re-read it.
+The custom `needs_human` status keeps dependents blocked. Every `--if-status` guard writes nothing on a mismatch and exits 13; treat 13 as "the ticket moved" and re-read it.
 
-- **Check a named ticket**: `bd show <id> --json | jq '.[0] | {status, assignee, project: .metadata.project, round: .metadata.review_round, open_blockers: [.dependencies[] | select(.dependency_type=="blocks" and .status!="closed") | .id]}'`. It is claimable when the status is `open` or `fix_code_review`, the assignee is `null`, the project is `<project-name>`, and `open_blockers` is `[]`.
-- **Next ticket to implement**: `bd ready -l ready-for-agent --metadata-field project=<project-name> --exclude-type epic --unassigned --sort oldest --json --brief`, plus `--parent <spec-id>` for one spec. It returns `open` and `fix_code_review` tickets with no open blocker; the first is next.
+- **Check a named ticket**: `bd show <id> --json | jq '.[0] | {status, assignee, labels, project: .metadata.project, open_blockers: [.dependencies[] | select(.dependency_type=="blocks" and .status!="closed") | .id]}'`. It is claimable when the status is `open`, the labels include `ready-for-agent`, the assignee is `null`, the project is `<project-name>`, and `open_blockers` is `[]`.
+- **Next ticket**: `bd ready -l ready-for-agent --metadata-field project=<project-name> --exclude-type epic --unassigned --sort oldest --json --brief`, plus `--parent <spec-id>` for one spec. It returns unassigned `open` tickets with no open blocker; the first is next.
 - **Claim**: `bd update <id> --claim`. It sets the assignee to you and the status to `in_progress`, and fails when someone else holds the ticket.
-- **To review**: `bd update <id> --if-status in_progress --status ready_for_agent_review --assignee ''`
-- **Next ticket to review**: `bd list --status ready_for_agent_review --no-assignee --metadata-field project=<project-name> --json --brief`
-- **Take for review**: `bd update <id> --if-status ready_for_agent_review --if-assignee '' --assignee reviewer`
-- **Findings**: `bd comment <id> --stdin` with the findings comment, then `bd update <id> --if-assignee reviewer --status fix_code_review --assignee '' --set-metadata review_round=<round + 1>`.
-- **Resolve**: after the merge, `bd close <id> --actor reviewer --reason "resolved: <merge-sha>"`, then `bd show <id>` to confirm status `closed`. `bd close` refuses an issue whose assignee differs from the actor, hence `--actor reviewer`. Closing unblocks the dependents.
-- **Needs a person**: `bd comment <id> --stdin` with the failure comment, then `bd update <id> --status needs_human --assignee ''`.
+- **Resolve**: `bd close <id> --reason "resolved: <commit-sha>"`, then `bd show <id>` to confirm status `closed` with that reason. Closing unblocks the dependents.
+- **Needs a person**: `bd comment <id> --stdin` with the failure comment, then `bd update <id> --if-status in_progress --status needs_human --assignee ''`.
 - **Person clears**: `bd update <id> --if-status needs_human --status open`
-- **Release an interrupted claim**: `bd unclaim <id>`. It works only on `in_progress`.
-- **Cancel**: `bd dep list <id> --direction=up --json` lists the dependents; each must be cancelled or have its edge removed with `bd dep remove <dependent-id> <id>`. Then `bd close <id> --force --reason "cancelled: <why>" && bd update <id> --add-label cancelled`. `--force` is needed because `bd close` refuses an issue with open blockers; use it only to cancel.
+- **Release an abandoned claim**: `bd unclaim <id>`. It works only on `in_progress`.
+- **Wontfix**: `bd dep list <id> --direction=up --json` lists the dependents; each must be `wontfix` or have its edge removed with `bd dep remove <dependent-id> <id>`, because closing would otherwise unblock them. Then `bd close <id> --force --reason "wontfix: <why>" && bd update <id> --add-label wontfix`. `--force` is needed because `bd close` refuses an issue with open blockers; use it only for wontfix.
 
 ## Wayfinding operations
 

@@ -8,6 +8,10 @@ Issues and specs are tracked as Markdown files in the Obsidian vault under `engi
 
 Triage uses the default canonical label vocabulary. See `docs/agents/triage-labels.md`.
 
+### Ticket lifecycle
+
+Implementation tickets move through five canonical states. See `docs/agents/ticket-lifecycle.md`.
+
 ### Domain docs
 
 This repository uses a single-context domain-doc layout. See `docs/agents/domain.md`.

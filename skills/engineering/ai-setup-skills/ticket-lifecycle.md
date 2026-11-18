@@ -10,11 +10,24 @@ An implementation ticket is in one of the states below. `docs/agents/issue-track
 - `resolved`: done. Terminal.
 - `wontfix`: a person dropped the work. Terminal.
 
+## Claim first
+
+Working a ticket starts with claiming it. Do these steps in order, before stating the plan, reading code, creating a branch, or changing any file:
+
+1. Fetch the ticket.
+2. Confirm it is claimable: `ready-for-agent`, every blocker `resolved`, and no holder.
+3. Claim it with the tracker's **Claim** operation.
+4. Read the ticket back and confirm you are the holder.
+
+If any step fails, stop and report the ticket's current state. Never work an unclaimed ticket, and never take over a ticket someone else holds. Reading a ticket without claiming it is only for planning, triage, or review, never for implementation.
+
+Hold the claim until you move the ticket to `resolved` or `needs-human`.
+
 ## Transitions
 
 | From | To | Actor | Condition |
 | --- | --- | --- | --- |
-| `ready-for-agent` | `claimed` | agent | Every blocker is `resolved` and no one else holds the ticket. Claim before the first change. |
+| `ready-for-agent` | `claimed` | agent | Every blocker is `resolved` and no one else holds the ticket. See [Claim first](#claim-first). |
 | `claimed` | `resolved` | the holder | Every acceptance criterion is ticked, every required check passes, the review has no unresolved Standards or Spec findings, and the change is committed. Record the commit SHA. |
 | `claimed` | `needs-human` | the holder | A person must act. Record the failure comment, release the claim, and keep the branch. |
 | `needs-human` | `ready-for-agent` | person | The obstacle is cleared. |

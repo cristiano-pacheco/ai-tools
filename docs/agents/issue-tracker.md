@@ -1,6 +1,6 @@
 # Issue tracker: Obsidian
 
-Implementation tickets follow `docs/agents/ticket-lifecycle.md`. Read it before you claim, move, or resolve one.
+Implementation tickets follow `docs/agents/ticket-lifecycle.md`. Read it whenever you fetch a ticket to work on it: claim the ticket before any other step.
 
 ## Output to Obsidian
 
@@ -33,7 +33,7 @@ If the vault is missing, stop the tracker operation and tell the user to set `OB
 - **IDs**: a ticket's ID is its two-digit `NN`, unique within the feature. Refer to a ticket outside its feature as `<feature>/<NN>`.
 - **Project**: the `<project>` directory. Every ticket of a feature belongs to that project.
 
-Obsidian has no locking or cycle detection. Edits are plain file writes, so read a ticket immediately before every change and read it back after.
+Obsidian has no cycle detection, and edits are plain file writes, so read a ticket immediately before every change and read it back after. Claims use a lock directory, described under Ticket lifecycle, because `mkdir` is atomic and a frontmatter edit is not.
 
 ## Conventions
 
@@ -59,6 +59,8 @@ Create the artifact at the path defined in Conventions or Wayfinding operations.
 ## When a skill says "fetch the relevant ticket"
 
 Read the complete referenced file, including comments. Resolve an issue number within the identified feature's `issues/` directory; if the feature or ticket is ambiguous, ask for the exact path rather than selecting by similarity or recency.
+
+To work the ticket, claim it next, before any other step: **Check a named ticket**, then **Claim**. When the claim fails, stop and report; another agent holds the ticket.
 
 ## When a skill says "resolve a ticket" or "close work"
 
@@ -101,13 +103,15 @@ A missing `assignee`, `labels`, or `resolution` line counts as empty. Add the li
 
 Each move below is guarded: read the file first and confirm the From state. On a mismatch, write nothing; the ticket moved, so report it. After writing, read the file back and confirm the saved frontmatter.
 
-- **Check a named ticket**: read its frontmatter. It is claimable when `status` is `ready-for-agent`, `assignee` is empty, and **Count open blockers** is 0.
+The claim lock is the directory `issues/.claims/<NN>`. Creating it is the claim; whoever creates it first holds the ticket. Obsidian ignores dot-directories, so the lock stays out of the vault view.
+
+- **Check a named ticket**: read its frontmatter. It is claimable when `status` is `ready-for-agent`, `assignee` is empty, `issues/.claims/<NN>` does not exist, and **Count open blockers** is 0.
 - **Next ticket**: scan `issues/*.md` in file-name order. The first claimable ticket is next.
-- **Claim**: set `status: claimed` and `assignee: <you>`, then read the file back and confirm both. The claim is not atomic, so a single dispatcher, a person or one agent, starts each ticket.
-- **Resolve**: set `status: resolved` and `resolution: "resolved: <commit-sha>"`, clear `assignee`, and read back the file.
-- **Needs a person**: append the failure comment under `## Comments`, then set `status: needs-human` and clear `assignee`. Leave unverified criteria unticked and preserve the worktree.
-- **Person clears**: from `needs-human`, set `status: ready-for-agent`.
-- **Release an abandoned claim**: from `claimed`, set `status: ready-for-agent` and clear `assignee`.
+- **Claim**: `mkdir -p <feature>/issues/.claims && mkdir <feature>/issues/.claims/<NN>`. If the second `mkdir` fails, another agent holds the ticket; stop and change nothing. If it succeeds, set `status: claimed` and `assignee: <you>`, where `<you>` is unique to this session, then read the file back and confirm both.
+- **Resolve**: set `status: resolved` and `resolution: "resolved: <commit-sha>"`, clear `assignee`, read back the file, then `rmdir <feature>/issues/.claims/<NN>`.
+- **Needs a person**: append the failure comment under `## Comments`, then set `status: needs-human` and clear `assignee`. Leave unverified criteria unticked and preserve the worktree. Keep the lock until a person clears the ticket.
+- **Person clears**: from `needs-human`, set `status: ready-for-agent`, then `rmdir <feature>/issues/.claims/<NN>`.
+- **Release an abandoned claim**: from `claimed`, set `status: ready-for-agent` and clear `assignee`, then `rmdir <feature>/issues/.claims/<NN>`. A lock with no `claimed` ticket behind it is also abandoned; only a person removes it.
 - **Wontfix**: **List dependents**; each must be `wontfix` or have this ticket removed from its `blocked_by`. Then set `status: wontfix` and `resolution: "wontfix: <why>"`.
 
 ## Wayfinding operations

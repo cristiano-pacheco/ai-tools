@@ -1,5 +1,7 @@
 # Issue tracker: Workplan
 
+Implementation tickets follow `docs/agents/ticket-lifecycle.md`. Read it whenever you fetch a ticket to work on it: claim the ticket before any other step.
+
 This repo resolves to project name **`<project-name>`** (basename of `git rev-parse --show-toplevel`). Its Workplan project is **`<canonical-repository-path>`**, the canonical physical repository path registered by setup.
 
 Specs are `spec` Workplans, wayfinding maps are `wayfinder` Workplans, and their child issues are Tickets. Workplan stores Ticket prerequisites, project assignment, lifecycle, and reviews.
@@ -32,6 +34,8 @@ Resolve an explicit spec slug first, then the canonical result of an immediately
 
 Fetch a Ticket with `wp --json ticket show <complete-identifier>`. When review history matters, read every page of `wp --json review list <complete-identifier>`; reviews are immutable and oldest first.
 
+To work the Ticket, claim it next, before any other step, with **Claim** under Implementation ticket lifecycle. When the claim fails, stop and report; another agent holds the Ticket.
+
 ## Publish a ticket graph
 
 For the graph approved in `ai-to-tickets`:
@@ -44,14 +48,27 @@ On failure, remove the temporary file, report the typed error and identifiers al
 
 ## Implementation ticket lifecycle
 
-For Workplan, the stored Ticket replaces the “ticket file” named by `ai-implement`:
+`docs/agents/ticket-lifecycle.md` defines the states and who moves a Ticket between them. Workplan's status catalog has only `ready-for-agent`, `claimed`, and `resolved`, so it stores them as:
 
-1. Claim a named complete identifier with `wp --json ticket claim <complete-identifier>`; otherwise run `wp --json ticket claim-next` from this repository with only user-supplied filters. A Ticket is claimable when it is `ready-for-agent` and every prerequisite is `resolved`; `no_ready_ticket` is clean no-work.
-2. Keep the complete claim response as the execution snapshot. Implement only that Ticket and account for every acceptance criterion in its `content_markdown`. Claimed Tickets cannot be updated, so leave that Markdown unchanged and record criterion evidence during the run.
-3. Store the exact `ai-review-changes` report as an immutable review with `wp --json review add <complete-identifier> --content <file>`. Resolve only after every criterion and required check passes, the review has no Standards or Spec findings, and the reviewed change is committed.
-4. Run `wp --json ticket resolve <complete-identifier>` and verify status `resolved`; `ticket status` does not replace `claim` or `resolve`.
+| State | Storage |
+| --- | --- |
+| `ready-for-agent` | status `ready-for-agent`, `claim` is `null` |
+| `claimed` | status `claimed` |
+| `needs-human` | status `claimed`, and the newest review starts with `- needs-human:` |
+| `resolved` | status `resolved`, and the newest review holds the commit SHA |
+| `wontfix` | soft-deleted, after a review that starts with `- wontfix:` |
 
-Claims have no owner, expiry, or release operation. After unsuccessful or interrupted work, preserve the worktree and claim; report the identifier, current state, and blocker.
+Claims have no owner or expiry. `claimed` is the lock: Workplan sets it atomically, and no other agent can claim the Ticket while it holds. A `needs-human` Ticket keeps that lock, so no agent picks it up before a person clears it.
+
+- **Check a named ticket**: `wp --json ticket show <complete-identifier>`. It is claimable when the status is `ready-for-agent` and every prerequisite is `resolved`.
+- **Next ticket**: `wp --json ticket ready` from this repository, with only user-supplied filters; the first Ticket is next.
+- **Claim**: `wp --json ticket claim <complete-identifier>` for a named Ticket, or `wp --json ticket claim-next` with the same filters as **Next ticket**. Claiming is atomic: an error means another agent holds the Ticket, so stop. `no_ready_ticket` is clean no-work. Keep the complete claim response as the execution snapshot.
+- **While claimed**: Workplan rejects `ticket update` on a claimed Ticket, so leave `content_markdown` unchanged and record criterion evidence during the run instead of ticking boxes.
+- **Resolve**: store the exact review report with `wp --json review add <complete-identifier> --content <file>`, ending with a `- resolved: <commit-sha>` line. Then run `wp --json ticket resolve <complete-identifier>` and verify status `resolved`. `ticket status` does not replace `claim` or `resolve`.
+- **Needs a person**: store the failure comment with `wp --json review add <complete-identifier> --content <file>`, then confirm the status is still `claimed`. Preserve the worktree.
+- **Person clears**: `wp --json ticket status <complete-identifier> ready-for-agent`
+- **Release an abandoned claim**: `wp --json ticket status <complete-identifier> ready-for-agent`, run by a person.
+- **Wontfix**: `wp --json dependency list <complete-identifier>` lists its prerequisites and dependents. Each dependent must be wontfix first, or have its edge removed with `wp --json dependency remove <dependent> <complete-identifier>`; remove the Ticket's own prerequisite edges the same way. Then store a review starting with `- wontfix: <why>` and run `wp --json ticket delete <complete-identifier>`. Delete fails while the Ticket is claimed or dependency-linked; set a claimed Ticket to `ready-for-agent` first. `ticket restore` undoes the delete.
 
 ## Labels
 

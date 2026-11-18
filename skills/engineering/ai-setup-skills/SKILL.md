@@ -12,7 +12,7 @@ Setup owns these repository outputs:
 
 - `docs/agents/issue-tracker.md`
 - `docs/agents/triage-labels.md` when this process includes triage labels
-- `docs/agents/ticket-lifecycle.md` when the tracker is Beads or Obsidian
+- `docs/agents/ticket-lifecycle.md` when the tracker is Beads, Obsidian, or Workplan
 - one root-level `## Agent skills` section in `AGENTS.md` or `CLAUDE.md`
 
 It does not own domain documentation. Leave `GLOSSARY.md`, `GLOSSARY-MAP.md`, ADRs, `docs/agents/domain.md`, and every instruction outside the `## Agent skills` section unchanged.
@@ -64,7 +64,7 @@ Show the exact proposed contents of:
 - the complete `## Agent skills` section;
 - `docs/agents/issue-tracker.md`;
 - `docs/agents/triage-labels.md` when label setup applies;
-- `docs/agents/ticket-lifecycle.md` when the tracker is Beads or Obsidian;
+- `docs/agents/ticket-lifecycle.md` when the tracker is Beads, Obsidian, or Workplan;
 - the Beads `status.custom` value, or the labels to create on GitHub or GitLab.
 
 The section has this shape, with only the applicable subsections:
@@ -99,7 +99,7 @@ Every other choice makes no tracker mutation.
 
 ### 5. Write only owned instructions
 
-Recreate `docs/agents/issue-tracker.md` from the selected adapter template. Recreate `docs/agents/triage-labels.md` when label setup applies, and `docs/agents/ticket-lifecycle.md` when the tracker is Beads or Obsidian. Use these seeds:
+Recreate `docs/agents/issue-tracker.md` from the selected adapter template. Recreate `docs/agents/triage-labels.md` when label setup applies, and `docs/agents/ticket-lifecycle.md` when the tracker is Beads, Obsidian, or Workplan. Use these seeds:
 
 - [issue-tracker-github.md](./issue-tracker-github.md)
 - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md)

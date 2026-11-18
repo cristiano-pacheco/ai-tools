@@ -1,6 +1,6 @@
 # Issue tracker: Beads
 
-Implementation tickets follow `docs/agents/ticket-lifecycle.md`. Read it before you claim, move, or resolve one.
+Implementation tickets follow `docs/agents/ticket-lifecycle.md`. Read it whenever you fetch a ticket to work on it: claim the ticket before any other step.
 
 Issues and specs live in a Beads workspace that can hold several projects. Use the `bd` CLI for all operations.
 
@@ -55,7 +55,7 @@ Create a Beads issue. For a spec, create a spec. For a ticket graph, create each
 
 ## When a skill says "fetch the relevant ticket"
 
-Read it as in **Read an issue** above.
+Read it as in **Read an issue** above. To work the ticket, claim it next, before any other step: **Check a named ticket**, then **Claim**, then confirm with `bd show <id> --json | jq '.[0] | {status, assignee}'` that the status is `in_progress` and the assignee is you. When the claim fails, stop and report; another agent holds the ticket.
 
 ## When a skill says "resolve a ticket" or "close work"
 

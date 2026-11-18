@@ -47,6 +47,6 @@ Only the shared deltas.
 
 - Domain docs stay out: upstream's Section C and the `CONTEXT.md` migration are dropped, because `domain-modeling` owns `GLOSSARY.md`, ADRs, and `docs/agents/domain.md`.
 - Extra trackers: Obsidian, Workplan, and Beads, with their templates.
-- `ticket-lifecycle.md` for Beads and Obsidian, and the `needs_human` Beads status that setup registers.
+- `ticket-lifecycle.md` for Beads, Obsidian, and Workplan, and the `needs_human` Beads status that setup registers.
 - The approval gate: setup shows the exact text and changes nothing before the user approves.
 - The GitHub template's fork check omits the upstream repo name.

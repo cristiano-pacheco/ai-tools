@@ -55,6 +55,10 @@ Create a Beads issue. For a spec, create a spec. For a ticket graph, create each
 
 Read it as in **Read an issue** above.
 
+## When a skill says "resolve a ticket" or "close work"
+
+Run `bd close <id> --reason "resolved: <commit-sha>"`, then `bd show <id>` and confirm the status is `closed` with that reason. Closing unblocks the ticket's dependents. A ticket in `ready-for-agent-review` is resolved by its reviewer instead, with **Resolve** under Ticket lifecycle.
+
 ## Ticket lifecycle
 
 `docs/agents/ticket-lifecycle.md` defines the states and who moves a ticket between them. Beads stores them as:

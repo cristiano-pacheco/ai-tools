@@ -46,11 +46,13 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
+- **Project** (Beads only): the repo that implements this ticket, by the project name the tracker doc defines
 
 Ask the user:
 
 - Does the granularity feel right? (too coarse / too fine)
 - Are the blocking edges correct: does each ticket only depend on tickets that genuinely gate it?
+- (Beads only) Is each ticket assigned to the right project?
 - Should any tickets be merged or split further?
 
 Iterate until the user approves the breakdown.
@@ -61,6 +63,7 @@ Publish the approved tickets. **How** depends on the tracker `/ai-setup-skills` 
 
 - **Local files** → write one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below: one ticket per file, never a single combined file.
 - **Obsidian** → write one file per ticket under `<vault>/engineering/<project>/workplans/<feature>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Resolve `<vault>` from `$OBSIDIAN_AI_VAULT` and use absolute filesystem paths, as configured by the issue-tracker adapter. Use the Obsidian ticket template below: one ticket per file, never a single combined file. Its `blocked_by` frontmatter lists the two-digit numbers of the tickets it depends on, or `[]`.
+- **Beads** → create one child issue per ticket under the spec, or under the source issue, in dependency order (blockers first), with the tracker doc's **Create a child issue** operation. Pass every blocker as a native `blocked-by` edge built from the IDs `bd` returned, and set the `project` metadata to the ticket's project. Use the issue template below without its Parent and Blocked by sections, since the parent and blockers are native. Apply the `ready-for-agent` triage label unless instructed otherwise.
 - **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. If the source was an existing issue, make each ticket its sub-issue (tracker doc's operation). Apply the `ready-for-agent` triage label unless instructed otherwise; the tickets are agent-grabbable by construction.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.

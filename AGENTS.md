@@ -11,3 +11,7 @@ Triage uses the default canonical label vocabulary. See `docs/agents/triage-labe
 ### Domain docs
 
 This repository uses a single-context domain-doc layout. See `docs/agents/domain.md`.
+
+## Upstream skills
+
+When upgrading `ai-implement-ticket`, `ai-to-tickets`, `ai-to-spec`, or `ai-setup-skills` from mattpocock/skills, follow `docs/agents/upstream-skills.md`.

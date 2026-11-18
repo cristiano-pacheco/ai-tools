@@ -1,0 +1,99 @@
+# Issue tracker: Beads
+
+Issues and specs live in a Beads workspace that can hold several projects. Use the `bd` CLI for all operations.
+
+## Preflight
+
+Run this once per session, before the first tracker call:
+
+```sh
+command -v bd >/dev/null || { echo "bd not installed"; exit 1; }
+bd where
+bd config get status.custom
+```
+
+If `bd` is missing, stop the tracker operation and tell the user to install Beads. `bd where` prints the workspace: the `BEADS_DIR` path when that variable is set, even outside this repo, otherwise the repo's `.beads/` directory. If `bd where` errors, stop and tell the user to check `BEADS_DIR` or run `bd init`. If `status.custom` lacks `ready_for_agent_review`, `fix_code_review`, or `needs_human`, stop and tell the user to rerun `/ai-setup-skills`.
+
+## Model
+
+- **Issue**: every issue carries a `project` metadata key naming the repo it belongs to. A project name is the basename of that repo's `git rev-parse --show-toplevel`; this repo's is `<project-name>`. A spec whose tickets span several repos is the one exception and carries no `project`.
+- **Spec**: an epic labelled `spec`, with the spec as its body.
+- **Ticket**: a child issue of a spec, map, or other parent issue. Children get IDs `<parent-id>.1`, `<parent-id>.2`, and so on, in creation order.
+- **IDs** look like `<prefix>-<hash>`. Beads has no issue URLs; refer to an issue by its ID.
+
+Write every multi-line body to stdin with a quoted heredoc (`<<'EOF'`) so the shell leaves backticks and `$` alone. `--silent` makes `bd create` print only the new ID; capture it for later edges. List commands return 50 rows unless given `-n 0`.
+
+## Conventions
+
+- **Create an issue**: `bd create "<title>" -l <labels> --metadata '{"project":"<name>"}' --silent --body-file - <<'EOF'`
+- **Create a spec**: the same with `-t epic -l spec,<labels>`. Omit `--metadata` when its tickets span several repos.
+- **Create a child issue**: add `--parent <parent-id> --no-inherit-labels`. Without `--no-inherit-labels` the child copies the parent's labels.
+- **Make an existing issue a child**: `bd update <child-id> --parent <parent-id>`
+- **Blocking**: native dependencies. Pass `--deps blocked-by:<id>,blocked-by:<id>` to `bd create`, or add an edge later with `bd dep add <blocked-id> <blocker-id>`. Remove one with `bd dep remove <blocked-id> <blocker-id>`. `bd` rejects edges that would form a cycle. Blockers may belong to other projects. A ticket is unblocked when every blocker is closed.
+- **Count open blockers**: `bd show <id> --json | jq '[.[0].dependencies[] | select(.dependency_type=="blocks" and .status!="closed")] | length'`. 0 means startable.
+- **List dependents**: `bd dep list <id> --direction=up --json`
+- **Change an issue's project**: `bd update <id> --set-metadata project=<name>`
+- **Read an issue**: `bd show <id>` prints the body, labels, metadata, parent, blockers, and comments. For JSON, use `bd show <id> --json --include-comments`. The reporter is `created_by`. `bd comments <id> --json` gives each comment's `author` and `created_at`.
+- **List issues**: `bd list --metadata-field project=<project-name> --status open --sort created -r -n 0 --json --brief | jq '[.[] | {id, title, status, labels, assignee, parent, created_by, created_at}]'`, oldest first. Filter with `--label <label>` (all must match), `--label-any`, `--no-labels` for never-triaged issues, `--parent <id>`, `-t <type>`, or `--status` (comma-separated for several; `--all` for every status). `bd show` the hits that need body or comments.
+- **List specs**: `bd list -t epic --label spec -n 0 --json --brief`
+- **Comment on an issue**: `bd comment <id> --stdin <<'EOF'`
+- **Apply / remove labels**: `bd update <id> --add-label <label>` / `--remove-label <label>`. Beads creates a label on first use, so a misspelled label silently becomes a new one; `bd label list-all` shows every label in use.
+- **Update a body**: `bd update <id> --body-file -` replaces the whole body. Run `bd show <id>` immediately before, then change only the intended part. Ticking an acceptance criterion is a body update that turns `- [ ]` into `- [x]`.
+- **Close**: post the explanation with `bd comment <id> --stdin`, then `bd close <id> --reason "<one-line reason>"`. On an already-closed issue, `bd close` keeps the old reason and still exits 0, so check the status first.
+- **Reopen**: `bd reopen <id>`
+- **Delete**: `bd delete <id>` removes the issue and every dependency edge on it. Use it only for an issue that should never have existed; close everything else.
+
+## Pull requests as a triage surface
+
+**PRs as a request surface: no.** Beads has no pull requests, so `/triage` covers issues only.
+
+## When a skill says "publish to the issue tracker"
+
+Create a Beads issue. For a spec, create a spec. For a ticket graph, create each ticket as a child of its spec or parent issue in dependency order, blockers first, each with its project and `blocked-by` edges.
+
+## When a skill says "fetch the relevant ticket"
+
+Read it as in **Read an issue** above.
+
+## Ticket lifecycle
+
+`docs/agents/ticket-lifecycle.md` defines the states and who moves a ticket between them. Beads stores them as:
+
+| State | Storage |
+| --- | --- |
+| `ready-for-agent` | status `open`, label `ready-for-agent` |
+| `in-progress` | status `in_progress`, assignee is the implementer |
+| `ready-for-agent-review` | status `ready_for_agent_review`, assignee empty until a reviewer takes it |
+| `fix-code-review` | status `fix_code_review`, no assignee |
+| `needs-human` | status `needs_human`, no assignee |
+| `resolved` | closed, reason `resolved: <merge-sha>` |
+| `cancelled` | closed, reason `cancelled: <why>`, label `cancelled` |
+
+The review round is the `review_round` metadata key, absent until the first review. The three custom statuses keep dependents blocked. Every `--if-status` or `--if-assignee` guard writes nothing on a mismatch and exits 13; treat 13 as "the ticket moved" and re-read it.
+
+- **Check a named ticket**: `bd show <id> --json | jq '.[0] | {status, assignee, project: .metadata.project, round: .metadata.review_round, open_blockers: [.dependencies[] | select(.dependency_type=="blocks" and .status!="closed") | .id]}'`. It is claimable when the status is `open` or `fix_code_review`, the assignee is `null`, the project is `<project-name>`, and `open_blockers` is `[]`.
+- **Next ticket to implement**: `bd ready -l ready-for-agent --metadata-field project=<project-name> --exclude-type epic --unassigned --sort oldest --json --brief`, plus `--parent <spec-id>` for one spec. It returns `open` and `fix_code_review` tickets with no open blocker; the first is next.
+- **Claim**: `bd update <id> --claim`. It sets the assignee to you and the status to `in_progress`, and fails when someone else holds the ticket.
+- **To review**: `bd update <id> --if-status in_progress --status ready_for_agent_review --assignee ''`
+- **Next ticket to review**: `bd list --status ready_for_agent_review --no-assignee --metadata-field project=<project-name> --json --brief`
+- **Take for review**: `bd update <id> --if-status ready_for_agent_review --if-assignee '' --assignee reviewer`
+- **Findings**: `bd comment <id> --stdin` with the findings comment, then `bd update <id> --if-assignee reviewer --status fix_code_review --assignee '' --set-metadata review_round=<round + 1>`.
+- **Resolve**: after the merge, `bd close <id> --actor reviewer --reason "resolved: <merge-sha>"`, then `bd show <id>` to confirm status `closed`. `bd close` refuses an issue whose assignee differs from the actor, hence `--actor reviewer`. Closing unblocks the dependents.
+- **Needs a person**: `bd comment <id> --stdin` with the failure comment, then `bd update <id> --status needs_human --assignee ''`.
+- **Person clears**: `bd update <id> --if-status needs_human --status open`
+- **Release an interrupted claim**: `bd unclaim <id>`. It works only on `in_progress`.
+- **Cancel**: `bd dep list <id> --direction=up --json` lists the dependents; each must be cancelled or have its edge removed with `bd dep remove <dependent-id> <id>`. Then `bd close <id> --force --reason "cancelled: <why>" && bd update <id> --add-label cancelled`. `--force` is needed because `bd close` refuses an issue with open blockers; use it only to cancel.
+
+## Wayfinding operations
+
+Used by `/wayfinder`. The **map** is one epic, and its **child** issues are the tickets. Maps and their tickets carry only `wayfinder:` labels, plus the `project` metadata. They skip the ticket lifecycle; a ticket is open until resolved, and claimed by its assignee.
+
+- **Map**: create an issue with `-t epic -l wayfinder:map` and the map body: Destination, Notes, Decisions so far, Not yet specified, Out of scope.
+- **Child ticket**: create a child issue of `<map-id>` with label `wayfinder:<type>`, where `<type>` is `research`, `prototype`, `grilling`, or `task`.
+- **Blocking**: see **Blocking** under Conventions. Wire edges in a second pass, after every ticket has an ID, and keep every blocker inside the map.
+- **Frontier query**: `bd ready --parent <map-id> --exclude-type epic --unassigned --sort oldest --json --brief`. It drops tickets with an open blocker or an assignee. The first result wins; check a named ticket with **Count open blockers** and its `assignee`.
+- **Claim**: `bd update <id> --claim`, the session's first write. It sets the assignee to you and fails when someone else holds the ticket.
+- **Map update**: see **Update a body** under Conventions.
+- **Resolve**: `bd comment <id> --stdin` with the answer, `bd close <id> --reason "<gist>"`, then append `- **<title>** (<id>): <gist>` to the map's Decisions so far. Link assets, such as a research branch, in a comment.
+- **Out of scope**: `bd close <id> --reason "out of scope: <why>"`, then append `- **<title>** (<id>): <gist>, <why>` to the map's Out of scope, not Decisions so far.
+- **Invalidated ticket**: update its body, close it with the reason, or delete it if it never should have existed.

@@ -12,6 +12,7 @@ Setup owns these repository outputs:
 
 - `docs/agents/issue-tracker.md`
 - `docs/agents/triage-labels.md` when this process includes triage labels
+- `docs/agents/ticket-lifecycle.md` when the tracker is Beads
 - one root-level `## Agent skills` section in `AGENTS.md` or `CLAUDE.md`
 
 It does not own domain documentation. Leave `GLOSSARY.md`, `GLOSSARY-MAP.md`, ADRs, `docs/agents/domain.md`, and every instruction outside the `## Agent skills` section unchanged.
@@ -27,22 +28,24 @@ Resolve the repository root with `git rev-parse --show-toplevel`, then resolve t
 - the existing root `## Agent skills` section, if any;
 - `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md`;
 - `.scratch/`;
+- `.beads/` and `$BEADS_DIR`;
 - whether the `triage` skill is installed.
 
 Do not inspect or infer a domain-document layout. Finish this step with the canonical repository path, the current tracker if one is configured, the instruction file to update, and whether triage setup applies.
 
 ### 2. Choose the tracker
 
-Summarize what exists and what setup would replace. Ask one section at a time, with the recommended answer first. An existing configured tracker is the rerun recommendation. Otherwise recommend GitHub for a GitHub remote and GitLab for a GitLab remote. Offer:
+Summarize what exists and what setup would replace. Ask one section at a time, with the recommended answer first. An existing configured tracker is the rerun recommendation. Otherwise recommend Beads when `.beads/` exists or `BEADS_DIR` is set, else GitHub for a GitHub remote and GitLab for a GitLab remote. Offer:
 
 - **GitHub**: GitHub Issues through `gh`;
 - **GitLab**: GitLab Issues through `glab`;
+- **Beads**: the Beads workspace at `$BEADS_DIR` or the repo's `.beads/`, through `bd`, with `<project-name>` set to the basename of the repository root;
 - **Local markdown**: files under `.scratch/<feature>/`;
 - **Obsidian**: files under `$OBSIDIAN_AI_VAULT/engineering/<project>/workplans/<feature>/`;
 - **Workplan**: the local tracker through `wp --json` and its Workplan skills;
 - **Other**: a workflow the user describes in one paragraph.
 
-For GitHub and GitLab, keep the template's request-surface flag off without asking about it.
+For GitHub and GitLab, keep the template's request-surface flag off without asking about it. They need a reachable repo: when no `git remote` points at the chosen host, get the repo URL from the user and wire it up (`git init` if needed, `git remote add origin <url>`) before going further. Done when `gh repo view` / `glab repo view` prints the project from inside this directory; if it can't, stop and tell the user what's missing.
 
 Workplan always uses the five canonical label slugs: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. Do not ask for overrides.
 
@@ -60,7 +63,9 @@ Show the exact proposed contents of:
 
 - the complete `## Agent skills` section;
 - `docs/agents/issue-tracker.md`;
-- `docs/agents/triage-labels.md` when label setup applies.
+- `docs/agents/triage-labels.md` when label setup applies;
+- `docs/agents/ticket-lifecycle.md` when the tracker is Beads;
+- the Beads `status.custom` value, or the labels to create on GitHub or GitLab.
 
 The section has this shape, with only the applicable subsections:
 
@@ -74,6 +79,10 @@ The section has this shape, with only the applicable subsections:
 ### Triage labels
 
 [one-line label summary]. See `docs/agents/triage-labels.md`.
+
+### Ticket lifecycle
+
+Implementation tickets move through canonical states. See `docs/agents/ticket-lifecycle.md`.
 ```
 
 For Workplan, name `ai-workplan` in the tracker summary. Let the user edit the draft. Make no tracker or repository mutation before the user approves the exact text.
@@ -82,18 +91,24 @@ For Workplan, name `ai-workplan` in the tracker summary. Let the user edit the d
 
 For Workplan, read and execute [setup-workplan.md](./setup-workplan.md). Its completion criterion is a verified canonical project and all five visible canonical label slugs. It must complete before step 5 changes any repository file.
 
-For every other choice, preserve the existing adapter behavior. This setup does not create remote labels or mutate the selected tracker.
+For GitHub and GitLab with label setup, create each configured label the tracker lacks (`gh label create` / `glab label create`).
+
+For Beads, register the lifecycle statuses. Read `bd config get status.custom`, add whichever of `ready_for_agent_review:wip`, `fix_code_review:active`, and `needs_human:frozen` it lacks, keep every existing entry, and write the result with `bd config set status.custom "<comma-separated list>"`. Done when `bd statuses` lists all three.
+
+Every other choice makes no tracker mutation.
 
 ### 5. Write only owned instructions
 
-Recreate `docs/agents/issue-tracker.md` from the selected adapter template. Recreate `docs/agents/triage-labels.md` when label setup applies. Use these seeds:
+Recreate `docs/agents/issue-tracker.md` from the selected adapter template. Recreate `docs/agents/triage-labels.md` when label setup applies, and `docs/agents/ticket-lifecycle.md` when the tracker is Beads. Use these seeds:
 
 - [issue-tracker-github.md](./issue-tracker-github.md)
 - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md)
+- [issue-tracker-beads.md](./issue-tracker-beads.md)
 - [issue-tracker-local.md](./issue-tracker-local.md)
 - [issue-tracker-obsidian.md](./issue-tracker-obsidian.md)
 - [issue-tracker-workplan.md](./issue-tracker-workplan.md)
 - [triage-labels.md](./triage-labels.md)
+- [ticket-lifecycle.md](./ticket-lifecycle.md)
 
 Replace template placeholders with the confirmed values. For Other, write the confirmed workflow instead of using a seed.
 

@@ -8,7 +8,8 @@ Reusable skills and reference material for AI-assisted engineering work.
 - `skills/misc/` contains small general-purpose skills.
 - `skills/deprecated/` keeps retired skills for reference. They are not part of the active set.
 - `docs/` contains repository conventions and the Go modular architecture guide.
-- `pi/extensions/` contains Pi extensions.
+- `harness/claude-code/` contains a reproducible Claude Code setup: settings, the ccstatusline status line, and `install.sh`, which also runs `rtk init -g`.
+- `harness/pi/extensions/` contains Pi extensions.
 
 ## Active skills
 

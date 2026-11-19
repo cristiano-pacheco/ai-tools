@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues and specs are tracked as Markdown files in the Obsidian vault under `engineering/ai-tools/workplans/`, rooted at `$OBSIDIAN_AI_VAULT`. See `docs/agents/issue-tracker.md`.
+Issues live in the shared Beads workspace at `$BEADS_DIR` under project `ai-tools`, managed through `bd`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

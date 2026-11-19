@@ -4,10 +4,6 @@
 
 Issues live in the shared Beads workspace at `$BEADS_DIR` under project `ai-tools`, managed through `bd`. See `docs/agents/issue-tracker.md`.
 
-### Triage labels
-
-Triage uses the default canonical label vocabulary. See `docs/agents/triage-labels.md`.
-
 ### Ticket lifecycle
 
 Implementation tickets move through five canonical states. See `docs/agents/ticket-lifecycle.md`.

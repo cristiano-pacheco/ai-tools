@@ -49,7 +49,7 @@ For GitHub and GitLab, keep the template's request-surface flag off without aski
 
 Workplan always uses the five canonical label slugs: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. Do not ask for overrides.
 
-For every other tracker, skip label setup when `triage` is not installed. When it is installed, ask exactly:
+Beads skips label setup, because its status holds the triage role. For every other tracker, skip label setup when `triage` is not installed. When it is installed, ask exactly:
 
 > Do you want to keep the default triage labels? (recommended: **yes**)
 

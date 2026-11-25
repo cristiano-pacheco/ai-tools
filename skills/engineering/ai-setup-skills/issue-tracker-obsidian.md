@@ -108,7 +108,7 @@ The claim lock is the directory `issues/.claims/<NN>`. Creating it is the claim;
 - **Check a named ticket**: read its frontmatter. It is claimable when `status` is `ready-for-agent`, `assignee` is empty, `issues/.claims/<NN>` does not exist, and **Count open blockers** is 0.
 - **Next ticket**: scan `issues/*.md` in file-name order. The first claimable ticket is next.
 - **Claim**: `mkdir -p <feature>/issues/.claims && mkdir <feature>/issues/.claims/<NN>`. If the second `mkdir` fails, another agent holds the ticket; stop and change nothing. If it succeeds, set `status: claimed` and `assignee: <you>`, where `<you>` is unique to this session, then read the file back and confirm both.
-- **Resolve**: set `status: resolved` and `resolution: "resolved: <commit-sha>"`, clear `assignee`, read back the file, then `rmdir <feature>/issues/.claims/<NN>`.
+- **Resolve**: append the resolution comment under `## Comments`, then set `status: resolved` and `resolution: "resolved: <commit-sha>"`, clear `assignee`, read back the file, then `rmdir <feature>/issues/.claims/<NN>`.
 - **Needs a person**: append the failure comment under `## Comments`, then set `status: needs-human` and clear `assignee`. Leave unverified criteria unticked and preserve the worktree. Keep the lock until a person clears the ticket.
 - **Person clears**: from `needs-human`, set `status: ready-for-agent`, then `rmdir <feature>/issues/.claims/<NN>`.
 - **Release an abandoned claim**: from `claimed`, set `status: ready-for-agent` and clear `assignee`, then `rmdir <feature>/issues/.claims/<NN>`. A lock with no `claimed` ticket behind it is also abandoned; only a person removes it.
